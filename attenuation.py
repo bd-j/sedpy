@@ -7,7 +7,7 @@ import scipy.interpolate as interp
 
 # A level of abstraction around the dust curves, which allows for some
 # generic methods.
-# The Attenuatoris composed of an (effective) DustLaw and a DustDistribution
+# The Attenuator is composed of an (effective) DustLaw and a DustDistribution
 # class, both of which can be easily extended.  The first takes wavelength and
 # tau_v as arguments and returns tau_\lambda.  The second takes arguments
 # that can be anything (e.g. stellar age, metallicity) and returns a
@@ -24,7 +24,7 @@ class Attenuator(object):
 
     def attenuate_spectrum(self, wave, inspec, pars):
         """This will be slow until the dust curves are vectorized"""
-        spec = np.atleast_2d(inspec)
+        spec = np.atleast_2d(inspec) #memory hog
         for i,p in enumerate(pars):
             tau = self.dustcurve.acurve(wave, A_v = p['A_V'], R_v = p['R_V'], f_bump = p['F_BUMP'])
             #print(tau.shape, spec.shape)
@@ -95,7 +95,6 @@ class MilkyWay(FMcurve):
         self.x0_unc = 0. #not given
         self.gamma = np.zeros(c1.shape)+0.99
         self.gamma_unc = 0. #not given
-
 
     def acurve(self, wave, A_v =1, R_v = None, f_bump = 1, **extras):
         x = 1e4/wave #inverse microns

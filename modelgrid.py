@@ -1,5 +1,5 @@
 import numpy as np
-import pyfits
+import astropy.io.fits as pyfits
 import scipy.spatial
 import astropy.constants as constants
 
@@ -48,7 +48,7 @@ class ModelLibrary(object):
             if values.shape[0] == len(fieldnames):
                 values=values.T
             else:
-                raise ValueError('ModelLibrary.structure_array: array and fieldnames do not have consistent shapes!')
+                raise ValueError('modelgrid.structure_array: array and fieldnames do not have consistent shapes!')
         nobj=values.shape[0]
         
         #set up the list of tuples describing the fields.  Assume each parameter is a float

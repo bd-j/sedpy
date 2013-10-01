@@ -18,21 +18,21 @@ import pyfits
 import yanny
 
 ##Load useful reference spectra######
-lightspeed=2.998E18 #AA/s
-vega_file=os.getenv('sedpy')+'/data/alpha_lyr_stis_005.fits'
+lightspeed = 2.998E18 #AA/s
+vega_file = os.getenv('sedpy')+'/data/alpha_lyr_stis_005.fits'
 #this file should be in AA and erg/s/cm^2/AA
 if os.path.isfile( vega_file ):
     fits = pyfits.open( vega_file )
-    vega = np.column_stack( (fits[1].data.field('WAVELENGTH'),fits[1].data.field('FLUX')) )
+    vega = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')) )
     fits.close()
 else:
-    raise ValueError('Could not find Vega spectrum at %s',vega_file)
+    raise ValueError('Could not find Vega spectrum at %s', vega_file)
 rat = (1.0/(3600*180/np.pi*10))**2.0 # conversion to d=10 pc from 1 AU
 solar_file = os.getenv('sedpy')+'/data/sun_kurucz93.fits'
 #this file should be in AA and erg/s/cm^2/AA at 1AU
 if os.path.isfile( solar_file ):
     fits = pyfits.open( solar_file )
-    solar = np.column_stack( (fits[1].data.field('WAVELENGTH'),fits[1].data.field('FLUX')*rat) )
+    solar = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')*rat) )
     fits.close()
 else:
     raise ValueError('Could not find Solar spectrum at %s', solar_file)
@@ -47,26 +47,27 @@ class Filter(object):
     ab_gnu=3.631e-20   #AB reference spctrum in erg/s/cm^2/Hz
     npts=0
     
-    def __init__(self, kname='sdss_r0', nick=None):
+    def __init__(self, kname = 'sdss_r0', nick = None):
         """Constructor"""
         self.name = kname
         if nick is None :
             self.nick = kname
         else:
-            self.nick=nick
+            self.nick = nick
 
         self.filename = os.getenv('sedpy')+'/data/filters/'+kname+'.par'
         if type( self.filename ) == type( '' ):
-            if not os.path.isfile( self.filename ): raise ValueError( 'Filter transmission file %s does not exist!' %self.filename )
+            if not os.path.isfile( self.filename ): raise ValueError( 'Filter transmission file {0} does not exist!'.format(self.filename) )
             self.loadKFilter(self.filename)
 
-    def loadKFilter(self,filename):
+    def loadKFilter(self, filename):
         """loadKFilter
         Read a filter in kcorrect (yanny) format and populate the
         wavelength and transmission arrays.  Then determine a
         number of filter properties and store in the object."""
 
-        #This should be replaced with the sdsspy yanny file readers # done, kept here in case reversion required
+        ##This should be replaced with the sdsspy yanny file readers
+        ##Done, code kept here in case reversion required
         #f=open(filename,'rU')
         #wave=[]
         #trans=[]
@@ -80,11 +81,11 @@ class Filter(object):
         #            trans.append(float(cols[2]))
         #f.close()
 
-        ff = yanny.read(filename,one=True)
+        ff = yanny.read(filename, one = True)
         wave = ff['lambda']
         trans = ff['pass']
         #clean negatives, NaNs, and Infs, then sort, then store
-        ind=np.where(np.logical_and( np.isfinite(trans), (trans >= 0.0) ))[0]
+        ind = np.where(np.logical_and( np.isfinite(trans), (trans >= 0.0) ))[0]
         order = wave[ind].argsort()
         self.npts = ind.shape[0]
         self.wavelength = wave[ind[order]]
@@ -100,11 +101,11 @@ class Filter(object):
         width definitions, as well as the in-band absolute AB solar magnitude, the Vega and
         AB reference detector signal, and the conversion between AB and Vega magnitudes. """
 
-        i0 = np.trapz(self.transmission*np.log(self.wavelength),np.log(self.wavelength))
-        i1 = np.trapz(self.transmission,np.log(self.wavelength))
-        i2 = np.trapz(self.transmission*self.wavelength,self.wavelength)
-        i3 = np.trapz(self.transmission,self.wavelength)
-        i4 = np.trapz(self.transmission * ( np.log(self.wavelength) )**2.0,np.log(self.wavelength))
+        i0 = np.trapz(self.transmission*np.log(self.wavelength), np.log(self.wavelength))
+        i1 = np.trapz(self.transmission, np.log(self.wavelength))
+        i2 = np.trapz(self.transmission*self.wavelength, self.wavelength)
+        i3 = np.trapz(self.transmission, self.wavelength)
+        i4 = np.trapz(self.transmission*( np.log(self.wavelength) )**2.0, np.log(self.wavelength))
         
         self.wave_effective = np.exp(i0/i1)
         self.wave_pivot = np.sqrt(i2/i1)
@@ -114,13 +115,16 @@ class Filter(object):
         self.gauss_width = (i4/i1)**(0.5)
         self.effective_width = 2.0*np.sqrt( 2.0*np.log(2.0) )*self.gauss_width*self.wave_mean
         self.rectangular_width = i3/self.transmission.max()
-        #self.norm           = np.trapz(transmission,wavelength)
+        #self.norm  = np.trapz(transmission,wavelength)
 
         self.ab_counts = self.objCounts( self.wavelength,self.ab_gnu*lightspeed/(self.wavelength**2) )
         self.vega_counts = self.objCounts(vega[:,0],vega[:,1]) 
         self.ab_to_vega = -2.5*np.log10(self.ab_counts/self.vega_counts)
-        self.solar_ab_mag = self.ABMag(solar[:,0],solar[:,1])
-
+        if self. wave_mean < 1e5:
+            self.solar_ab_mag = self.ABMag(solar[:,0],solar[:,1])
+        else:
+            self.solar_ab_mag = float('NaN')
+            
     def display(self):
         """display
         Plot the filter transmission curve"""
@@ -150,15 +154,15 @@ class Filter(object):
 	else:
             return float('NaN')
 
-    def ABMag(self,sourcewave,sourceflux,sourceflux_unc=0):
+    def ABMag(self, sourcewave, sourceflux, sourceflux_unc=0):
         """ABMag: Convolve source spectrum  with filter and return the AB magnitude
         """
-        return 0-2.5*np.log10(self.objCounts(sourcewave,sourceflux)/self.ab_counts)
+        return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.ab_counts)
 
-    def vegaMag(self,sourcewave,sourceflux,sourceflux_unc=0):
+    def vegaMag(self, sourcewave, sourceflux, sourceflux_unc=0):
         """vegaMag: Convolve source spectrum  with filter and return the Vega magnitude
         """
-        return 0-2.5*np.log10(self.objCounts(sourcewave,sourceflux)/self.vega_counts)        
+        return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.vega_counts)        
 
 
 ###Useful utilities#####
@@ -171,7 +175,7 @@ def load_filters(filternamelist):
         filterlist.append(Filter(f))
     return filterlist
 
-def getSED(sourcewave,sourceflux,filterlist):
+def getSED(sourcewave, sourceflux, filterlist):
     """Takes wavelength array [ndarray of shape (nwave)], a flux
     array [ndarray of shape (nsource,nwave)] and list of Filter objects
     and returns the AB mag SED [ndarray of shape (nsource,nfilter)]"""
