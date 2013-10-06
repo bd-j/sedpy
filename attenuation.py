@@ -20,7 +20,7 @@ class Attenuator(object):
     def __init__(self, dust_type = 'MilkyWay'):
         self.name = dust_type
         self.dustcurve = getattr(thismod, dust_type)()
-        #self.dust_dist = 
+        #self.dustdist = 
 
     def attenuate_spectrum(self, wave, inspec, pars):
         """This will be slow until the dust curves are vectorized"""
@@ -56,7 +56,8 @@ class FMcurve(object):
         return (A_v/R_v) * (self.c[0] + self.c[1]*x +
                        f_bump*self.c[2]*self._D(x, self.gamma, self.x0) +
                        self.c[3]*self._F(x) ) + A_v
-        
+
+    
     def _D(self, x, gamma, x0):
         """Drude profile for the 2175AA bump"""
         return x**2 / ( (x**2-x0**2)**2 +(x*gamma)**2 )
@@ -74,6 +75,7 @@ class FMcurve(object):
         self.gamma = 1.00 #bump width (inverse microns)
         self.gamma_unc = 0.000
 
+
 class MilkyWay(FMcurve):
     """R dependent MW curves from Fitzpatrick 1999, including a variable bump (c_3)"""
     def __init__(self, R_v = 3.1):
@@ -81,8 +83,7 @@ class MilkyWay(FMcurve):
         self.coeffs()
 
     def coeffs(self):
-        """FM90 parameterization coefficients. These are MW R_v=3.1
-        average values, roughly, provided as a template"""
+        """FM99 parameterization coefficients."""
         if type(self.R_v) is not np.ndarray:
             self.R_v = np.atleast_1d(np.array(self.R_v))
         c2 = -0.824 + 4.717/self.R_v
