@@ -19,7 +19,8 @@ class ModelLibrary(object):
     def __init__(self,pars=None, parnames = None):
         if pars is not None :
             self.set_pars(pars, parnames)
-            
+        
+        
     def set_pars(self, pars,parnames):
         self.pars = self.structure_array(pars,parnames)
         self.ngrid = self.pars.shape[0]
@@ -41,7 +42,7 @@ class ModelLibrary(object):
     def structure_array(self, values,fieldnames, types=['<f8']):
         """turn a numpy array of floats into a structurd array. fieldnames can be a list or
         string array of parameter names with length nfield.
-        Assumes pars is a numpy array of shape (nobj,nfield)
+        Assumes values is a numpy array of shape (nobj,nfield)
         """
         values=np.atleast_2d(values)
         if values.shape[-1] != len(fieldnames):
@@ -81,7 +82,7 @@ class ModelLibrary(object):
                 newrecarray[name] = a[name]
         return newrecarray
 
-    def model_weights(self, target_points, parnames=None, itype='dt',subinds=None):
+    def model_weights(self, target_points, parnames=None, itype='dt',subinds=None, force_triangulation = False):
         """Given an ndarray of target points of shape (ntarg,ndim) and optionally a
         list of parnames of length (ndim) construct the corresponding model grid ndarry,
         pass to weightsDT, and return the indices and weights of the model grid points
@@ -93,19 +94,26 @@ class ModelLibrary(object):
             targets = np.array(target_points.tolist())
         else:
             targets = target_points
-        targets=np.atleast_2d(targets)
-            
+        targets = np.atleast_2d(targets)
+
+        #if necessary rebuild the model delauynay triangulation
         #pull the grid points out of the model record data and make an (nmodel,ndim) array of
-        #model grid parameter values.  need to loop to make sure order is correct
-        model_points=[]
-        for pname in parnames:
-            model_points.append(np.squeeze(self.pars[subinds][pname]))
-        model_points = np.array(model_points).transpose() #(nmod, ndim)
+        #model grid parameter values.  need to loop to make sure order is correct.
+        self.triangle_dirtiness += force_triangulation
+        if self.triangle_dirtiness > 0:
+            model_points = []
+            for pname in parnames:
+                model_points.append(np.squeeze(self.pars[subinds][pname]))
+            model_points = np.array(model_points).transpose() #(nmod, ndim)
+            #delaunay triangulate
+            self.dtri = scipy.spatial.Delaunay(model_points)
+            self.triangle_parameters = parnames
+            self.triangle_dirtiness = 0
 
         #pass the result to weightsDT
-        return self.weightsDT(model_points,targets)
+        return self.weightsDT(targets)
 
-    def weightsDT(self,model_points,target_points):
+    def weightsDT(self,target_points):
         """ The interpolation weights are determined from barycenter coordinates
         of the vertices of the enclosing Delaunay triangulation. This allows for
         the use of irregular Nd grids. see also weightsLinear.
@@ -113,23 +121,23 @@ class ModelLibrary(object):
             target_points - array of shape (ntarg,ndim)
             output inds and weights - arrays of shape (npts,ndim+1)
         """
-
-        #should find a way to sore the triangulation and only regenerate if necessary
+        #find the encompassing (hyper)triangle(s) for the desired point, given a delauynay triangulation        
         ndim = target_points.shape[-1]
-        #delaunay triangulate and find the encompassing (hyper)triangle(s) for the desired point
-        dtri = scipy.spatial.Delaunay(model_points)
         #output triangle_inds is an (ntarg) array of simplex indices
-        triangle_inds = dtri.find_simplex(target_points)
+        triangle_inds = self.dtri.find_simplex(target_points)
         #and get model indices of (hyper)triangle vertices. inds has shape (ntarg,ndim+1)
-        inds = dtri.vertices[triangle_inds,:]
+        inds = self.dtri.vertices[triangle_inds,:]
         #get the barycenter coordinates through matrix multiplication and dimensional juggling
-        bary = np.dot( dtri.transform[triangle_inds,:ndim,:ndim],
-                       (target_points-dtri.transform[triangle_inds,ndim,:]).reshape(-1,ndim,1) )
+        bary = np.dot( self.dtri.transform[triangle_inds,:ndim,:ndim],
+                       (target_points - self.dtri.transform[triangle_inds,ndim,:]).reshape(-1,ndim,1) )
         oned = np.arange(triangle_inds.shape[0])
         bary = np.atleast_2d(np.squeeze(bary[oned,:,oned,:])) #ok.  in np 1.7 can add an axis to squeeze
-        last = 1-bary.sum(axis=-1) #the last bary coordinate is 1-sum of the other coordinates
+        last = 1 - bary.sum(axis=-1) #the last bary coordinate is 1-sum of the other coordinates
         weights = np.hstack((bary,last[:,np.newaxis]))
 
+        outside = (triangle_inds == -1)
+        weights[outside,:] = 0
+        
         #loop implementation of the above for clarity
         #npts = triangle_inds.shape[0]
         #bary = np.zeros([npts,ndim+1])
@@ -207,7 +215,7 @@ class SpecLibrary(ModelLibrary):
                 
         return sed, lbol, outspectra
 
-    def interpolate_to_pars(self, target_points, parnames=None, itype='dt',subinds=None ):
+    def interpolate_to_pars(self, target_points, parnames=None, itype='dt',subinds=None, **extras):
         """Method to obtain the model spectrum for a given set of parameter values via
         interpolation of the model grid. The interpolation weights are determined
         from barycenters of a Delaunay triangulation or nLinear interpolation.
@@ -227,10 +235,11 @@ class SpecLibrary(ModelLibrary):
         #Note: should (but doesn't yet) check that point is in the grid
 
 
-        inds, weights = self.model_weights(target_points, parnames=parnames, itype='dt',subinds = subinds)
+        inds, weights = self.model_weights(target_points, parnames=parnames,
+                                           itype='dt',subinds = subinds, **extras)
         if subinds is not None:
             inds = subinds[inds]
-
+        
         return self.combine_weighted_spectra(inds, weights)
 
     def combine_weighted_spectra(self, inds, weights):
