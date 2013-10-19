@@ -18,7 +18,7 @@ thismod = sys.modules[__name__]
 
 class Attenuator(object):
 
-    def __init__(self, dust_type = 'MilkyWay'):
+    def __init__(self, dust_type = 'FM07'):
         self.name = dust_type
         self.dustcurve = getattr(thismod, dust_type)()
         #self.dustdist = 
@@ -75,6 +75,7 @@ class GenericCurve(object):
         return k*(1./x)**alpha - R_v
 
     def spline(self, x, spline_x = [1.8,2.5,3.0], spline_k = [0.0,1.32, 2.02]):
+        """Cubic spline, for the optical."""
         spline_x = np.asarray(spline_x)
         spline_k = np.asarray(spline_k)
         sp = interp.InterpolatedUnivariateSpline(spline_x, spline_k)
@@ -86,12 +87,13 @@ class GenericCurve(object):
         self.setpars(**pars)
         return self.ecurve(x, self.pardict) * self.pardict['A_v']/self.pardict['R_v'] + 1
         
-    def setpars(self, A_v = 1, R_v = 3.1, f_bump = 1.0, uv_slope = 1):        
+    def setpars(self, A_v = 1, R_v = 3.1, f_bump = 1.0, uv_slope = 1, var = False, **extras):
+        self.default_pars(var =var)
         self.pardict['c3'] *= f_bump
         self.pardict['A_v'] = A_v
         self.pardict['R_v'] = R_v
         self.pardict['c2'] *= uv_slope
-        self.selfupdate()
+        self.selfupdate(var = var)
 
 
 class FM07(GenericCurve):
@@ -106,29 +108,38 @@ class FM07(GenericCurve):
         scatter in the coefficients based on the FM07 sample."""        
         p = {}
         #UV
-        p['c2'] = 0.81 + var*normal(0, 0.25)
-        p['c3'] = 2.99 + var*normal(0, 1.0)
-        p['c4'] = 0.32 +var*normal(0, 0.16)
-        p['c5'] = 6.10 + var*normal(0, 0.6)
-        p['x0'] = 4.59+ var*normal(0, 0.025)
-        p['gamma'] = 0.90 + var*normal(0, 0.1)
+        p['c2'] = 0.81 
+        p['c3'] = 2.99 
+        p['c4'] = 0.32 
+        p['c5'] = 6.10 
+        p['x0'] = 4.59
+        p['gamma'] = 0.90 
         #Optical
         p['ospline_x'] = 1e4/np.array([3300., 4000., 5330])
-        p['ospline_k'] = (np.array([2.05, 1.32, 0.0])
-                          + var*normal(0,1,3)*np.array([0.17, 0.026, 0.008]))
+        p['ospline_k'] = (np.array([2.05, 1.32, 0.0]))
         #NIR
-        p['alpha'] = -1.84
-        p['R_v'] = 3.1 + var*normal(0., 0.6)
-        
+        p['alpha'] = 0-1.84
+        p['R_v'] = 3.1
+
+        if var:
+            draws = normal(0,1,10)
+            p['c2'] += draws[0]*0.25
+            p['c3'] += draws[1]*1.0
+            p['c4'] += draws[2]*0.16
+            p['c5'] += draws[3]*0.6
+            p['x0'] += draws[4]*0.025
+            p['gamma'] += draws[5]*0.1
+            p['ospline_k'] += draws[6:9]*np.array([0.17, 0.026, 0.008])
+            p['R_v'] += draws[9]*0.6
+            
         self.pardict = p
-        self.selfupdate()
+        self.selfupdate(var = var)
 
     def selfupdate(self, var = False):
         """Enforce empirical relationships between some of the
         exctinction curve parameters, optionally including variance
         in the relationships"""
-        
-        self.pardict['k'] = -0.83 + 0.63*self.pardict['R_v'] + var*normal(0, 0.12)
+        self.pardict['k'] = 0-0.83 + 0.63 * self.pardict['R_v'] + var*normal(0, 0.12)
         self.pardict['c1'] = 2.02 - 3.007 * self.pardict['c2'] +var*normal(0, 0.3)
 
     def ecurve(self, x, pardict):
@@ -141,7 +152,6 @@ class FM07(GenericCurve):
         spline_k = np.array(self.fm_curve(spline_x[0:2], **pardict).tolist() + 
                              pardict['ospline_k'].tolist() +
                              self.powerlaw( spline_x[-2:], **pardict).tolist())
-        print(spline_x, spline_k)
         optical  = self.spline(x, spline_x =spline_x[::-1], spline_k = spline_k[::-1]) 
         return nir*(x < 0.75) + uv*(x > 3.8) + optical*((x >= 0.75) & (x <= 3.8)) 
     

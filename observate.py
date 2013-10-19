@@ -169,7 +169,7 @@ class Filter(object):
 
 def load_filters(filternamelist):
     """Given a list of filter names, this method returns a list of Filter objects"""
-    filterlist=[]
+    filterlist = []
     for f in filternamelist:
         #print(f)
         filterlist.append(Filter(f))
@@ -180,11 +180,11 @@ def getSED(sourcewave, sourceflux, filterlist):
     array [ndarray of shape (nsource,nwave)] and list of Filter objects
     and returns the AB mag SED [ndarray of shape (nsource,nfilter)]"""
 
-    sourceflux=np.atleast_2d(sourceflux)
+    sourceflux = np.atleast_2d(sourceflux)
     sedshape = [sourceflux.shape[0], len(filterlist)]
     sed = np.zeros(sedshape)
     for i,f in enumerate(filterlist):
-        sed[:,i]=f.ABMag(sourcewave,sourceflux)
+        sed[:,i] = f.ABMag(sourcewave,sourceflux)
     return np.squeeze(sed)
 
 def filter_dict(filterlist):
@@ -197,14 +197,14 @@ def filter_dict(filterlist):
 
 def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
     """assumes wavelength varies along last axis of spec"""
-    inds=np.where(np.logical_and(wave < wave_max, wave >= wave_min))
+    inds = np.where(np.logical_and(wave < wave_max, wave >= wave_min))
     return np.trapz(spec[...,inds[0]],wave[inds])
 
 
 def air2vac(wave):
     """Convert from in-air wavelengths to vacuum wavelengths.  Based on Allen's Astrophysical Quantities"""
-    ss=1E4/wave
-    wv=wave*(1+6.4328e-5 + 2.94981e-2/(146-ss^2) + 2.5540e-4/(41-ss^2))
+    ss = 1E4/wave
+    wv = wave*(1+6.4328e-5 + 2.94981e-2/(146-ss^2) + 2.5540e-4/(41-ss^2))
     return wv
 
 #def velBroaden(self,sourcewave,sourceflux,sigma,sigma0=0,outwave=-1):

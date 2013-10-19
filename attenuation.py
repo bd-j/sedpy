@@ -272,7 +272,16 @@ def conroy(wave, tau_v =1, R_v=3.1, f_bump=0.6, **kwargs):
 
     return tau_v*alam
 
-    pass
+def wild_powerlaw(wave, tau_v =1 ,alpha=[0.7,0.7,0.7], breaks=[0,3000,10000,4e4], **kwargs):
+    """As in V. Wild 2011, i.e. power-law slope can change between regions.
+    Superceded by Chevallard 2013 for optical/NIR"""
+    if len(breaks) == len(alpha)+1 : print "make sure of your power law breaks"
+    tau=np.array(len(wave))
+    for i in range(alpha):
+	inds=np.where((wave > breaks[i]) & (wave <=breaks[i+1]))
+	tau[inds]=tau_v*(wave/5500)**alpha[i]
+    return tau
+
 
 ##### EXTINCTION CURVES ########
 
@@ -367,14 +376,4 @@ def lmc(wave, tau_v =1, **kwargs):
     return tau_v * (abs_ab/norm_v)
 
     
-
-def wild_powerlaw(wave, tau_v =1 ,alpha=[0.7,0.7,0.7], breaks=[0,3000,10000,4e4], **kwargs):
-    """As in V. Wild 2011, i.e. power-law slope can change between regions.
-    Superceded by Chevallard 2013 for optical/NIR"""
-    if len(breaks) == len(alpha)+1 : print "make sure of your power law breaks"
-    tau=np.array(len(wave))
-    for i in range(alpha):
-	inds=np.where((wave > breaks[i]) & (wave <=breaks[i+1]))
-	tau[inds]=tau_v*(wave/5500)**alpha[i]
-    return tau
 
