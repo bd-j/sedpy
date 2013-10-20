@@ -96,7 +96,7 @@ class ModelLibrary(object):
             targets = target_points
         targets = np.atleast_2d(targets)
 
-        #if necessary rebuild the model delauynay triangulation
+        #if necessary rebuild the model delauynay triangulation and KDTree
         #pull the grid points out of the model record data and make an (nmodel,ndim) array of
         #model grid parameter values.  need to loop to make sure order is correct.
         self.triangle_dirtiness += force_triangulation
@@ -109,6 +109,8 @@ class ModelLibrary(object):
             self.dtri = scipy.spatial.Delaunay(model_points)
             self.triangle_parameters = parnames
             self.triangle_dirtiness = 0
+            #kdtree
+            self.kdt = sklearn.neighbors.KDTree(model_points)
 
         #pass the result to weightsDT
         return self.weightsDT(targets)
@@ -116,7 +118,7 @@ class ModelLibrary(object):
     def weightsDT(self,target_points):
         """ The interpolation weights are determined from barycenter coordinates
         of the vertices of the enclosing Delaunay triangulation. This allows for
-        the use of irregular Nd grids. see also weightsLinear.
+        the use of irregular Nd grids. see also weights_1DLinear and weights_kNN_inverse_distance.
             model_points - array of shape (nmod, ndim)
             target_points - array of shape (ntarg,ndim)
             output inds and weights - arrays of shape (npts,ndim+1)
@@ -165,7 +167,15 @@ class ModelLibrary(object):
 
         return inds, weights
 
-
+    def weights_kNN_inverse_dist(self, target_points, k = 1):
+        dists, inds = self.kdt.query(target_points, k = k, return_distance = True)
+        if k == 1:
+            return inds, np.ones(inds.shape[0])
+        weights = 1/dists
+        weights[np.isinf(weights)] = large_number
+        weights = weights/weights.sum(axis = -1)
+        return inds, weights
+    
     def nearest_index(self, array, value):
         return (np.abs(array-value)).argmin(axis = -1)
 
@@ -200,7 +210,7 @@ class SpecLibrary(ModelLibrary):
 	#split big model grids to avoid memory constraints
 	i=0
         while (i*maxmod <= ngrid):
-            print('generateSEDs: chunk {0}'.format(i+1))
+            #print('generateSEDs: chunk {0}'.format(i+1))
 	    s1, s2 = (i)*maxmod, np.min([(i+1)*maxmod-1,ngrid])
 	    spec = self.spectra_from_pars(pars[s1:s2])
             if attenuator is not None:
