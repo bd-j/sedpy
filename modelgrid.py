@@ -51,7 +51,7 @@ class ModelLibrary(object):
         #create the dtype and structured array
         if types is None:
             types = ['<f8']*len(fieldnames)
-        dt = np.dtype(zip(fieldnames, types)
+        dt = np.dtype(zip(fieldnames, types))
         struct = np.zeros(nobj, dtype = dt)
         for i,f in enumerate(fieldnames):
             struct[f] = values[...,i]

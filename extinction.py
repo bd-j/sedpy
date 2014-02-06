@@ -45,12 +45,12 @@ class GenericCurve(object):
     """Class for handling extinction curves with the parameterization
     of Fitzpatrick & Massa 1990 or F&M 2007"""
 
-    def __init__(self, form = 'F90', var = False):
+    def __init__(self, form = 'F07', var = False):
         self.default_pars(var = var)
 
         if form is 'FM90':
             self._f = self.f_90
-        else:
+        elif form is 'F07':
             self._f = self.f_07                        
  
     def fm_curve(self, x, c1 = None, c2 = None, c3 = None, c4 = None, c5 = None,
@@ -104,7 +104,7 @@ class FM07(GenericCurve):
         self._f = self.f_07                        
 
     def default_pars(self, var = False):
-        """FM07 parameterization coefficients.  Set var to True to include
+        """FM07 parameterization coefficients, based on MW stars.  Set var to True to include
         scatter in the coefficients based on the FM07 sample."""        
         p = {}
         #UV

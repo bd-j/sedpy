@@ -304,7 +304,7 @@ def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
     wsh = np.where( x > x_sup)
     wlg = np.where( x < x_inf)
 
-    print(w2[0])
+    #print(w2[0])
 
     y = x[w1] - 1.82
     a[w1] = 1. + 0.17699 * y - 0.50447 * y**2. - 0.02427 * y**3. + 0.72085 * y**4. + \
@@ -319,7 +319,7 @@ def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
     fa = x[w3] * 0.
     fb = x[w3] * 0.
     ou = (x[w3] > 5.9)
-    print(type(ou),ou[0], type(w3))
+    #print(type(ou),ou[0], type(w3))
     
     if ou.any():
 	y = x[w3[0][ou]] - 5.9
