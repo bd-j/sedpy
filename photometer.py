@@ -1,3 +1,5 @@
+# Simple Aperture photometry
+
 import numpy as np
 from numpy import hypot, sqrt
 from astropy import wcs
