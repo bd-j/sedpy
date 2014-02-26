@@ -12,7 +12,10 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import astropy.io.fits as pyfits
+try:
+    import astropy.io.fits as pyfits
+except (ImportError):
+    import pyfits
 import yanny
 
 ##Load useful reference spectra######
@@ -207,7 +210,7 @@ def air2vac(wave):
     wv = wave*(1+6.4328e-5 + 2.94981e-2/(146-ss^2) + 2.5540e-4/(41-ss^2))
     return wv
 
-#def velBroaden(self,sourcewave,sourceflux,sigma,sigma0=0,outwave=-1):
+#def vel_broaden(self,sourcewave,sourceflux,sigma,sigma0=0,outwave=-1):
 #    sigma=np.sqrt(sigma**2-sigma0**2)
 #    K=(sigma*sqrt(2*!PI))^(-1.)
 #    wr=outwave#(1/wave)
@@ -217,7 +220,7 @@ def air2vac(wave):
 #    broadflux=total(dv*flux[0:nw-2,*]*ee[0:nw-2,*],2)
 #    return K*broadflux #/1.553??????
 
-#def waveBroaden(self,sourcewave,sourceflux,fwhm,fwhm_spec=0,outwave=-1):
+#def wave_broaden(self,sourcewave,sourceflux,fwhm,fwhm_spec=0,outwave=-1):
 #    sigma=sqrt(fwhm^2.-fwhm_spec^2)/2.3548
 #    K=(sigma*sqrt(2.*!PI))^(-1.)
 #    for iw in range(len(outwave)):
