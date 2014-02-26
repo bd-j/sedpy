@@ -44,8 +44,15 @@ else:
 class Filter(object):
     """This class operates on filter transmission files.  It reads SDSS-style yanny
     files containing filter transmissions (these are easy to create) and determines
-    a number of useful filter files.  Methods are provided to convolve a source
-    spectrum with the filter and return the magnitude."""
+    a number of useful filter quantities.  Methods are provided to convolve a source
+    spectrum with the filter and return the magnitude.
+
+    :param kname:
+        the kcorrect style name of the filter, excluing '.par', e.g. sdss_r0
+
+    :param nick:
+        a nickname to associate with the filter
+    """
 
     ab_gnu=3.631e-20   #AB reference spctrum in erg/s/cm^2/Hz
     npts=0
@@ -64,10 +71,14 @@ class Filter(object):
             self.loadKFilter(self.filename)
 
     def loadKFilter(self, filename):
-        """loadKFilter
-        Read a filter in kcorrect (yanny) format and populate the
-        wavelength and transmission arrays.  Then determine a
-        number of filter properties and store in the object."""
+        """Read a filter in kcorrect (yanny) format and populate the wavelength and
+        transmission arrays.  Then determine a number of filter properties and
+        store in the object.
+
+        :param filename:
+            the fully qualified path and filename of the yanny file that contains
+            the filter transmission
+        """
 
         ##This should be replaced with the sdsspy yanny file readers
         ##Done, code kept here in case reversion required
@@ -98,11 +109,11 @@ class Filter(object):
 
         
     def getProperties(self):
-        """getProperties
-        Determine a number of properties of the filter and store them in the object.
+        """Determine a number of properties of the filter and store them in the object.
         These properties include several 'effective' wavelength definitions and several
         width definitions, as well as the in-band absolute AB solar magnitude, the Vega and
-        AB reference detector signal, and the conversion between AB and Vega magnitudes. """
+        AB reference detector signal, and the conversion between AB and Vega magnitudes.
+        """
 
         i0 = np.trapz(self.transmission*np.log(self.wavelength), np.log(self.wavelength))
         i1 = np.trapz(self.transmission, np.log(self.wavelength))
@@ -129,49 +140,79 @@ class Filter(object):
             self.solar_ab_mag = float('NaN')
             
     def display(self):
-        """display
-        Plot the filter transmission curve"""
+        """Plot the filter transmission curve"""
         if self.npts > 0:
             plt.plot(self.wavelength,self.transmission)
             plt.title(self.name)
 
     def objCounts(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """getCounts: Convolve source spectrum with filter and return the detector signal
-               sourcewave - spectrum wavelength (in AA), ndarray of shape (nwave)
-               sourceflux -  associated flux (in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
-               output: float Detector signals (nspec)"""
+        """Project source spectrum ont filter and return the detector signal
 
+        :param sourcewave:
+            spectrum wavelength (in AA), ndarray of shape (nwave)
+        :param sourceflux:
+            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
 
+        :returns counts:
+            Detector signals (nspec)
+        """
+        
         #interpolate filter transmission to source spectrum
         newtrans = np.interp(sourcewave, self.wavelength,self.transmission, 
                                 left=0.,right=0.)
             #print(self.name,sourcewave.shape,self.wavelength.shape,newtrans.shape)
         
         #integrate lambda*f_lambda*R
-	if True in (newtrans > 0.):
+        if True in (newtrans > 0.):
             ind = np.where(newtrans > 0.)
             ind=ind[0]
             counts = np.trapz(sourcewave[ind]*newtrans[ind]*sourceflux[...,ind], sourcewave[ind],axis=-1)
             #if  np.isinf(counts).any() : print(self.name, "Warn for inf value")
             return np.squeeze(counts)
-	else:
+        else:
             return float('NaN')
 
     def ABMag(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """ABMag: Convolve source spectrum  with filter and return the AB magnitude
+        """Project source spectrum  onto filter and return the AB magnitude
+        
+        :param sourcewave:
+            spectrum wavelength (in AA), ndarray of shape (nwave)
+        :param sourceflux:
+            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
+
+        :returns mag:
+            AB magnitude of the source
         """
+        
         return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.ab_counts)
 
     def vegaMag(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """vegaMag: Convolve source spectrum  with filter and return the Vega magnitude
+        """Project source spectrum  onto filter and return the Vega magnitude
+               
+        :param sourcewave:
+            spectrum wavelength (in AA), ndarray of shape (nwave)
+        :param sourceflux:
+            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
+
+        :returns mag:
+            Vega magnitude of the source
         """
+
         return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.vega_counts)        
 
 
 ###Useful utilities#####
 
 def load_filters(filternamelist):
-    """Given a list of filter names, this method returns a list of Filter objects"""
+    """Given a list of filter names, this method returns a list of Filter objects
+
+    :param filternamelist:
+        list of strings giving names of the filters
+
+    :returns filterlist:
+        a list of filter objects
+    """
+    
     filterlist = []
     for f in filternamelist:
         #print(f)
@@ -179,9 +220,19 @@ def load_filters(filternamelist):
     return filterlist
 
 def getSED(sourcewave, sourceflux, filterlist):
-    """Takes wavelength array [ndarray of shape (nwave)], a flux
-    array [ndarray of shape (nsource,nwave)] and list of Filter objects
-    and returns the AB mag SED [ndarray of shape (nsource,nfilter)]"""
+    """Takes wavelength vector, a flux array and list of Filter objects
+    and returns the SED in AB magnitudes.
+
+    :param sourcewave:
+        spectrum wavelength (in AA), ndarray of shape (nwave)
+    :param sourceflux:
+        associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nsource,nwave)
+    :param filterlist:
+        list of filter objects, of length nfilt
+
+    :returns sed:
+        array of broadband magnitudes, of shape (nsource, nfilter)
+    """
 
     sourceflux = np.atleast_2d(sourceflux)
     sedshape = [sourceflux.shape[0], len(filterlist)]
@@ -199,10 +250,24 @@ def filter_dict(filterlist):
 ###Routines for spectra######
 
 def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
-    """assumes wavelength varies along last axis of spec"""
+    """Calculate the bolometric luminosity of a spectrum or spectra.
+
+    :param wave:
+       The wavelength vector of length nwave
+    :param spec:
+       The spectra, of shape (...nsource, nwave)
+    :param wave_min:
+       minimum wavelength for the integral
+    :param max_wave:
+       maximum wavelength for the integral
+
+    :returns lbol:
+       the bolometric luminosity, integrated from wave_min to
+       wave_max.  Array of length (...nsource)
+    """
+
     inds = np.where(np.logical_and(wave < wave_max, wave >= wave_min))
     return np.trapz(spec[...,inds[0]],wave[inds])
-
 
 def air2vac(wave):
     """Convert from in-air wavelengths to vacuum wavelengths.  Based on Allen's Astrophysical Quantities"""
@@ -247,5 +312,5 @@ def selftest():
         print(filterlist[i].wave_effective, filterlist[i].solar_ab_mag, filterlist[i].ab_to_vega)
         assert abs(filterlist[i].wave_effective-weff_kcorr[i]) < weff_kcorr[i]*0.01
         assert abs(filterlist[i].solar_ab_mag-msun_kcorr[i]) < 0.05
-        #assert abs(filterlist[i].ab_to_vega+ab2vega_kcorr[i]) < 0.05
+        #assert abs(filterlist[i].ab_to_vega+ab2vega_kcorr[i]) < 0.05 #this fails because of the vega spectrum used by k_correct
 

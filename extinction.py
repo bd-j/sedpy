@@ -4,19 +4,16 @@ import scipy.interpolate as interp
 from numpy.random import normal 
 
 
-#### Attenuator class
-
-# A level of abstraction around the dust curves, which allows for some
-# generic methods.
-# The Attenuator is composed of an (effective) DustLaw and a DustDistribution
-# class, both of which can be easily extended.  The first takes wavelength and
-# tau_v as arguments and returns tau_\lambda.  The second takes arguments
-# that can be anything (e.g. stellar age, metallicity) and returns a
-# distribution of tau_V
-
 thismod = sys.modules[__name__]
 
 class Attenuator(object):
+    """A level of abstraction around the dust curves, which allows for some
+    generic methods. The Attenuator is composed of an (effective) DustLaw and
+    a DustDistribution class, both of which can be easily extended.  The
+    first takes wavelength and tau_v as arguments and returns tau_\lambda.
+    The second takes arguments that can be anything (e.g. stellar age, metallicity)
+    and returns a distribution of tau_V
+    """
 
     def __init__(self, dust_type = 'FM07'):
         self.name = dust_type
@@ -36,6 +33,7 @@ class Attenuator(object):
         return spec
 
     def draw_taus(self,ntau, pars):
+        """ Not implemented"""
         pass
 
 #########Extinction Law Classes
@@ -59,23 +57,53 @@ class GenericCurve(object):
         return  (c1 + c2*x + c3*self.drude(x, gamma, x0) + c4 * self._f(x, c5 = c5))
     
     def drude(self, x, gamma, x0):
-        """Drude profile for the 2175AA bump"""
+        """Drude profile for the 2175AA bump.
+        :params x:
+           inverse wavelength (inverse microns)
+        :params gamma:
+           width of the Drude profile
+        :params x0:
+           center of the Drude profile, inverse microns
+        :returns k_lambda:
+           the value of the Drude profile at x
+        """
         return x*x / ( (x*x-x0*x0)**2 +(x*gamma)**2 )
 
     def f_90(self, x, **extras):
-        """UV rise in the excess curve.  FM90 (defined cubic polynomial)"""
+        """UV rise in the excess curve.  FM90 (defined cubic polynomial)
+        :params x:
+            inverse wavelength in inverse microns
+        :returns:
+            Cubic polynomial in x centered on 5.9 microns**(-1), as in FM90
+        """
         return (x > 5.9)*(0.5392*(x-5.9)*(x-5.9)+0.05644*(x-5.9)**3)
 
     def f_07(self, x, c5 = 5.9, **extras):
-        """UV rise in the excess curve, FM07 (quadratic with variable center)"""
+        """UV rise in the excess curve, FM07 (quadratic with variable center)
+        :params x:
+            inverse wavelength in inverse microns
+        :params c5:
+            pivot point for the quadratic
+        :returns:
+            quadratic in x centered on c5, as in FM07
+        """
         return (x > c5)*(x-c5)*(x-c5)
 
     def powerlaw(self, x, R_v = 3.1, k = None, alpha = -1.84, **extras):
-        """Power-law shape of excess curve, for the NIR"""
+        """Power-law shape of the color excess curve, for the NIR extinction curve
+        :params x:
+        :params R_v:
+        :params k:
+        :params alpha:
+        """
         return k*(1./x)**alpha - R_v
 
     def spline(self, x, spline_x = [1.8,2.5,3.0], spline_k = [0.0,1.32, 2.02]):
-        """Cubic spline, for the optical."""
+        """Cubic spline, for the optical.
+        :params x:
+        :params spline_x:
+        :params spline_k:
+        """
         spline_x = np.asarray(spline_x)
         spline_k = np.asarray(spline_k)
         sp = interp.InterpolatedUnivariateSpline(spline_x, spline_k)
@@ -104,8 +132,12 @@ class FM07(GenericCurve):
         self._f = self.f_07                        
 
     def default_pars(self, var = False):
-        """FM07 parameterization coefficients, based on MW stars.  Set var to True to include
-        scatter in the coefficients based on the FM07 sample."""        
+        """FM07 parameterization coefficients, based on MW stars.
+
+        :param var:
+            Set to True to include scatter in the coefficients
+            based on the FM07 sample.
+        """        
         p = {}
         #UV
         p['c2'] = 0.81 
