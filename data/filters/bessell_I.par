@@ -1,0 +1,63 @@
+# Units:
+#  "lambda" is in Angstroms
+#  "pass" is the contribution to the detector signal per photon
+#         entering the atmosphere of Earth
+#
+# Bandpass Name(s): I
+#
+# Instrument: Hypothetical system developed to match known "standards"
+#             of Johnson/Cousins to spectrophotometry
+# 
+# Determined by: M. S. Bessell
+#
+# Date of determination: 1990
+#
+# Meaning of/Reason for default column: Only available
+#
+# Notes:
+#
+# These filter curves define the "official" Johnson/Cousins BVRI
+# system, as far # as I am concerned. One must take care to make sure
+# that you really want these filters; ie. that the observations have
+# been converted into this system. Otherwise, you will have to use
+# custom filter curves (which may not be a bad idea).
+# 
+# Details of how/why this system is defined can be found in:
+#
+# Bessell, M.S. 1990, PASP, 102, 1181
+#
+# Read it; it will give you a good insight into how complex this 
+# whole business really is.
+#
+# Michael Blanton
+# 2002-08-19
+#
+
+typedef struct {
+  double lambda;
+  double pass;
+} KFILTER;
+
+KFILTER 7000. 0
+KFILTER 7100. 0.0169014084507042
+KFILTER 7200. 0.161111111111111
+KFILTER 7300. 0.38013698630137
+KFILTER 7400. 0.530405405405405
+KFILTER 7500. 0.606666666666667
+KFILTER 7600. 0.634868421052632
+KFILTER 7700. 0.63961038961039
+KFILTER 7800. 0.634615384615385
+KFILTER 7900. 0.629746835443038
+KFILTER 8000. 0.625
+KFILTER 8100. 0.617283950617284
+KFILTER 8200. 0.603658536585366
+KFILTER 8300. 0.590361445783133
+KFILTER 8400. 0.56547619047619
+KFILTER 8500. 0.535294117647059
+KFILTER 8600. 0.5
+KFILTER 8700. 0.431034482758621
+KFILTER 8800. 0.318181818181818
+KFILTER 8900. 0.185393258426966
+KFILTER 9000. 0.0833333333333333
+KFILTER 9100. 0.0164835164835165
+KFILTER 9200. 0
