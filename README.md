@@ -23,7 +23,8 @@ Description:
 
 - `modelgrid.py` is a module with classes for the storage and
   interpolation of model SEDs (using numpy structured arrays, usually,
-  and Delaunay triangulation)
+  and Delaunay triangulation or inverse distance weighting of the k
+  nearest neighbors and KD-trees)
 
 - `photometer.py` has some basic aperture photometry algorithms
 
