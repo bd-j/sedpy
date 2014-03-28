@@ -1,16 +1,12 @@
 import numpy as np
-import astropy.io.fits as pyfits
+try:
+    import astropy.io.fits as pyfits
+except (ImportError):
+    import pyfits
 import scipy.spatial
 import sklearn.neighbors
-import astropy.constants as constants
 
 import observate
-
-lsun = constants.L_sun.cgs.value
-pc = constants.pc.cgs.value
-hplanck = constants.h.cgs.value
-c_cgs = constants.c.cgs.value
-kboltz = constants.k_B.cgs.value
 
 class ModelLibrary(object):
     """Class to deal with (irregular) grids of models.  Primary attribute
@@ -43,16 +39,15 @@ class ModelLibrary(object):
     def structure_array(self, values,fieldnames, types = None):
         """Turn a numpy array of floats into a structurd array.
 
-        :param values:
-            Values of the structure.  Assumed to be a numpy array of shape
-            (NOBJ x NFIELD)
+        :param values: ndarray, shape(nrec, nfield).
+            Values of the structure.
 
-        :param fieldnames:
-            A list or string array of parameter names with length NFIELD
+        :param fieldnames: string sequence of length nfield.
+            A list or string array of parameter names with length NFIELD.
 
         :param types:
             Optional sequence of string format identifiers for each field.
-            Defaults to '<f8'
+            Defaults to '<f8'.
 
         :returns struct:
             A numpy structured array.
@@ -82,7 +77,7 @@ class ModelLibrary(object):
         :param arrays:
             A sequence of structured arrays.  These must each have the same length
         :returns newarray:
-            The joined arrays.
+            A single array containing the fields of ``arrays``.
         """
         
         if False in [len(a) == len(arrays[0]) for a in arrays] :
@@ -99,45 +94,46 @@ class ModelLibrary(object):
 
     def model_weights(self, target_points, parnames = None, subinds = None,
                       itype = 'dt', force_triangulation = False):
-        """Given an array of target points of shape (ntarg,npar) and optionally a
-        list of parnames of length (npar), return the indices and weights of the
-        model grid points for interpolation.
+        """Given an array of target coordinates and optionally a list of parnames, return
+        the indices and weights of the model grid points that will interpolate to the
+        target points.
 
-        :param target_points:
+        :param target_points: ndarray, shape(ntarg, npar)
             The points to which you want to interpolate.  Can be a numpy structured array
             of length NTARG or a simple numpy array of dimension [NTARG x NPAR], if parnames
             is also passed.  If a numpy structured array, then the field names should
             correspond to parameters in the `par` structure.  1d arrays (i.e. a single target point)
             will be automatically upgraded to 2d arrays
 
-        :param parnames:
+        :param parnames: string sequence
             A list of the parameter names corresponding to the NPAR dimension of target_points.
             These names should correspond to parameters in the `par` structure.
 
         :param subinds:
             An optional array identifying the members of the grid to be used for interpolation.
 
-        :param itype: (default: 'dt')
+        :param itype: string (default 'dt')
             A string giving the type of interpolation to perform.  Available options are:
-               'dt' - use Delaunay triangulation.  This is suitable for irregular grids, though
-                      care must be taken that target points are within the convex hull described
-                      by the grid
-               'idw' - inverse distance weighting to the NPAR nearest neighbors.
-               'nearest' - nearest neighbor, as determined by a kd-tree
-               'NDlinear' - not yet implemented'
 
-        :param force_triangulation:
-            Normally the triangulation and kdtree formed from the model grid is stored and reused
-            unless the `triangle_dirtiness' attribute is greater than zero.  If this keyword is true,
-            force the triangulation and kdtree to be regenerated regardless of 'dirtiness'
+            * 'dt' - use Delaunay triangulation.  This is suitable for irregular grids, though
+              care must be taken that target points are within the convex hull described
+              by the grid
+            * 'idw' - inverse distance weighting to the NPAR nearest neighbors.
+            * 'nearest' - nearest neighbor, as determined by a kd-tree
+            * 'ndlinear' - not yet implemented'
 
+        :param force_triangulation: bool (default False)
+            Normally the triangulation and kdtree formed from the model grid is stored and
+            reused unless the `triangle_dirtiness' attribute is greater than zero.  If this
+            keyword is true, force the triangulation and kdtree to be regenerated regardless
+            of 'dirtiness'
 
-        :returns inds:
-            An array that indexes the model parameter grid to give the interpolating models for each
-            target point.  It has shape (NTARG, NIND) where NIND is NPAR+1 for Delaunay triangulation,
-            NPAR for 'idw', and 1 for 'nearest'
+        :returns inds: ndarray, shape(ntarg, nind)
+            An array that indexes the model parameter grid to give the interpolating models
+            for each target point.  It has shape (NTARG, NIND) where nind is NPAR+1 for
+            Delaunay triangulation, NPAR for 'idw', and 1 for 'nearest'
 
-        :returns weights:
+        :returns weights: ndarray, shape(ntarg, nind)
             The interpolation weight for each model grid point specified by inds, and of identical
             shape. The weights summed along the NIND direction will always be 1. Thus for
             'nearest' weights is always 1.  
@@ -190,12 +186,14 @@ class ModelLibrary(object):
         allows for the use of irregular Nd grids. See also weights_1DLinear and
         weights_kNN_inverse_distance.
         
-        :param target_points:
-            array of shape (ntarg,npar)
-        :returns inds:
-            array of shape (ntarg,npar+1) giving the model indices of the interpolates
-        :returns weights:
-            array of shape (ntarg,npar+1) giving the weights of each model of ind in the interpolates
+        :param target_points: ndarray, shape(ntarg,npar)
+            The coordinates to which you wish to interpolate
+            
+        :returns inds: ndarray, shape(ntarg,npar+1)
+             The model indices of the interpolates
+             
+        :returns weights: narray, shape (ntarg,npar+1)
+             The weights of each model given by ind in the interpolates
         """
         
         #find the encompassing (hyper)triangle(s) for the desired points, given a delauynay triangulation        
@@ -303,15 +301,18 @@ class SpecLibrary(ModelLibrary):
         interpolation of the model grid. The interpolation weights are determined
         from barycenters of a Delaunay triangulation or nLinear interpolation or
         k-nearest-neighbor inverse distance.
-        
-        The input is an array of target model parameters, optionally a string list of the
-        fields containing the corresponding library model parameters
-            target_points - ndarray of shape (ntarg,ndim) of ndim desired model parameters.
-                            Can also be a structured array with fields named for the model parameters
-            subinds - ndarray of indices of the model pars structure to use in interpolation.
-                      allows for only portions of the library to be used
-            parnames  - string list of the names of the model library parameters
-        The output has shape (ntarg, nwave)"""
+                
+        :param target_points: ndarray, shape (ntarg,ndim)
+            desired model parameters. Can also be a structured array with fields named
+            for the model parameters.  See ModelLibrary.model_weights() 
+        :param subinds: ndarray
+            Indices of the model pars structure to use in interpolation. Allows for only
+            portions of the model library to be used.
+        :param parnames: string sequence, len (ndim)
+            The names of the model library parameters
+        :returns spectra: ndarray, shape (ntarg, nwave)
+            The interpolated spectra
+        """
 
         inds, weights = self.model_weights(target_points, parnames = parnames,
                                             itype=itype, subinds = subinds, **extras)
@@ -321,7 +322,7 @@ class SpecLibrary(ModelLibrary):
 
     def combine_weighted_spectra(self, inds, weights):
         """weight self.spectra using broadcasting, then sum the weighted spectra and
-        return (nwave,ntarg).  inds has shape () and weights has shape ()"""
+        return (nwave,ntarg).  inds has shape (ntarg, nint) and weights has shape (ntarg, nint)"""
         return (( weights* (self.spectra[inds].transpose(2,0,1)) ).sum(axis=2)).T
 
 
