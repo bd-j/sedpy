@@ -6,8 +6,11 @@ except (ImportError):
 import scipy.spatial
 import sklearn.neighbors
 
-import observate
-
+try:
+    import observate
+except (ImportError):
+    print('Warning - observate not imported, SpecLibrary class unavailable')
+    
 class ModelLibrary(object):
     """Class to deal with (irregular) grids of models.  Primary attribute
     is `pars`: a structured array of parameter values of shape (ngrid).  Methods
@@ -45,9 +48,8 @@ class ModelLibrary(object):
         :param fieldnames: string sequence of length nfield.
             A list or string array of parameter names with length NFIELD.
 
-        :param types:
-            Optional sequence of string format identifiers for each field.
-            Defaults to '<f8'.
+        :param types: string sequence, optional
+            Format identifiers for each field. Defaults to '<f8'.
 
         :returns struct:
             A numpy structured array.
@@ -152,7 +154,7 @@ class ModelLibrary(object):
         #model grid parameter values.  need to loop to make sure order is correct.
         #if subinds is not None:
         #    force_triangulation = True
-        print( subinds) 
+        #print( subinds) 
         self.triangle_dirtiness += force_triangulation
         if self.triangle_dirtiness > 0:
             self.refresh_graphs(parnames, subinds = subinds)
@@ -222,25 +224,6 @@ class ModelLibrary(object):
         #    bary[i,:-1]= np.dot( dtri.transform[triangle_inds[0],:ndim,:ndim],
         #                       (target_points-dtri.transform[triangle_inds[i],ndim,:])
 
-    def weights_1DLinear(self, model_points, target_points):
-        order = model_points.argsort()
-        mod_sorted = model_points[order]
-        ind_nearest = np.searchsorted(mod_sorted, target_points,side='left')
-
-        maxind = mod_sorted.shape[0]-1
-        edge = ( ind_nearest == 0) | ( ind_nearest == (maxind+1) )
-        inds = (np.vstack([order[np.clip(ind_nearest, 0, maxind)],
-                           order[np.clip(ind_nearest-1, 0, maxind)]])).T
-
-        d1 = np.abs( model_points[inds[:,0]] - target_points )
-        d2 = np.abs( model_points[inds[:,1]] - target_points )
-        width = d1+d2
-        width[edge] = 1
-        weights = np.vstack([1-d1/width, 1-d2/width]).T
-        weights[edge,:]=0.5
-
-        return inds, weights
-
     def weights_kNN_inverse_dist(self, target_points, k = 1):
         dists, inds = self.kdt.query(target_points, k = k, return_distance = True)
         if k == 1:
@@ -248,6 +231,48 @@ class ModelLibrary(object):
         weights = 1/dists
         weights[np.isinf(weights)] = large_number
         weights = weights/weights.sum(axis = -1)
+        return inds, weights
+
+    def weights_1DLinear(self, model_points, target_points, extrapolate = False):
+        """ The interpolation weights are determined from 1D linear interpolation.
+
+        :param model_points: ndarray, shape(nmod)
+            The parameter coordinate of the available models
+                
+        :param target_points: ndarray, shape(ntarg)
+            The coordinate to which you wish to interpolate
+            
+        :returns inds: ndarray, shape(ntarg,2)
+             The model indices of the interpolates
+             
+        :returns weights: narray, shape (ntarg,2)
+             The weights of each model given by ind in the interpolates
+        """
+
+        order = model_points.argsort()
+        mod_sorted = model_points[order]
+    
+        x_new_indices = np.searchsorted(mod_sorted, target_points)
+        x_new_indices = x_new_indices.clip(1, len(mod_sorted)-1).astype(int)
+        lo = x_new_indices - 1
+        hi = x_new_indices
+        x_lo = mod_sorted[lo]
+        x_hi = mod_sorted[hi]
+        width = x_hi - x_lo    
+        w_lo = (x_hi - target_points)/width
+        w_hi = (target_points - x_lo)/width
+
+        if extrapolate is False:
+            above_scale = w_lo < 0 #fidn places where target is above or below the model range
+            below_scale = w_hi < 0
+            lo[above_scale] = hi[above_scale] #set the indices to be indentical in these cases
+            hi[below_scale] = lo[below_scale]
+            w_lo[above_scale] = 1 - w_hi[above_scale] #make the combined weights sum to one
+            w_hi[below_scale] = 1 - w_lo[below_scale]
+
+        inds = np.vstack([lo,hi]).T
+        weights = np.vstack([w_lo, w_hi]).T
+
         return inds, weights
     
     def nearest_index(self, array, value):
@@ -282,13 +307,13 @@ class SpecLibrary(ModelLibrary):
         #split big model grids to avoid memory constraints
         i = 0
         while (i*maxmod <= ngrid):
-	    s1, s2 = (i)*maxmod, np.min( [(i+1)*maxmod-1,ngrid] )
-	    spec = self.spectra_from_pars(pars[s1:s2], **extras)
+            s1, s2 = (i)*maxmod, np.min( [(i+1)*maxmod-1,ngrid] )
+            spec = self.spectra_from_pars(pars[s1:s2], **extras)
             if attenuator is not None:
                 spec  = attenuator.attenuate_spectrum(self.wavelength, spec, pars[s1:s2], **extras)
-	    sed[s1:s2,:] = observate.getSED(self.wavelength, spec, filterlist)
-	    lbol[s1:s2] = observate.Lbol(self.wavelength, spec, wave_min = wave_min, wave_max = wave_max)
-	    i += 1
+            sed[s1:s2,:] = observate.getSED(self.wavelength, spec, filterlist)
+            lbol[s1:s2] = observate.Lbol(self.wavelength, spec, wave_min = wave_min, wave_max = wave_max)
+            i += 1
             if keepspec:
                 outspectra[s1:s2,:] = spec
             elif intspec:
