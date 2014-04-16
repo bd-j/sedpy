@@ -11,7 +11,10 @@
 
 import numpy as np
 import os
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    pass
 try:
     import astropy.io.fits as pyfits
 except (ImportError):
@@ -21,8 +24,8 @@ import yanny
 ##Load useful reference spectra######
 sedpydir, f = os.path.split(__file__)
 
-lightspeed = 2.998E18 #AA/s
-vega_file = sedpydir + '/data/alpha_lyr_stis_005.fits'
+lightspeed = 2.998e18 #AA/s
+vega_file = os.path.join(sedpydir, 'data','alpha_lyr_stis_005.fits')
 #this file should be in AA and erg/s/cm^2/AA
 if os.path.isfile( vega_file ):
     fits = pyfits.open( vega_file )
@@ -31,7 +34,7 @@ if os.path.isfile( vega_file ):
 else:
     raise ValueError('Could not find Vega spectrum at %s', vega_file)
 rat = (1.0/(3600*180/np.pi*10))**2.0 # conversion to d=10 pc from 1 AU
-solar_file = sedpydir + '/data/sun_kurucz93.fits'
+solar_file = os.path.join(sedpydir,'data','sun_kurucz93.fits')
 #this file should be in AA and erg/s/cm^2/AA at 1AU
 if os.path.isfile( solar_file ):
     fits = pyfits.open( solar_file )
@@ -234,6 +237,8 @@ def getSED(sourcewave, sourceflux, filterlist):
         array of broadband magnitudes, of shape (nsource, nfilter)
     """
 
+    if filterlist is None:
+        return None
     sourceflux = np.atleast_2d(sourceflux)
     sedshape = [sourceflux.shape[0], len(filterlist)]
     sed = np.zeros(sedshape)

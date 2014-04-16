@@ -1,14 +1,17 @@
 # Simple Aperture photometry
-
+import sys
 import numpy as np
 from numpy import hypot, sqrt
-from astropy import wcs
-import sys
-import sklearn
-from astroML.density_estimation import bayesian_blocks
-from scipy.optimize import curve_fit
 
-import matplotlib.pyplot as pl
+#the below are for some of the more arcane sky measurement methods
+try:
+    from scipy.optimize import curve_fit
+    import sklearn
+    from astroML.density_estimation import bayesian_blocks
+    import matplotlib.pyplot as pl
+except ImportError:
+    pass
+
 
 thismod = sys.modules[__name__]
 
@@ -37,7 +40,6 @@ class Aperture(object):
     #def get_flux(self, image, ivar = None):
     #    return self.measure_flux(self.shape, image, ivar = ivar, skypars = self.skypars, wcs = self.wcs)
         
-    
 class Circular(Aperture):
 
     def __init__(self,  exact = False):
@@ -161,7 +163,7 @@ def quartile_sky(values, percentiles = [0.16, 0.5, 0.84], **extras):
     #qval = values[oo[np.round(npix*percentiles)]] 
     return qval[1], qval[1]-qval[0]
 
-def gaussfit_sky(values, p_thresh = 0.65, **extras):
+def gaussfit_sky(values, p_thresh = 0.65, plot = False, **extras):
     """Fit a gaussian to the lower part of a histogram of the sky values.
     The histogram bins are estimated using Bayesian blocks.  p_thresh gives
     the percentile below which the gaussian is fitted to the data. Return
@@ -184,11 +186,12 @@ def gaussfit_sky(values, p_thresh = 0.65, **extras):
     # p0 is the initial guess for the fitting coefficients (A, mu and sigma above)
     p0 = [np.max(hist[0]), values.mean(), values.std()]
     coeff, var_matrix = curve_fit(gauss, cbin[lower], hist[0][lower], p0=p0)
-    print(len(hist[1]), len(hist[0]),type(coeff))
-    pl.figure()
-    pl.plot(cbin,hist[0], color = 'b')
-    pl.plot(cbin, gauss(cbin, [coeff[0], coeff[1], coeff[2]]), color = 'r')
-    pl.axvline(val_thresh)
+    if plot:
+        print(len(hist[1]), len(hist[0]),type(coeff))
+        pl.figure()
+        pl.plot(cbin,hist[0], color = 'b')
+        pl.plot(cbin, gauss(cbin, [coeff[0], coeff[1], coeff[2]]), color = 'r')
+        pl.axvline(val_thresh)
     return coeff[1], coeff[2]
 
 def gmm_sky(values, **extras):

@@ -10,22 +10,22 @@ installation & setup:
    'sdir'/data/filters/
    
 Description:
-- `observate.py` has methods for generating synthetic photometry through
+* `observate` has methods for generating synthetic photometry through
   any filters, and classes for dealing with filters
   generally. Functionality for spectra is being added slowly. With a
   huge debt to Mike Blanton's k_correct code .
   
-- `attenuation.py` contains dust attenuation methods (very
+* `attenuation` contains dust attenuation methods (very
   preliminary).
 
-- `extinction.py` contains classes for a detailed modeling of
+* `extinction` contains classes for a detailed modeling of
   extinction curves, following the Fitzpatrick and Massa parameterizations.
 
-- `modelgrid.py` is a module with classes for the storage and
+* `modelgrid` is a module with classes for the storage and
   interpolation of model SEDs (using numpy structured arrays, usually,
   and Delaunay triangulation or inverse distance weighting of the k
   nearest neighbors and KD-trees)
 
-- `photometer.py` has some basic aperture photometry algorithms
+* `photometer` has some basic aperture photometry algorithms
 
-- `yanny.py` (from Erin Sheldon) is for reading filter curves.
+* `yanny` (from Erin Sheldon) is for reading filter curves.
