@@ -1,0 +1,101 @@
+# Units:
+#  "lambda" is in Angstroms
+#  "pass" is the contribution to the detector signal per photon
+#         entering the atmosphere of Earth
+#
+# Bandpass Name(s): H
+#
+# Instrument: 2MASS Cameras in Mt. Hopkins, AZ, and CTIO, Chile
+# 
+# Determined by: Cohen et al 2003 notes on the web page are:
+# 			  
+# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (µm) 	Bandwidth (µm) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 µm-1)
+#  J 	1.235 ± 0.006 	0.162 ± 0.001 	1594 ± 27.8 	3.129E-13 ± 5.464E-15
+#  H 	1.662 ± 0.009 	0.251 ± 0.002 	1024 ± 20.0 	1.133E-13 ± 2.212E-15
+#  Ks 	2.159 ± 0.011 	0.262 ± 0.002 	666.7 ± 12.6 	4.283E-14 ± 8.053E-16
+# 
+# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral 
+#  response curves (RSRs), peak-normalized to unity. These curves are 
+#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable 
+#  for integrating over stellar spectra when using or generating synthetic 
+#  photometry. These RSRs are consistent with the absolute calibration of 
+#  2MASS given in Table 1 above. "
+#
+# The full reference is:
+#  Cohen, Wheaton & Megeath (2003), AJ, 126, 1090
+#
+# Date of determination: Unknown (see previous note for upper limit)
+#
+# Meaning of/Reason for default column: Only column available
+#
+# Notes:
+#
+# I am not in a position to judge the quality of these curves, but
+# have no reason to doubt them.
+#
+# Michael Blanton 2005-07-06
+#
+
+typedef struct {
+  double lambda;
+  double pass;
+} KFILTER;
+
+KFILTER 1.300000e+04 0.000000e+00
+KFILTER 1.315000e+04 0.000000e+00
+KFILTER 1.341000e+04 0.000000e+00
+KFILTER 1.368000e+04 0.000000e+00
+KFILTER 1.397000e+04 0.000000e+00
+KFILTER 1.418000e+04 0.000000e+00
+KFILTER 1.440000e+04 3.472222e-08
+KFILTER 1.462000e+04 1.915185e-07
+KFILTER 1.478000e+04 5.480379e-07
+KFILTER 1.486000e+04 1.931359e-06
+KFILTER 1.493000e+04 5.833891e-06
+KFILTER 1.504000e+04 1.339096e-05
+KFILTER 1.515000e+04 2.892409e-05
+KFILTER 1.528000e+04 4.492147e-05
+KFILTER 1.539000e+04 5.315789e-05
+KFILTER 1.546000e+04 5.705692e-05
+KFILTER 1.551000e+04 5.878788e-05
+KFILTER 1.556000e+04 5.956941e-05
+KFILTER 1.565000e+04 5.938019e-05
+KFILTER 1.572000e+04 5.551527e-05
+KFILTER 1.577000e+04 5.431833e-05
+KFILTER 1.583000e+04 5.575490e-05
+KFILTER 1.592000e+04 5.766960e-05
+KFILTER 1.597000e+04 5.802755e-05
+KFILTER 1.602000e+04 5.665418e-05
+KFILTER 1.613000e+04 5.740856e-05
+KFILTER 1.619000e+04 5.685608e-05
+KFILTER 1.628000e+04 5.676904e-05
+KFILTER 1.633000e+04 5.655236e-05
+KFILTER 1.642000e+04 5.735688e-05
+KFILTER 1.648000e+04 5.759102e-05
+KFILTER 1.657000e+04 5.918527e-05
+KFILTER 1.659000e+04 5.989753e-05
+KFILTER 1.671000e+04 5.984440e-05
+KFILTER 1.684000e+04 5.677553e-05
+KFILTER 1.701000e+04 5.432687e-05
+KFILTER 1.715000e+04 5.726531e-05
+KFILTER 1.727000e+04 5.741749e-05
+KFILTER 1.739000e+04 5.685451e-05
+KFILTER 1.746000e+04 5.608247e-05
+KFILTER 1.751000e+04 5.529412e-05
+KFILTER 1.753000e+04 5.345123e-05
+KFILTER 1.756000e+04 5.233485e-05
+KFILTER 1.764000e+04 4.774943e-05
+KFILTER 1.775000e+04 3.758310e-05
+KFILTER 1.785000e+04 1.509244e-05
+KFILTER 1.790000e+04 2.522905e-05
+KFILTER 1.796000e+04 9.638085e-06
+KFILTER 1.803000e+04 5.973378e-06
+KFILTER 1.810000e+04 3.906077e-06
+KFILTER 1.813000e+04 2.813017e-07
+KFILTER 1.818000e+04 1.100110e-06
+KFILTER 1.828000e+04 2.188184e-08
+KFILTER 1.835000e+04 0.000000e+00
+KFILTER 1.850000e+04 5.405405e-09
+KFILTER 1.871000e+04 0.000000e+00
+KFILTER 1.893000e+04 0.000000e+00
+KFILTER 1.915000e+04 0.000000e+00

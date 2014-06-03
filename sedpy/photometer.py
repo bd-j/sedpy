@@ -1,4 +1,11 @@
-# Simple Aperture photometry
+# Simple Aperture photometry.  kind of a stupid class dependence.
+# Ideally a photometer object should take an image and a region object
+# as arguments, where the region object is an instance of a particualr aperture class and
+# can return an in_region boolean (or perhaps a 'fraction') for
+# any position(s).  As it is now the 'photometer' object (called Aperture)
+# is actually subclassed by the more detailed apertures/regions,
+# and requires passing a shape disctionary as well.  redundant
+
 import sys
 import numpy as np
 from numpy import hypot, sqrt
@@ -96,7 +103,6 @@ class ZeroSky(Background):
         return self.return_value
 
 
-    
 ### Pixnum methods ####
 def circle_frac_quick(xcen = 0, ycen = 0, radius = 1, inner_radius = None, subpixels = 1, **extras):
     """obtain fractional pixel coverage.  optionally use subpixels to
@@ -145,8 +151,26 @@ def circle_frac_exact(xcen, ycen, radius):
     pass
 
 
-def ellipse_frac_quick(xcen = 0, ycen = 0, a = 1, b = 1, pa = 90, precision = None):
-    pass
+def ellipse_frac_quick(xcen = 0, ycen = 0, a = 1, b = 1, pa = 0, precision = None):
+    
+    yy, xx = np.ogrid[ 0:sz, 0:sz ]
+    dx, dy = (xx - off[0]), (yy-off[1])
+    
+    within = 1 - np.sqrt(((dx * np.cos(pa) - dy * np.sin(pa))/a)**2 + ((dx * np.sin(pa) + dy * np.cos(pa))/b)**2)
+    within[within > 1.0] = 1.0
+    within[within < 0] = 0.
+
+
+    #rebin if you used subpixels
+    if subpixels != 1:
+        an = an.reshape((an.shape[0]/subpixels, subpixels, an.shape[1]/subpixels, subpixels)).mean(1).mean(2)
+    #pick the pixels to rturn, and get their fractional coverage
+    pix1 = np.where(an > 0.0)
+    fracs = an[pix1[0],pix1[1]]
+    x = (pix1[0] + start[0]/subpixels).astype('i8')
+    y = (pix1[1] + start[1]/subpixels).astype('i8')
+
+    return (x, y), fracs
 
 
 #####SKY statistics determination methods #####

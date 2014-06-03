@@ -1,0 +1,15 @@
+PACS:::
+The PACS filter transmission curves are available from within the HIPE data processing environment (see below). The transmission curves are listed as fractional flux density transmission (as opposed to photon counts).
+
+
+The color corrections were computed by using the PACS filter profiles and reference wavelengths of 70, 100 and 160 microns for the blue, green, and red filters, respectively. Additionally, these computations assumed that PACS reports fluxes using the nu_F(nu) = constant approximation.
+The correction is applied by dividing the observed flux by the ‘cc’ factors listed below.
+
+SPIRE::::
+With the advent of the new V5.1 calibration product tree for SPIRE, the photometric accuracies for the photometer are now dominated by the absolute accuracy of the main calibrator Neptune of 5%. The photometric reproducibility of SPIRE is better than 2% in all bands, thus the overall calibration uncertainty that can be quoted is ±7%. The first calibration tree with this calibration has the name “spire_cal_5_1″. However, it is always recommended to use the newest calibration trees that correspond to the newest version of HIPE. The newest calibration tree is named “spire_cal_6_1″.
+Data that is currently retrieved from the HSA has been reprocessed with HIPE 4. If no reprocessing with the newest calibration is performed, the following statements apply:
+The SPIRE ICC announced on 9-Mar-2010 a re-assessment of the uncertainties for the SPIRE photometer. The original statement from the PI Matt Griffin quotes a ±15% calibration accuracy and also re-states the need to apply the following multiplicative calibration factors to the results from the official SPIRE pipeline (for data processed with calibration versions 4 and earlier):
+Detector Name	PSW	PMW	PLW
+Reference Wavelength [microns]	250	350	500
+Correction Factor	1.02	1.05	0.94
+SPIRE ﬂux densities are quoted for wavelengths of 250, 350 and 500 microns, based on the Herschel convention of an assumed source SED with ﬂat nu*S(nu) (i.e., spectral index −1). Colour correction factors to convert to a different spectal index are small (a few %) and within the 15% overall error.

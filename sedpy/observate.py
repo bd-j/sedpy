@@ -11,38 +11,51 @@
 
 import numpy as np
 import os
+from pkg_resources import resource_filename
+
+from yanny import read as yanny_read
+import astropy.io.fits as pyfits
+
 try:
     import matplotlib.pyplot as plt
 except ImportError:
     pass
-try:
-    import astropy.io.fits as pyfits
-except (ImportError):
-    import pyfits
-import yanny
 
-##Load useful reference spectra######
+## Load useful reference spectra ######
 sedpydir, f = os.path.split(__file__)
+sedpydir = sedpydir
 
 lightspeed = 2.998e18 #AA/s
-vega_file = os.path.join(sedpydir, 'data','alpha_lyr_stis_005.fits')
+try:
+    vega_file = resource_filename('data', 'alpha_lyr_stis_005.fits')
+except:
+    vega_file = os.path.join(sedpydir, 'data','alpha_lyr_stis_005.fits')
+    
 #this file should be in AA and erg/s/cm^2/AA
 if os.path.isfile( vega_file ):
     fits = pyfits.open( vega_file )
     vega = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')) )
     fits.close()
 else:
-    raise ValueError('Could not find Vega spectrum at %s', vega_file)
+    raise ValueError('Could not find Vega spectrum at {0}'.format(vega_file))
+
+try:
+    solar_file = resource_filename('data','sun_kurucz93.fits')
+except:
+    solar_file = os.path.join(sedpydir,'data','sun_kurucz93.fits')
+
 rat = (1.0/(3600*180/np.pi*10))**2.0 # conversion to d=10 pc from 1 AU
-solar_file = os.path.join(sedpydir,'data','sun_kurucz93.fits')
 #this file should be in AA and erg/s/cm^2/AA at 1AU
 if os.path.isfile( solar_file ):
     fits = pyfits.open( solar_file )
     solar = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')*rat) )
     fits.close()
 else:
-    raise ValueError('Could not find Solar spectrum at %s', solar_file)
+    raise ValueError('Could not find Solar spectrum at {0}'.format(solar_file))
 
+
+def load_package_data(dir, filename):
+    pass
 
 class Filter(object):
     """This class operates on filter transmission files.  It reads SDSS-style yanny
@@ -68,9 +81,13 @@ class Filter(object):
         else:
             self.nick = nick
 
-        self.filename = sedpydir + '/data/filters/' + kname + '.par'
+        try:
+            self.filename = resource_filename('/data/filters/',kname + '.par')
+        except:
+            self.filename = sedpydir + '/data/filters/' + kname + '.par'
         if type( self.filename ) == type( '' ):
-            if not os.path.isfile( self.filename ): raise ValueError( 'Filter transmission file {0} does not exist!'.format(self.filename) )
+            if not os.path.isfile( self.filename ):
+                raise ValueError( 'Filter transmission file {0} does not exist!'.format(self.filename) )
             self.loadKFilter(self.filename)
 
     def loadKFilter(self, filename):
@@ -98,7 +115,7 @@ class Filter(object):
         #            trans.append(float(cols[2]))
         #f.close()
 
-        ff = yanny.read(filename, one = True)
+        ff = yanny_read(filename, one = True)
         wave = ff['lambda']
         trans = ff['pass']
         #clean negatives, NaNs, and Infs, then sort, then store
@@ -181,7 +198,7 @@ class Filter(object):
         :param sourcewave:
             spectrum wavelength (in AA), ndarray of shape (nwave)
         :param sourceflux:
-            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
+            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nobj,nwave)
 
         :returns mag:
             AB magnitude of the source
@@ -195,7 +212,7 @@ class Filter(object):
         :param sourcewave:
             spectrum wavelength (in AA), ndarray of shape (nwave)
         :param sourceflux:
-            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
+            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nobj,nwave)
 
         :returns mag:
             Vega magnitude of the source
@@ -260,7 +277,7 @@ def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
     :param wave:
        The wavelength vector of length nwave
     :param spec:
-       The spectra, of shape (...nsource, nwave)
+       The spectra, of shape (...,nsource, nwave)
     :param wave_min:
        minimum wavelength for the integral
     :param max_wave:
@@ -274,24 +291,97 @@ def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
     inds = np.where(np.logical_and(wave < wave_max, wave >= wave_min))
     return np.trapz(spec[...,inds[0]],wave[inds])
 
-def air2vac(wave):
-    """Convert from in-air wavelengths to vacuum wavelengths.  Based on Allen's Astrophysical Quantities"""
-    ss = 1E4/wave
-    wv = wave*(1+6.4328e-5 + 2.94981e-2/(146-ss^2) + 2.5540e-4/(41-ss^2))
-    return wv
+def air2vac(air):
+    """Convert from in-air wavelengths to vacuum wavelengths.
+    Based on Allen's Astrophysical Quantities"""
+    ss = 1e4/air
+    vac = air * (1 + 6.4328e-5 + 2.94981e-2 / (146 - ss**2) + 2.5540e-4 / (41 - ss**2))
+    return vac
 
-#def vel_broaden(self,sourcewave,sourceflux,sigma,sigma0=0,outwave=-1):
-#    sigma=np.sqrt(sigma**2-sigma0**2)
-#    K=(sigma*sqrt(2*!PI))^(-1.)
-#    wr=outwave#(1/wave)
-#    v=c*(wr-1.)
-#    ee=exp(0.-v^2./(2.*sigma^2.))
-#    dv=(v[1:nw-1,*]-v[0:nw-2,*])
-#    broadflux=total(dv*flux[0:nw-2,*]*ee[0:nw-2,*],2)
-#    return K*broadflux #/1.553??????
+def vac2air(vac):
+    """Convert from vacuum wavelengths to in-air wavelengths.
+    Follows the SDSS statement of the IAU standard from Morton 1991 ApJS.
 
-#def wave_broaden(self,sourcewave,sourceflux,fwhm,fwhm_spec=0,outwave=-1):
-#    sigma=sqrt(fwhm^2.-fwhm_spec^2)/2.3548
+    vac2air(air2vac(wave)) yields wave to within 1 part in a million
+    over the optical range.
+    """
+    
+    air = vac / (1.0 + 2.735182e-4 + 131.4182/vac**2 + 2.76249e8 / vac**4)
+    return air
+
+
+
+def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
+                outwave = None, nsig = 5.0, minusewave = 0, maxusewave = 1e8):
+    """Vectorized version of velocity broadening.  This can become very slow
+    when memory constraints are reached (i.e. when nw_in * nw_out * nsource is
+    large).  This should be rewritten to work with (fft) convolutions for speed, though
+    that requires regular (log) velocity scale.
+    """
+    sourceflux = np.atleast_2d(sourceflux)
+    #sigma after accounting for intrinsic sigma of the library.
+    sigma = np.sqrt(sigma_in**2-sigma0**2)
+    
+    if outwave is None:
+        outwave = sourcewave
+    # Set up arrays and limits
+    minw, maxw = outwave.min(), outwave.max()
+    maxw  *= (1 + nsig * sigma/lightspeed)
+    minw  *= (1 - nsig * sigma/lightspeed)
+    use = (sourcewave > np.max([minw, minusewave])) & (sourcewave < np.min([maxw, maxusewave]))
+    
+    K = 1 / (sigma * np.sqrt(2 * np.pi)) #don't need since renormalizing weights
+    wr = outwave[:,None] / sourcewave[None, use ]
+    v = lightspeed/1e13 * (1 - wr)
+    ee = np.exp(-0.5 * v**2 / sigma**2)
+    #renormalize - why?
+    ee /= np.trapz(ee, x = v, axis=-1)[:,None]
+    #now, integrate over the velocities in the sourcewave direction
+    flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:], x= v[None,:,:], axis = -1)
+
+    #H = lightspeed/1e13/sigma
+    #flux = np.trapz( sourceflux[:,None,use] * np.exp(-0.5 * (H * (1 - outwave[:,None] / sourcewave[None, use ]))**2),
+    #                 x= lightspeed/1e13 * (1 - outwave[None,:,None]/sourcewave[None,None,:]), axis = -1)
+    
+    return  flux #* K
+
+
+def vel_broaden_fast(sourcewave, sourceflux, sigma):
+    pass
+
+    
+def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0 = 0, outwave = None,
+                 nsig = 5.0, minusewave = 0, maxusewave = 1e8):
+    """Vectorized version of wavelength broadening.  This can become very slow
+    when memory constraints are reached (i.e. when nw_in * nw_out * nsource is
+    large).  This should be rewritten to work with (fft) convolutions for speed.
+    """
+    sourceflux = np.atleast_2d(sourceflux)
+    
+    sigma = np.sqrt(fwhm**2. - fwhm0**2.) / 2.3548
+    if outwave is None:
+        outwave = sourcewave
+    # Set up arrays and limits
+    minw, maxw = outwave.min(), outwave.max()
+    maxw  *= (1 + nsig * sigma)
+    minw  *= (1 - nsig * sigma)
+    use = (sourcewave > np.max([minw, minusewave])) & (sourcewave < np.min([maxw, maxusewave]))
+
+    dl = outwave[:,None] - sourcewave[None, use]
+    ee = np.exp(-0.5 * dl**2 / sigma**2)
+    ee /= np.trapz(ee, x = dl, axis=-1)[:,None]
+    flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:], x= dl[None,:,:], axis = -1)
+
+    return flux
+
+
+def broaden(sourcewave, sourceflux, width, width0 = 0, stype = 'vel', **kwargs):
+    if stype is 'vel':
+        return vel_broaden(sourcewave, sourceflux, width, sigma0 = width0, **kwargs)
+    elif stype is 'wave':
+        return wave_broaden(sourcewave, sourceflux, width, fwhm0 = width0, **kwargs)
+
+
 #    K=(sigma*sqrt(2.*!PI))^(-1.)
 #    for iw in range(len(outwave)):
 #        dl=(outwave[iw]-wave)**2.
@@ -319,3 +409,17 @@ def selftest():
         assert abs(filterlist[i].solar_ab_mag-msun_kcorr[i]) < 0.05
         #assert abs(filterlist[i].ab_to_vega+ab2vega_kcorr[i]) < 0.05 #this fails because of the vega spectrum used by k_correct
 
+def selftest_broaden():
+    import fsps
+    sps = fsps.StellarPopulation()
+    ages = [1., 2., 3., 4., 5., 6., 7.]
+    allspec = np.zeros( [len(ages), len(sps.wavelengths)])
+    for i,tage in enumerate(ages):
+        wave, spec = sps.get_spectrum(peraa = True, tage =tage)
+        allspec[i,:] = spec
+
+    outwave = wave[(wave > 1e3) & (wave < 1e4)]
+    vbflux = vel_broaden( wave, allspec, 150., outwave = outwave )
+    wbflux = wave_broaden( wave, allspec, 5., outwave = outwave )
+
+        

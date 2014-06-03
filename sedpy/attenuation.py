@@ -1,6 +1,5 @@
 import numpy as np
 import warnings, sys
-import scipy.interpolate as interp
 
 
 ###### ATTENUATION CURVES ###########

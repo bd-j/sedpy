@@ -1,5 +1,8 @@
-data/filters/*
-*~
-*.pyc
+sedpy/data/filters/hst/
+sedpy/data/filters/uvot/
+sedpy/data/filters/*
+sedpy/data/extinction/
+sedpy/*~
+sedpy/*.pyc
 junk*
-uvblue*
+*~

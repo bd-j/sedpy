@@ -58,11 +58,11 @@ class GenericCurve(object):
     
     def drude(self, x, gamma, x0):
         """Drude profile for the 2175AA bump.
-        :params x:
+        :param x:
            inverse wavelength (inverse microns)
-        :params gamma:
+        :param gamma:
            width of the Drude profile
-        :params x0:
+        :param x0:
            center of the Drude profile, inverse microns
         :returns k_lambda:
            the value of the Drude profile at x
@@ -71,7 +71,7 @@ class GenericCurve(object):
 
     def f_90(self, x, **extras):
         """UV rise in the excess curve.  FM90 (defined cubic polynomial)
-        :params x:
+        :param x:
             inverse wavelength in inverse microns
         :returns:
             Cubic polynomial in x centered on 5.9 microns**(-1), as in FM90
@@ -80,9 +80,9 @@ class GenericCurve(object):
 
     def f_07(self, x, c5 = 5.9, **extras):
         """UV rise in the excess curve, FM07 (quadratic with variable center)
-        :params x:
+        :param x:
             inverse wavelength in inverse microns
-        :params c5:
+        :param c5:
             pivot point for the quadratic
         :returns:
             quadratic in x centered on c5, as in FM07
@@ -91,18 +91,18 @@ class GenericCurve(object):
 
     def powerlaw(self, x, R_v = 3.1, k = None, alpha = -1.84, **extras):
         """Power-law shape of the color excess curve, for the NIR extinction curve
-        :params x:
-        :params R_v:
-        :params k:
-        :params alpha:
+        :param x:
+        :param R_v:
+        :param k:
+        :param alpha:
         """
         return k*(1./x)**alpha - R_v
 
     def spline(self, x, spline_x = [1.8,2.5,3.0], spline_k = [0.0,1.32, 2.02]):
         """Cubic spline, for the optical.
-        :params x:
-        :params spline_x:
-        :params spline_k:
+        :param x:
+        :param spline_x:
+        :param spline_k:
         """
         spline_x = np.asarray(spline_x)
         spline_k = np.asarray(spline_k)
