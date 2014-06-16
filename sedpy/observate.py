@@ -1,12 +1,14 @@
-#PYTHON MODULE FOR STORING FILTER INFORMATION AND TOOLS FOR PROJECTING THEM
-#ONTO SPECTRA ALSO INCLUDES TOOLS FOR CONVOLVING AND REDSHIFTING SPECTRA
-#Assumed input units are erg/s/cm^2/AA and AA
+# Python module for storing filter information and tools for
+# projecting spectra onto filters.  Also includes tools for convolving
+# spectra.
+#
+# Assumed input units are erg/s/cm^2/AA and AA
 
 #To Do: -- Add methods for obtaining magnitude uncertainties
 #          given an error spectrum along with the source spectrum
 #       -- Add index measurements
 #       -- Test the broadening functions for accuracy and speed.
-#       -- Add some redshifting methods/classes
+#       -- Add some redshifting methods/classes?
 
 
 import numpy as np
@@ -54,27 +56,30 @@ else:
     raise ValueError('Could not find Solar spectrum at {0}'.format(solar_file))
 
 
-def load_package_data(dir, filename):
-    pass
-
 class Filter(object):
-    """This class operates on filter transmission files.  It reads SDSS-style yanny
-    files containing filter transmissions (these are easy to create) and determines
-    a number of useful filter quantities.  Methods are provided to convolve a source
-    spectrum with the filter and return the magnitude.
+    """
+    This class operates on filter transmission files.  It reads
+    SDSS-style yanny files containing filter transmissions (these are
+    easy to create) and determines a number of useful filter
+    quantities.  Methods are provided to convolve a source spectrum
+    with the filter and return the magnitude.
 
-    :param kname:
-        the kcorrect style name of the filter, excluing '.par', e.g. sdss_r0
+    :param kname: (default: 'sdss_r0')
+        The kcorrect style name of the filter, excluing '.par',
+        e.g. sdss_r0.
 
-    :param nick:
-        a nickname to associate with the filter
+    :param nick: (optional)
+        A nickname to associate with the filter.
+        
     """
 
     ab_gnu=3.631e-20   #AB reference spctrum in erg/s/cm^2/Hz
     npts=0
     
     def __init__(self, kname = 'sdss_r0', nick = None):
-        """Constructor"""
+        """
+        Constructor.
+        """
         self.name = kname
         if nick is None :
             self.nick = kname
@@ -91,13 +96,14 @@ class Filter(object):
             self.loadKFilter(self.filename)
 
     def loadKFilter(self, filename):
-        """Read a filter in kcorrect (yanny) format and populate the wavelength and
-        transmission arrays.  Then determine a number of filter properties and
-        store in the object.
+        """
+        Read a filter in kcorrect (yanny) format and populate the
+        wavelength and transmission arrays.  Then determine a number
+        of filter properties and store in the object.
 
         :param filename:
-            the fully qualified path and filename of the yanny file that contains
-            the filter transmission
+            The fully qualified path and filename of the yanny file
+            that contains the filter transmission.
         """
 
         ##This should be replaced with the sdsspy yanny file readers
@@ -129,10 +135,13 @@ class Filter(object):
 
         
     def getProperties(self):
-        """Determine a number of properties of the filter and store them in the object.
-        These properties include several 'effective' wavelength definitions and several
-        width definitions, as well as the in-band absolute AB solar magnitude, the Vega and
-        AB reference detector signal, and the conversion between AB and Vega magnitudes.
+        """
+        Determine and store a number of properties of the filter and
+        store them in the object.  These properties include several
+        'effective' wavelength definitions and several width
+        definitions, as well as the in-band absolute AB solar
+        magnitude, the Vega and AB reference detector signal, and the
+        conversion between AB and Vega magnitudes.
         """
 
         i0 = np.trapz(self.transmission*np.log(self.wavelength), np.log(self.wavelength))
@@ -160,21 +169,27 @@ class Filter(object):
             self.solar_ab_mag = float('NaN')
             
     def display(self):
-        """Plot the filter transmission curve"""
+        """
+        Plot the filter transmission curve.
+        """
         if self.npts > 0:
             plt.plot(self.wavelength,self.transmission)
             plt.title(self.name)
 
     def objCounts(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """Project source spectrum ont filter and return the detector signal
+        """
+        Project source spectrum onto filter and return the detector
+        signal.
 
         :param sourcewave:
-            spectrum wavelength (in AA), ndarray of shape (nwave)
+            Apectrum wavelength (in AA), ndarray of shape (nwave).
+            
         :param sourceflux:
-            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nspec,nwave)
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray
+            of shape (nspec,nwave).
 
         :returns counts:
-            Detector signals (nspec)
+            Detector signal(s) (nspec).
         """
         
         #interpolate filter transmission to source spectrum
@@ -193,29 +208,37 @@ class Filter(object):
             return float('NaN')
 
     def ABMag(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """Project source spectrum  onto filter and return the AB magnitude
+        """
+        Project source spectrum onto filter and return the AB
+        magnitude,
         
         :param sourcewave:
-            spectrum wavelength (in AA), ndarray of shape (nwave)
+            Spectrum wavelength (in AA), ndarray of shape (nwave).
+            
         :param sourceflux:
-            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nobj,nwave)
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray
+            of shape (nobj,nwave).
 
         :returns mag:
-            AB magnitude of the source
+            AB magnitude of the source.
         """
         
         return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.ab_counts)
 
     def vegaMag(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """Project source spectrum  onto filter and return the Vega magnitude
+        """
+        Project source spectrum onto filter and return the Vega
+        magnitude.
                
         :param sourcewave:
-            spectrum wavelength (in AA), ndarray of shape (nwave)
+            Spectrum wavelength (in AA), ndarray of shape (nwave).
+            
         :param sourceflux:
-            associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nobj,nwave)
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray
+            of shape (nobj,nwave).
 
         :returns mag:
-            Vega magnitude of the source
+            Vega magnitude of the source.
         """
 
         return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.vega_counts)        
@@ -224,13 +247,15 @@ class Filter(object):
 ###Useful utilities#####
 
 def load_filters(filternamelist):
-    """Given a list of filter names, this method returns a list of Filter objects
+    """
+    Given a list of filter names, this method returns a list of Filter
+    objects.
 
     :param filternamelist:
-        list of strings giving names of the filters
+        List of strings giving names of the filters.
 
     :returns filterlist:
-        a list of filter objects
+        A list of filter objects.
     """
     
     filterlist = []
@@ -240,18 +265,22 @@ def load_filters(filternamelist):
     return filterlist
 
 def getSED(sourcewave, sourceflux, filterlist):
-    """Takes wavelength vector, a flux array and list of Filter objects
+    """
+    Takes wavelength vector, a flux array and list of Filter objects
     and returns the SED in AB magnitudes.
 
     :param sourcewave:
-        spectrum wavelength (in AA), ndarray of shape (nwave)
+        Spectrum wavelength (in AA), ndarray of shape (nwave).
+        
     :param sourceflux:
-        associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape (nsource,nwave)
+        Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of
+        shape (nsource,nwave).
+        
     :param filterlist:
-        list of filter objects, of length nfilt
+        List of filter objects, of length nfilt.
 
     :returns sed:
-        array of broadband magnitudes, of shape (nsource, nfilter)
+        array of broadband magnitudes, of shape (nsource, nfilter).
     """
 
     if filterlist is None:
@@ -272,19 +301,23 @@ def filter_dict(filterlist):
 ###Routines for spectra######
 
 def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
-    """Calculate the bolometric luminosity of a spectrum or spectra.
+    """
+    Calculate the bolometric luminosity of a spectrum or spectra.
 
     :param wave:
-       The wavelength vector of length nwave
+       The wavelength vector of length nwave.
+       
     :param spec:
-       The spectra, of shape (...,nsource, nwave)
+       The spectra, of shape (...,nsource, nwave).
+       
     :param wave_min:
-       minimum wavelength for the integral
+       Minimum wavelength for the integral.
+       
     :param max_wave:
-       maximum wavelength for the integral
+       Maximum wavelength for the integral
 
     :returns lbol:
-       the bolometric luminosity, integrated from wave_min to
+       The bolometric luminosity, integrated from wave_min to
        wave_max.  Array of length (...nsource)
     """
 
@@ -292,18 +325,34 @@ def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
     return np.trapz(spec[...,inds[0]],wave[inds])
 
 def air2vac(air):
-    """Convert from in-air wavelengths to vacuum wavelengths.
-    Based on Allen's Astrophysical Quantities"""
+    """
+    Convert from in-air wavelengths to vacuum wavelengths.
+    Based on Allen's Astrophysical Quantities.
+
+    :param air:
+        The in-air wavelengths.
+        
+    :returns vac:
+        The corresponding vacuum wavelengths.
+    """
     ss = 1e4/air
     vac = air * (1 + 6.4328e-5 + 2.94981e-2 / (146 - ss**2) + 2.5540e-4 / (41 - ss**2))
     return vac
 
 def vac2air(vac):
-    """Convert from vacuum wavelengths to in-air wavelengths.
-    Follows the SDSS statement of the IAU standard from Morton 1991 ApJS.
+    """
+    Convert from vacuum wavelengths to in-air wavelengths.  Follows
+    the SDSS statement of the IAU standard from Morton 1991 ApJS.
 
     vac2air(air2vac(wave)) yields wave to within 1 part in a million
     over the optical range.
+
+    :param vac:
+        The vacuum wavelengths.
+        
+    :returns vac:
+        The corresponding in-air wavelengths.
+
     """
     
     air = vac / (1.0 + 2.735182e-4 + 131.4182/vac**2 + 2.76249e8 / vac**4)
@@ -313,10 +362,12 @@ def vac2air(vac):
 
 def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
                 outwave = None, nsig = 5.0, minusewave = 0, maxusewave = 1e8):
-    """Vectorized version of velocity broadening.  This can become very slow
-    when memory constraints are reached (i.e. when nw_in * nw_out * nsource is
-    large).  This should be rewritten to work with (fft) convolutions for speed, though
-    that requires regular (log) velocity scale.
+    """
+    Vectorized version of velocity broadening.  This can become very
+    slow when memory constraints are reached (i.e. when nw_in * nw_out
+    * nsource is large).  This should be rewritten to work with (fft)
+    convolutions for speed, though that requires regular (log)
+    velocity scale.
     """
     sourceflux = np.atleast_2d(sourceflux)
     #sigma after accounting for intrinsic sigma of the library.
@@ -352,9 +403,11 @@ def vel_broaden_fast(sourcewave, sourceflux, sigma):
     
 def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0 = 0, outwave = None,
                  nsig = 5.0, minusewave = 0, maxusewave = 1e8):
-    """Vectorized version of wavelength broadening.  This can become very slow
-    when memory constraints are reached (i.e. when nw_in * nw_out * nsource is
-    large).  This should be rewritten to work with (fft) convolutions for speed.
+    """
+    Vectorized version of wavelength broadening.  This can become very
+    slow when memory constraints are reached (i.e. when nw_in * nw_out
+    * nsource is large).  This should be rewritten to work with (fft)
+    convolutions for speed.
     """
     sourceflux = np.atleast_2d(sourceflux)
     
