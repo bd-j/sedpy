@@ -12,10 +12,12 @@ except (ImportError):
     print('Warning - observate not imported, SpecLibrary class unavailable')
     
 class ModelLibrary(object):
-    """Class to deal with (irregular) grids of models.  Primary attribute
-    is `pars`: a structured array of parameter values of shape (ngrid).  Methods
-    are provided to manipulate the parameter structure, and to obtain interpolation
-    weights for specific points within the grid using a variety of methods.
+    """
+    Class to deal with (irregular) grids of models.  Primary attribute
+    is `pars`: a structured array of parameter values of shape
+    (ngrid).  Methods are provided to manipulate the parameter
+    structure, and to obtain interpolation weights for specific points
+    within the grid using a variety of methods.
     """
 
     triangle_dirtiness = 1 #force generation of the DT and KDtree in first pass

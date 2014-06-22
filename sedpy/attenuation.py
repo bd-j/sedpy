@@ -1,27 +1,44 @@
 import numpy as np
 import warnings, sys
 
-
 ###### ATTENUATION CURVES ###########
-######
-
-def chevallard(wave, tau_v = 1, **kwargs):
-    """\tau_v dependent attenuation curves matched to disk RT models, as in
-    Chevallard et al. 2013.  No UV bump (or indeed tests in the UV at all)
-    """
-    #missing a UV bump
-    alpha_v = 2.8/(1+np.sqrt(tau_v)) #+/- 25%
-    bb = 0.3 - 0.05*tau_v  #+/- 10%
-    alpha = alpha_v + bb*(wave*1e-4 - 0.55)
-    tau_lambda = tau_v*(wave/5500.0)**(0-alpha)
-    return tau_lambda
 
 def powerlaw(wave, tau_v = 1, alpha = 1.0, **kwargs):
+    """
+    Simple power-law attenuation, normalized to 5500\AA.
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+        
+    :returns tau:
+        The optical depth at each wavelength.
+    """
     return tau_v * (wave/5500)**(0-alpha)
 
-def calzetti(wave, tau_v = 1, R_v=4.05, **kwargs):
-    """Calzetti et al. 2000 starburst attenuation curve, with extrapolations
-    to the FUV and NIR"""
+def calzetti(wave, tau_v = 1, R_v = 4.05, **kwargs):
+    """
+    Calzetti et al. 2000 starburst attenuation curve, with
+    extrapolations to the FUV and NIR.
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+
+    :param R_v: (default: 4.05)
+        The ratio of total selective extinction, parameterizing the
+        slope of the attenuation curve.  A_v = R_v * E(B-V)
+                
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
     p11=1/0.11
     ff11=2.659*(-2.156+1.509*p11-0.198*p11**2.+0.011*p11**3.0) + R_v
     p12=1/0.12
@@ -42,13 +59,54 @@ def calzetti(wave, tau_v = 1, R_v=4.05, **kwargs):
     tau_lambda=tau_v*ff/R_v/0.999479
     return tau_lambda
 
+def chevallard(wave, tau_v = 1, **kwargs):
+    """
+    \tau_v dependent attenuation curves matched to disk RT models, as
+    in Chevallard et al. 2013.  No UV bump (or indeed tests in the UV
+    at all).
 
-def wg00(wave,tau_v =1, geometry = 'SHELL',composition='MW', local = 'homogenous', **kwargs):
-    """Witt+Gordon 2000 DIRTY radiative transfer results, for idealized geometries"""
-    pass
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+        
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
+    #missing a UV bump
+    alpha_v = 2.8/(1+np.sqrt(tau_v)) #+/- 25%
+    bb = 0.3 - 0.05*tau_v  #+/- 10%
+    alpha = alpha_v + bb*(wave*1e-4 - 0.55)
+    tau_lambda = tau_v*(wave/5500.0)**(0-alpha)
+    return tau_lambda
 
 def conroy(wave, tau_v =1, R_v=3.1, f_bump=0.6, **kwargs):
-    """Conroy et al 2010 dust attenuation curves including a decreased UV bump."""
+    """
+    Conroy & Schiminovich 2010 dust attenuation curves including a
+    decreased UV bump.
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+
+    :param R_v: (default: 3.1)
+        The ratio of total selective extinction, parameterizing the
+        slope of the attenuation curve.  A_v = R_v * E(B-V)
+
+    :param f_bump: (default: 0.6)
+        The strength of the 2175\AA UV bump, as a fraction of the bump
+        strength in Cardelli et al. extinction curve.
+        
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
     x = 1e4/wave
     nx = x.shape[0]
     a = x * 0
@@ -95,9 +153,24 @@ def conroy(wave, tau_v =1, R_v=3.1, f_bump=0.6, **kwargs):
 
     return tau_v*alam
 
-def wild_powerlaw(wave, tau_v =1 ,alpha=[0.7,0.7,0.7], breaks=[0,3000,10000,4e4], **kwargs):
-    """As in V. Wild 2011, i.e. power-law slope can change between regions.
-    Superceded by Chevallard 2013 for optical/NIR"""
+def broken_powerlaw(wave, tau_v =1, alpha=[0.7,0.7,0.7],
+                    breaks=[0,3000,10000,4e4], **kwargs):
+    """
+    Attenuation curve as in V. Wild et al. 2011, i.e. power-law slope
+    can change between regions.  Superceded by Chevallard 2013 for
+    optical/NIR.
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+        
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
     if len(breaks) == len(alpha)+1 : print "make sure of your power law breaks"
     tau=np.array(len(wave))
     for i in range(alpha):
@@ -105,12 +178,37 @@ def wild_powerlaw(wave, tau_v =1 ,alpha=[0.7,0.7,0.7], breaks=[0,3000,10000,4e4]
 	tau[inds]=tau_v*(wave/5500)**alpha[i]
     return tau
 
+def wg00(wave,tau_v =1, geometry = 'SHELL', composition = 'MW',
+         local = 'homogenous', **kwargs):
+    """
+    Witt+Gordon 2000 DIRTY radiative transfer results, for idealized
+    geometries.
+    """
+    pass
 
 ##### EXTINCTION CURVES ########
 
 def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
-    """Cardelli, Clayton, and Mathis 1998 Milky Way extinction curve,
-    with an update in the near-UV from O'Donnell 1994"""
+    """
+    Cardelli, Clayton, and Mathis 1998 Milky Way extinction curve,
+    with an update in the near-UV from O'Donnell 1994
+
+    
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+
+    :param R_v: (default: 3.1)
+        The ratio of total selective extinction, parameterizing the
+        slope of the attenuation curve.  A_v = R_v * E(B-V)
+        
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
 
     if (wave < 1e3).any() :
         warnings.warn('Cardelli: extinction not defined (set to zero) below 1000AA')
@@ -159,7 +257,20 @@ def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
     return tau_v*tau
 
 def smc(wave, tau_v =1, **kwargs):
-    """Pei 1992 SMC extinction curve"""
+    """
+    Pei 1992 SMC extinction curve.
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+        
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
     if (wave < 1e3).any() :
         warnings.warn('SMC: extinction extrapolation below 1000AA is poor')
     mic = wave * 1e-4
@@ -179,7 +290,20 @@ def smc(wave, tau_v =1, **kwargs):
     return tau_v * (abs_ab/norm_v)
 
 def lmc(wave, tau_v =1, **kwargs):
-    """Pei 1992 LMC extinction curve"""
+    """
+    Pei 1992 LMC extinction curve.
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the
+        attenuation curve.
+        
+    :returns tau:
+        The optical depth at each wavelength.
+
+    """
     if (wave < 1e3).any() :
         warnings.warn('LMC: extinction extrapolation below 1000AA is poor')
     mic = wave * 1e-4
@@ -198,5 +322,4 @@ def lmc(wave, tau_v =1, **kwargs):
 
     return tau_v * (abs_ab/norm_v)
 
-    
 

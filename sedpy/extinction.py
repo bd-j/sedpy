@@ -7,12 +7,14 @@ from numpy.random import normal
 thismod = sys.modules[__name__]
 
 class Attenuator(object):
-    """A level of abstraction around the dust curves, which allows for some
-    generic methods. The Attenuator is composed of an (effective) DustLaw and
-    a DustDistribution class, both of which can be easily extended.  The
-    first takes wavelength and tau_v as arguments and returns tau_\lambda.
-    The second takes arguments that can be anything (e.g. stellar age, metallicity)
-    and returns a distribution of tau_V
+    """
+    A level of abstraction around the dust curves, which allows for
+    some generic methods. The Attenuator is composed of an (effective)
+    DustLaw and a DustDistribution class, both of which can be easily
+    extended.  The first takes wavelength and tau_v as arguments and
+    returns tau_\lambda. The second takes arguments that can be
+    anything (e.g. stellar age, metallicity) and returns a
+    distribution of tau_V
     """
 
     def __init__(self, dust_type = 'FM07'):
@@ -21,7 +23,9 @@ class Attenuator(object):
         #self.dustdist = 
 
     def attenuate_spectrum(self, wave, inspec, pars):
-        """This will be slow until the dust curves are vectorized"""
+        """
+        This will be slow until the dust curves are vectorized
+        """
         spec = np.atleast_2d(inspec) #memory hog
         for i,p in enumerate(pars):
             tau = self.dustcurve.acurve(wave, A_v = p['A_V'],
@@ -40,8 +44,10 @@ class Attenuator(object):
 ########
 
 class GenericCurve(object):
-    """Class for handling extinction curves with the parameterization
-    of Fitzpatrick & Massa 1990 or F&M 2007"""
+    """
+    Class for handling extinction curves with the parameterization
+    of Fitzpatrick & Massa 1990 or F&M 2007
+    """
 
     def __init__(self, form = 'F07', var = False):
         self.default_pars(var = var)
@@ -51,58 +57,91 @@ class GenericCurve(object):
         elif form is 'F07':
             self._f = self.f_07                        
  
-    def fm_curve(self, x, c1 = None, c2 = None, c3 = None, c4 = None, c5 = None,
-                 x0 = 4.59, gamma  = 0.89, **extras):
-        """Fitzpatrick & Massa parameterization of the UV excess curve """
+    def fm_curve(self, x, c1 = None, c2 = None, c3 = None, c4 = None,
+                 c5 = None, x0 = 4.59, gamma  = 0.89, **extras):
+        """
+        Fitzpatrick & Massa parameterization of the UV excess curve.
+        """
         return  (c1 + c2*x + c3*self.drude(x, gamma, x0) + c4 * self._f(x, c5 = c5))
     
     def drude(self, x, gamma, x0):
-        """Drude profile for the 2175AA bump.
+        """
+        Drude profile for the 2175AA bump.
+        
         :param x:
-           inverse wavelength (inverse microns)
+           Inverse wavelength (inverse microns) at which
+           values for the drude profile are requested.
+           
         :param gamma:
-           width of the Drude profile
+           Width of the Drude profile (inverse microns).
+           
         :param x0:
-           center of the Drude profile, inverse microns
+           Center of the Drude profile (inverse microns).
+           
         :returns k_lambda:
-           the value of the Drude profile at x
+           The value of the Drude profile at x
         """
         return x*x / ( (x*x-x0*x0)**2 +(x*gamma)**2 )
 
     def f_90(self, x, **extras):
-        """UV rise in the excess curve.  FM90 (defined cubic polynomial)
+        """
+        UV rise in the excess curve, from FM90 (defined cubic
+        polynomial).
+        
         :param x:
-            inverse wavelength in inverse microns
+            Inverse wavelength in inverse microns
+            
         :returns:
-            Cubic polynomial in x centered on 5.9 microns**(-1), as in FM90
+            Cubic polynomial at x centered on 5.9 microns**(-1), as in
+            FM90
         """
         return (x > 5.9)*(0.5392*(x-5.9)*(x-5.9)+0.05644*(x-5.9)**3)
 
     def f_07(self, x, c5 = 5.9, **extras):
-        """UV rise in the excess curve, FM07 (quadratic with variable center)
+        """
+        UV rise in the excess curve, from FM07 (quadratic with
+        variable center).
+        
         :param x:
-            inverse wavelength in inverse microns
+            Inverse wavelength in inverse microns.
+            
         :param c5:
-            pivot point for the quadratic
+            Pivot point for the quadratic.
+            
         :returns:
-            quadratic in x centered on c5, as in FM07
+            Quadratic at x centered on c5, as in FM07.
         """
         return (x > c5)*(x-c5)*(x-c5)
 
     def powerlaw(self, x, R_v = 3.1, k = None, alpha = -1.84, **extras):
-        """Power-law shape of the color excess curve, for the NIR extinction curve
+        """
+        Power-law shape of the color excess curve, for the NIR
+        extinction curve, as in FM09.
+        
         :param x:
-        :param R_v:
-        :param k:
-        :param alpha:
+            Inverse wavelength in inverse microns.
+            
+        :param R_v: (default: 3.1)
+            Slope of the optical portion of the curve.
+            
+        :param k: (default: None)
+            Power-law normalization.
+            
+        :param alpha: (default: -1.84)
+            Power-law slope.
         """
         return k*(1./x)**alpha - R_v
 
     def spline(self, x, spline_x = [1.8,2.5,3.0], spline_k = [0.0,1.32, 2.02]):
-        """Cubic spline, for the optical.
+        """
+        Cubic spline, for the optical portion of the extinction curve.
+        
         :param x:
+            Inverse wavelength in inverse microns.
         :param spline_x:
+            Location of the spline anchor points, in inverse microns.
         :param spline_k:
+            Value at the spline anchor points.
         """
         spline_x = np.asarray(spline_x)
         spline_k = np.asarray(spline_k)
@@ -110,7 +149,9 @@ class GenericCurve(object):
         return sp(x)
         
     def acurve(self, wave, **pars):
-        """Return the extinction curve given the excess curve"""
+        """
+        Return the extinction curve given the excess curve.
+        """
         x = 1e4/wave
         self.setpars(**pars)
         return self.ecurve(x, self.pardict) * self.pardict['A_v']/self.pardict['R_v'] + 1
@@ -125,14 +166,17 @@ class GenericCurve(object):
 
 
 class FM07(GenericCurve):
-    """ Extinction curves from Fitzpatrick and Massa 2007"""
+    """
+    Extinction curves from Fitzpatrick and Massa 2007
+    """
 
     def __init__(self, var = False):
         self.default_pars(var = var)
         self._f = self.f_07                        
 
     def default_pars(self, var = False):
-        """FM07 parameterization coefficients, based on MW stars.
+        """
+        FM07 parameterization coefficients, based on MW stars.
 
         :param var:
             Set to True to include scatter in the coefficients
@@ -168,14 +212,19 @@ class FM07(GenericCurve):
         self.selfupdate(var = var)
 
     def selfupdate(self, var = False):
-        """Enforce empirical relationships between some of the
-        exctinction curve parameters, optionally including variance
-        in the relationships"""
+        """
+        Enforce empirical relationships between some of the
+        exctinction curve parameters, optionally including variance in
+        the relationships.  These are based on data in FM09 and Gordon
+        et al 2002.
+        """
         self.pardict['k'] = 0-0.83 + 0.63 * self.pardict['R_v'] + var*normal(0, 0.12)
         self.pardict['c1'] = 2.02 - 3.007 * self.pardict['c2'] +var*normal(0, 0.3)
 
     def ecurve(self, x, pardict):
-        """Excess curve, including 3 components (UV, Optical, and NIR)"""
+        """
+        Excess curve, including 3 components (UV, Optical, and NIR).
+        """
         nir = self.powerlaw( x, **pardict) 
         uv = self.fm_curve(x, **pardict) 
         spline_x = np.array([1e4/2600, 1e4/2700] +
@@ -242,16 +291,22 @@ class SMC(FM07):
 
 
 class F99(GenericCurve):
-    """Fitzpatrick 1999 R_v dependent extinction curves.  These are a one
-    parameter family, though in practice we allow the bump strength to vary."""
+    """
+    Fitzpatrick 1999 R_v dependent extinction curves.  These are a one
+    parameter family, though in practice we allow the bump strength to
+    vary.
+    """
     
     def __init__(self, var = False):
         self.default_pars(var = var)
         self._f = self.f_90                        
 
     def default_pars(self, var = False):
-        """FM99 parameterization coefficients, for an R_v dependent curve.  Set var to True to include
-        scatter in the coefficients based on the FM07 sample."""
+        """
+        FM99 parameterization coefficients, for an R_v dependent
+        curve.  Set var to True to include scatter in the coefficients
+        based on the FM07 sample.
+        """
         p = {}
         #NIR
         p['R_v'] = 3.1 +var*normal(0., 0.6)
@@ -270,8 +325,10 @@ class F99(GenericCurve):
         self.selfupdate()
 
     def selfupdate(self, var = False):
-        """Enforce empirical relationships between some of the
-        exctinction curve parameters"""
+        """
+        Enforce empirical relationships between some of the
+        exctinction curve parameters.
+        """
         p={}
         p['R_v'] = self.pardict['R_v']
         self.pardict['c2'] = -0.824 + 4.717/p['R_v'] + var*normal(0, 0.25)
@@ -286,7 +343,9 @@ class F99(GenericCurve):
 
         
     def ecurve(self, x, pardict):
-        """Excess curve, including 2 components (UV and Optical/NIR)"""
+        """
+        Excess curve, including 2 components (UV and Optical/NIR)
+        """
         uv = self.fm_curve(x, **pardict) * (x > 3.8)
         spline_x = np.array([1e4/2600, 1e4/2700] +
                             pardict['ospline_x'].tolist())
