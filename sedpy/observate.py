@@ -23,11 +23,10 @@ try:
 except ImportError:
     pass
 
+lightspeed = 2.998e18 #AA/s
 ## Load useful reference spectra ######
 sedpydir, f = os.path.split(__file__)
 sedpydir = sedpydir
-
-lightspeed = 2.998e18 #AA/s
 try:
     vega_file = resource_filename('data', 'alpha_lyr_stis_005.fits')
 except:
