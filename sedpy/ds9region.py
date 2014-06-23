@@ -113,8 +113,13 @@ class Polygon(Region):
         Requires that a WCS be given.  Uses Path objects from matlib,
         should probably use Shapely.
         """
-        vv = wcs.wcs_world2pix(self.ra, self.dec, 1)
-        vertices = [(r-1,d) for r,d in zip(vv[0], vv[1])]
+        if wcs is not None:
+            vv = wcs.wcs_world2pix(self.ra, self.dec, 1)
+            vv[0] -= 1 #convert to numpy indexing
+        else:
+            vv = (self.ra, self.dec)
+            
+        vertices = [(r,d) for r,d in zip(vv[0], vv[1])]
         vertices += [vertices[0]]
         poly = path.Path(vertices, closed =True)
         points = np.vstack((x,y)).T

@@ -5,7 +5,7 @@ import numpy as np
 from astropy import wcs as pywcs
 import astropy.io.fits as pyfits
 try:
-    import photometer
+    from sedpy import photometer
 except:
     print('Point source photometry not enabled - get sedpy!')
 
