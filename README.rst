@@ -5,11 +5,10 @@ Modules for storing and operating on astronomical source spectral energy distrib
 
 Installation & setup:
 
-1. Download code to some directory 'sdir'. 
-2. cp any desired filters from the k_correct filter directory to
-   'sdir'/data/filters/
-3. ``echo 'sdir' > sedpy.pth`` and copy sedpy.pth to your python
-   site-packages directory
+1. ``git clone http://blah``
+2. ``cd sedpy; python setup.py install``
+3. cp any desired filters from the k_correct filter directory to
+   sedpy/data/filters/
 4. then in python, e.g., ``from sedpy import observate``
     
 Description:
