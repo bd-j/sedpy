@@ -16,8 +16,10 @@ import os
 from pkg_resources import resource_filename
 
 from yanny import read as yanny_read
-import astropy.io.fits as pyfits
-
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 try:
     import matplotlib.pyplot as plt
 except ImportError:
