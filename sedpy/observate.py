@@ -13,8 +13,10 @@
 
 import numpy as np
 import os
-from pkg_resources import resource_filename
-
+try:
+    from pkg_resources import resource_filename
+except ImportError:
+    pass
 from yanny import read as yanny_read
 try:
     import astropy.io.fits as pyfits
