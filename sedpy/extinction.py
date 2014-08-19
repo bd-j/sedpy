@@ -28,10 +28,10 @@ class Attenuator(object):
         """
         spec = np.atleast_2d(inspec) #memory hog
         for i,p in enumerate(pars):
-            tau = self.dustcurve.acurve(wave, A_v = p['A_V'],
-                                        R_v = p['R_V'],
-                                        f_bump = p['F_BUMP'],
-                                        uv_slope = p['UV_SLOPE'])
+            tau = self.dustcurve.acurve(wave, A_v=p['A_V'],
+                                        R_v=p['R_V'],
+                                        f_bump=p['F_BUMP'],
+                                        uv_slope=p['UV_SLOPE'])
             #print(tau.shape, spec.shape)
             spec[i,:] = spec[i,:]*np.exp(-tau)
         return spec
@@ -49,8 +49,8 @@ class GenericCurve(object):
     of Fitzpatrick & Massa 1990 or F&M 2007
     """
 
-    def __init__(self, form = 'F07', var=False):
-        self.default_pars(var = var)
+    def __init__(self, form='F07', var=False):
+        self.default_pars(var=var)
 
         if form is 'FM90':
             self._f = self.f_90
@@ -58,7 +58,7 @@ class GenericCurve(object):
             self._f = self.f_07                        
  
     def fm_curve(self, x, c1=None, c2=None, c3=None, c4=None,
-                 c5=None, x0=4.59, gamma =0.89, **extras):
+                 c5=None, x0=4.59, gamma=0.89, **extras):
         """
         Fitzpatrick & Massa parameterization of the UV excess curve.
         """
@@ -157,7 +157,7 @@ class GenericCurve(object):
         return self.ecurve(x, self.pardict) * self.pardict['A_v']/self.pardict['R_v'] + 1
         
     def setpars(self, A_v=1, R_v=3.1, f_bump=1.0, uv_slope=1, var=False, **extras):
-        self.default_pars(var =var)
+        self.default_pars(var=var)
         self.pardict['c3'] *= f_bump
         self.pardict['A_v'] = A_v
         self.pardict['R_v'] = R_v
