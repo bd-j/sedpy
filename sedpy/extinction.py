@@ -49,7 +49,7 @@ class GenericCurve(object):
     of Fitzpatrick & Massa 1990 or F&M 2007
     """
 
-    def __init__(self, form = 'F07', var = False):
+    def __init__(self, form = 'F07', var=False):
         self.default_pars(var = var)
 
         if form is 'FM90':
@@ -57,12 +57,12 @@ class GenericCurve(object):
         elif form is 'F07':
             self._f = self.f_07                        
  
-    def fm_curve(self, x, c1 = None, c2 = None, c3 = None, c4 = None,
-                 c5 = None, x0 = 4.59, gamma  = 0.89, **extras):
+    def fm_curve(self, x, c1=None, c2=None, c3=None, c4=None,
+                 c5=None, x0=4.59, gamma =0.89, **extras):
         """
         Fitzpatrick & Massa parameterization of the UV excess curve.
         """
-        return  (c1 + c2*x + c3*self.drude(x, gamma, x0) + c4 * self._f(x, c5 = c5))
+        return  (c1 + c2*x + c3*self.drude(x, gamma, x0) + c4 * self._f(x, c5=c5))
     
     def drude(self, x, gamma, x0):
         """
@@ -97,7 +97,7 @@ class GenericCurve(object):
         """
         return (x > 5.9)*(0.5392*(x-5.9)*(x-5.9)+0.05644*(x-5.9)**3)
 
-    def f_07(self, x, c5 = 5.9, **extras):
+    def f_07(self, x, c5=5.9, **extras):
         """
         UV rise in the excess curve, from FM07 (quadratic with
         variable center).
@@ -113,7 +113,7 @@ class GenericCurve(object):
         """
         return (x > c5)*(x-c5)*(x-c5)
 
-    def powerlaw(self, x, R_v = 3.1, k = None, alpha = -1.84, **extras):
+    def powerlaw(self, x, R_v=3.1, k=None, alpha=-1.84, **extras):
         """
         Power-law shape of the color excess curve, for the NIR
         extinction curve, as in FM09.
@@ -132,7 +132,7 @@ class GenericCurve(object):
         """
         return k*(1./x)**alpha - R_v
 
-    def spline(self, x, spline_x = [1.8,2.5,3.0], spline_k = [0.0,1.32, 2.02]):
+    def spline(self, x, spline_x=[1.8,2.5,3.0], spline_k=[0.0,1.32, 2.02]):
         """
         Cubic spline, for the optical portion of the extinction curve.
         
@@ -156,7 +156,7 @@ class GenericCurve(object):
         self.setpars(**pars)
         return self.ecurve(x, self.pardict) * self.pardict['A_v']/self.pardict['R_v'] + 1
         
-    def setpars(self, A_v = 1, R_v = 3.1, f_bump = 1.0, uv_slope = 1, var = False, **extras):
+    def setpars(self, A_v=1, R_v=3.1, f_bump=1.0, uv_slope=1, var=False, **extras):
         self.default_pars(var =var)
         self.pardict['c3'] *= f_bump
         self.pardict['A_v'] = A_v
@@ -170,11 +170,11 @@ class FM07(GenericCurve):
     Extinction curves from Fitzpatrick and Massa 2007
     """
 
-    def __init__(self, var = False):
-        self.default_pars(var = var)
+    def __init__(self, var=False):
+        self.default_pars(var=var)
         self._f = self.f_07                        
 
-    def default_pars(self, var = False):
+    def default_pars(self, var=False):
         """
         FM07 parameterization coefficients, based on MW stars.
 
@@ -209,9 +209,9 @@ class FM07(GenericCurve):
             p['R_v'] += draws[9]*0.6
             
         self.pardict = p
-        self.selfupdate(var = var)
+        self.selfupdate(var=var)
 
-    def selfupdate(self, var = False):
+    def selfupdate(self, var=False):
         """
         Enforce empirical relationships between some of the
         exctinction curve parameters, optionally including variance in
@@ -239,7 +239,7 @@ class FM07(GenericCurve):
 
 class LMC(FM07):
     def __init__(self, var = False):
-        self.default_pars(var = var)
+        self.default_pars(var=var)
         self._f = self.f_90                        
 
     def default_pars(self, var = False):
@@ -264,11 +264,11 @@ class LMC(FM07):
         self.selfupdate()
  
 class SMC(FM07):
-    def __init__(self, var = False):
-        self.default_pars(var = var)
+    def __init__(self, var=False):
+        self.default_pars(var=var)
         self._f = self.f_90                        
 
-    def default_pars(self, var = False):
+    def default_pars(self, var=False):
         """Gordon 2003 parameterization coefficients.  Set var to True to include
         scatter in the coefficients based on the Gordon 03 sample."""
         p = {}
@@ -297,11 +297,11 @@ class F99(GenericCurve):
     vary.
     """
     
-    def __init__(self, var = False):
-        self.default_pars(var = var)
+    def __init__(self, var=False):
+        self.default_pars(var=var)
         self._f = self.f_90                        
 
-    def default_pars(self, var = False):
+    def default_pars(self, var=False):
         """
         FM99 parameterization coefficients, for an R_v dependent
         curve.  Set var to True to include scatter in the coefficients
@@ -324,7 +324,7 @@ class F99(GenericCurve):
         self.pardict = p
         self.selfupdate()
 
-    def selfupdate(self, var = False):
+    def selfupdate(self, var=False):
         """
         Enforce empirical relationships between some of the
         exctinction curve parameters.

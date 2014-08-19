@@ -28,7 +28,11 @@ except ImportError:
     pass
 
 lightspeed = 2.998e18 #AA/s
+
+###########
 ## Load useful reference spectra ######
+###########
+
 sedpydir, f = os.path.split(__file__)
 sedpydir = sedpydir
 try:
@@ -36,7 +40,7 @@ try:
 except:
     vega_file = os.path.join(sedpydir, 'data','alpha_lyr_stis_005.fits')
     
-#this file should be in AA and erg/s/cm^2/AA
+# This file should be in AA and erg/s/cm^2/AA
 if os.path.isfile( vega_file ):
     fits = pyfits.open( vega_file )
     vega = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')) )
@@ -50,7 +54,7 @@ except:
     solar_file = os.path.join(sedpydir,'data','sun_kurucz93.fits')
 
 rat = (1.0/(3600*180/np.pi*10))**2.0 # conversion to d=10 pc from 1 AU
-#this file should be in AA and erg/s/cm^2/AA at 1AU
+# This file should be in AA and erg/s/cm^2/AA at 1AU
 if os.path.isfile( solar_file ):
     fits = pyfits.open( solar_file )
     solar = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')*rat) )
@@ -79,7 +83,7 @@ class Filter(object):
     ab_gnu=3.631e-20   #AB reference spctrum in erg/s/cm^2/Hz
     npts=0
     
-    def __init__(self, kname = 'sdss_r0', nick = None):
+    def __init__(self, kname='sdss_r0', nick=None):
         """
         Constructor.
         """
@@ -124,7 +128,7 @@ class Filter(object):
         #            trans.append(float(cols[2]))
         #f.close()
 
-        ff = yanny_read(filename, one = True)
+        ff = yanny_read(filename, one=True)
         wave = ff['lambda']
         trans = ff['pass']
         #clean negatives, NaNs, and Infs, then sort, then store
@@ -303,7 +307,7 @@ def filter_dict(filterlist):
 
 ###Routines for spectra######
 
-def Lbol(wave,spec,wave_min=90,wave_max = 1e6):
+def Lbol(wave, spec, wave_min=90, wave_max=1e6):
     """
     Calculate the bolometric luminosity of a spectrum or spectra.
 
@@ -364,7 +368,7 @@ def vac2air(vac):
 
 
 def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
-                outwave = None, nsig = 5.0, minusewave = 0, maxusewave = 1e8):
+                outwave=None, nsig=5.0, minusewave=0, maxusewave=1e8):
     """
     Vectorized version of velocity broadening.  This can become very
     slow when memory constraints are reached (i.e. when nw_in * nw_out
@@ -404,8 +408,8 @@ def vel_broaden_fast(sourcewave, sourceflux, sigma):
     pass
 
     
-def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0 = 0, outwave = None,
-                 nsig = 5.0, minusewave = 0, maxusewave = 1e8):
+def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0=0, outwave=None,
+                 nsig=5.0, minusewave=0, maxusewave=1e8):
     """
     Vectorized version of wavelength broadening.  This can become very
     slow when memory constraints are reached (i.e. when nw_in * nw_out
@@ -426,16 +430,16 @@ def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0 = 0, outwave = None,
     dl = outwave[:,None] - sourcewave[None, use]
     ee = np.exp(-0.5 * dl**2 / sigma**2)
     ee /= np.trapz(ee, x = dl, axis=-1)[:,None]
-    flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:], x= dl[None,:,:], axis = -1)
+    flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:], x= dl[None,:,:], axis=-1)
 
     return flux
 
 
-def broaden(sourcewave, sourceflux, width, width0 = 0, stype = 'vel', **kwargs):
+def broaden(sourcewave, sourceflux, width, width0=0, stype = 'vel', **kwargs):
     if stype is 'vel':
-        return vel_broaden(sourcewave, sourceflux, width, sigma0 = width0, **kwargs)
+        return vel_broaden(sourcewave, sourceflux, width, sigma0=width0, **kwargs)
     elif stype is 'wave':
-        return wave_broaden(sourcewave, sourceflux, width, fwhm0 = width0, **kwargs)
+        return wave_broaden(sourcewave, sourceflux, width, fwhm0=width0, **kwargs)
 
 
 #    K=(sigma*sqrt(2.*!PI))^(-1.)

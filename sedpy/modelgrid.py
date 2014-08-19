@@ -22,7 +22,7 @@ class ModelLibrary(object):
 
     triangle_dirtiness = 1 #force generation of the DT and KDtree in first pass
     
-    def __init__(self, pars = None, parnames = None):
+    def __init__(self, pars=None, parnames=None):
         if pars is not None :
             self.set_pars(pars, parnames)
         
@@ -31,17 +31,17 @@ class ModelLibrary(object):
         self.ngrid = self.pars.shape[0]
 
     def add_par(self, value, name, dtype='<f8'):
-        self.pars = self.join_struct_arrays( [self.pars, self.structure_array(value, [name], types = [dtype])] )
+        self.pars = self.join_struct_arrays( [self.pars, self.structure_array(value, [name], types=[dtype])] )
         pass
 
     def par_names(self):
         return self.pars.dtype.names
 
-    def par_range(self, parname, inds = None):
+    def par_range(self, parname, inds=None):
         range_list = [ (np.nanmin(self.pars[inds][p]),np.nanmax(self.pars[inds][p]), p ) for p in parname]
         return range_list
 
-    def structure_array(self, values,fieldnames, types = None):
+    def structure_array(self, values, fieldnames, types=None):
         """
         Turn a numpy array of floats into a structurd array.
 
@@ -71,7 +71,7 @@ class ModelLibrary(object):
         if types is None:
             types = ['<f8']*len(fieldnames)
         dt = np.dtype(zip(fieldnames, types))
-        struct = np.zeros(nobj, dtype = dt)
+        struct = np.zeros(nobj, dtype=dt)
         for i,f in enumerate(fieldnames):
             struct[f] = values[...,i]
         return struct
@@ -94,14 +94,14 @@ class ModelLibrary(object):
         newdtype = np.dtype(sum((a.dtype.descr for a in arrays), []))        
         if len(np.unique(newdtype.names)) != len(newdtype.names):
             raise ValueError ('arrays have duplicate fields.')
-        newrecarray = np.empty(len(arrays[0]), dtype = newdtype)
+        newrecarray = np.empty(len(arrays[0]), dtype=newdtype)
         for a in arrays:
             for name in a.dtype.names:
                 newrecarray[name] = a[name]
         return newrecarray
 
-    def model_weights(self, target_points, parnames = None, subinds = None,
-                      itype = 'dt', force_triangulation = False):
+    def model_weights(self, target_points, parnames=None, subinds=None,
+                      itype='dt', force_triangulation=False):
         """
         Given an array of target coordinates and optionally a list of
         parnames, return the indices and weights of the model grid
@@ -184,7 +184,7 @@ class ModelLibrary(object):
             inds, weights =  self.weights_kNN_inverse_dist(targets, k = 1)
         return inds, weights
 
-    def refresh_graphs(self, parnames, subinds = None):
+    def refresh_graphs(self, parnames, subinds=None):
         """
         Given parameter names and optionally specific model indices,
         build a a Delaunay triangulation and a KDTree for the model
@@ -200,7 +200,7 @@ class ModelLibrary(object):
         #kdtree
         self.kdt = sklearn.neighbors.KDTree(model_points)
 
-    def weightsDT(self,target_points):
+    def weightsDT(self, target_points):
         """
         The interpolation weights are determined from barycenter
         coordinates of the vertices of the enclosing Delaunay
@@ -245,16 +245,16 @@ class ModelLibrary(object):
         #    bary[i,:-1]= np.dot( dtri.transform[triangle_inds[0],:ndim,:ndim],
         #                       (target_points-dtri.transform[triangle_inds[i],ndim,:])
 
-    def weights_kNN_inverse_dist(self, target_points, k = 1):
-        dists, inds = self.kdt.query(target_points, k = k, return_distance = True)
+    def weights_kNN_inverse_dist(self, target_points, k=1):
+        dists, inds = self.kdt.query(target_points, k=k, return_distance=True)
         if k == 1:
             return inds, np.ones(inds.shape)
         weights = 1/dists
         weights[np.isinf(weights)] = large_number
-        weights = weights/weights.sum(axis = -1)
+        weights = weights/weights.sum(axis=-1)
         return inds, weights
 
-    def weights_1DLinear(self, model_points, target_points, extrapolate = False):
+    def weights_1DLinear(self, model_points, target_points, extrapolate=False):
         """
         The interpolation weights are determined from 1D linear
         interpolation.
@@ -299,7 +299,7 @@ class ModelLibrary(object):
         return inds, weights
     
     def nearest_index(self, array, value):
-        return (np.abs(array-value)).argmin(axis = -1)
+        return (np.abs(array-value)).argmin(axis=-1)
 
 class SpecLibrary(ModelLibrary):
     """
@@ -317,8 +317,8 @@ class SpecLibrary(ModelLibrary):
     def __init__(self):
         pass
 
-    def generateSEDs(self, pars, filterlist, wave_min = 90, wave_max = 1e7,
-                     keepspec = False, intspec = False, attenuator = None, **extras):
+    def generateSEDs(self, pars, filterlist, wave_min=90, wave_max=1e7,
+                     keepspec=False, intspec=False, attenuator=None, **extras):
         """
         :returns sed: ndarray of shape (nobj,nfilter)
 
@@ -346,7 +346,7 @@ class SpecLibrary(ModelLibrary):
             if attenuator is not None:
                 spec  = attenuator.attenuate_spectrum(self.wavelength, spec, pars[s1:s2], **extras)
             sed[s1:s2,:] = observate.getSED(self.wavelength, spec, filterlist)
-            lbol[s1:s2] = observate.Lbol(self.wavelength, spec, wave_min = wave_min, wave_max = wave_max)
+            lbol[s1:s2] = observate.Lbol(self.wavelength, spec, wave_min=wave_min, wave_max=wave_max)
             i += 1
             if keepspec:
                 outspectra[s1:s2,:] = spec
@@ -355,8 +355,8 @@ class SpecLibrary(ModelLibrary):
                 
         return sed, lbol, outspectra
 
-    def interpolate_to_pars(self, target_points, parnames = None, subinds=None,
-                            itype = 'dt', **extras):
+    def interpolate_to_pars(self, target_points, parnames=None, subinds=None,
+                            itype='dt', **extras):
         """
         Method to obtain the model spectrum for a given set of
         parameter values via interpolation of the model grid. The
@@ -378,8 +378,8 @@ class SpecLibrary(ModelLibrary):
             The interpolated spectra.
         """
 
-        inds, weights = self.model_weights(target_points, parnames = parnames,
-                                            itype=itype, subinds = subinds, **extras)
+        inds, weights = self.model_weights(target_points, parnames=parnames,
+                                            itype=itype, subinds=subinds, **extras)
         if subinds is not None:
             inds = subinds[inds]
         return self.combine_weighted_spectra(inds, weights)
