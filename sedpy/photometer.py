@@ -22,6 +22,48 @@ except ImportError:
 
 thismod = sys.modules[__name__]
 
+class Photometer(object):
+    """
+    Trying for a better class dependence.  Basically wraps the image
+    in an object with photometry methods.  Incomplete
+    """
+    def __init__(self, image, wcs=None, ivar=None):
+        self.nx, self.ny = image.shape
+        self.image = image.flatten()
+        self.wcs = wcs
+        self.ivar = ivar
+        yy, xx = np.indices(self.nx, self.ny)
+        if wcs is not None:
+            self._x, self._y = wcs.wcs_pix2world(xx, yy, 0)
+        else
+            self._x, self._y = xx, yy
+            
+    def measure_flux(self, aperture, background):
+        """
+        Measure background subtracted flux.  Takes an aperture object,
+        and a local background object.
+        """
+        o, a, e = self.object_flux(aperture)
+        b, ba, be = background.evaluate(self)
+        flux = o - a*b
+        flux_var = e*e + a*a*be*be/ba
+        return flux, sqrt(flux_var)
+
+    def object_flux(self, aperture, weights=1.0):
+        """
+        Measure total flux (source + background) within an aperture.
+        Takes an image, and an aperture object.
+        """
+        fracs = aperture.contains(self._x, self._y)
+        inds = fracs > 0
+        if self.ivar is not None:
+            unc = sqrt((fracs[inds]/self.ivar[inds]).sum())
+        else:
+            unc = np.nan
+            
+        return (self.image * weights * fracs).sum(), fracs.sum(), unc
+
+        
 class Aperture(object):
 
     def world_to_pixels(shape, wcs):

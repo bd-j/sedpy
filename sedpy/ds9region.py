@@ -1,3 +1,5 @@
+### VERY PRELIMINARY!!!! #####
+
 import numpy as np
 import matplotlib.path as path
 
