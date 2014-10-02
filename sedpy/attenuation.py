@@ -210,8 +210,8 @@ def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
 
     """
 
-    if (wave < 1e3).any() :
-        warnings.warn('Cardelli: extinction not defined (set to zero) below 1000AA')
+    #if (wave < 1e3).any() :
+    #    warnings.warn('Cardelli: extinction not defined (set to zero) below 1000AA')
     mic=wave*1e-4
     x_sup, x_inf = 10.0, 0.3
     x = 1/mic
