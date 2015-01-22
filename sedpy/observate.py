@@ -80,8 +80,8 @@ class Filter(object):
         
     """
 
-    ab_gnu=3.631e-20   #AB reference spctrum in erg/s/cm^2/Hz
-    npts=0
+    ab_gnu = 3.631e-20   #AB reference spctrum in erg/s/cm^2/Hz
+    npts = 0
     
     def __init__(self, kname='sdss_r0', nick=None):
         """
@@ -172,17 +172,17 @@ class Filter(object):
         i4 = np.trapz(self.transmission * (np.log(self.wavelength/self.wave_effective))**2.0,
                       np.log(self.wavelength))
         self.gauss_width = (i4/i1)**(0.5)
-        self.effective_width = (2.0*np.sqrt( 2.0*np.log(2.0) ) * self.gauss_width *
+        self.effective_width = (2.0 * np.sqrt( 2.0*np.log(2.0) ) * self.gauss_width *
                                 self.wave_effective)
         #self.norm  = np.trapz(transmission,wavelength)
 
-        # Get zero points and AB to Vega  conversion
-        self.ab_zero_counts = self.obj_counts( self.wavelength,
-                                              self.ab_gnu*lightspeed/(self.wavelength**2) )
-        self.vega_zero_counts = self.obj_counts(vega[:,0],vega[:,1]) 
-        self.ab_to_vega = -2.5*np.log10(self.ab_zero_counts/self.vega_zero_counts)
+        # Get zero points and AB to Vega conversion
+        self.ab_zero_counts = self.obj_counts(self.wavelength,
+                                              self.ab_gnu * lightspeed / (self.wavelength**2))
+        self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1]) 
+        self.ab_to_vega = -2.5 * np.log10(self.ab_zero_counts/self.vega_zero_counts)
         if self.wave_mean < 1e5:
-            self.solar_ab_mag = self.ab_mag(solar[:,0],solar[:,1])
+            self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1])
         else:
             self.solar_ab_mag = float('NaN')
             
