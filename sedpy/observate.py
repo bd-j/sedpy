@@ -100,9 +100,9 @@ class Filter(object):
         if type( self.filename ) == type( '' ):
             if not os.path.isfile( self.filename ):
                 raise ValueError( 'Filter transmission file {0} does not exist!'.format(self.filename) )
-            self.loadKFilter(self.filename)
+            self.load_kfilter(self.filename)
 
-    def loadKFilter(self, filename):
+    def load_kfilter(self, filename):
         """
         Read a filter in kcorrect (yanny) format and populate the
         wavelength and transmission arrays.  Then determine a number
@@ -131,47 +131,58 @@ class Filter(object):
         ff = yanny_read(filename, one=True)
         wave = ff['lambda']
         trans = ff['pass']
-        #clean negatives, NaNs, and Infs, then sort, then store
+        # Clean negatives, NaNs, and Infs, then sort, then store
         ind = np.where(np.logical_and( np.isfinite(trans), (trans >= 0.0) ))[0]
         order = wave[ind].argsort()
         self.npts = ind.shape[0]
         self.wavelength = wave[ind[order]]
         self.transmission = trans[ind[order]]
 
-        self.getProperties()
+        self.get_properties()
 
         
-    def getProperties(self):
+    def get_properties(self):
         """
         Determine and store a number of properties of the filter and
         store them in the object.  These properties include several
         'effective' wavelength definitions and several width
         definitions, as well as the in-band absolute AB solar
-        magnitude, the Vega and AB reference detector signal, and the
-        conversion between AB and Vega magnitudes.
-        """
+        magnitude, the Vega and AB reference zero-point detector
+        signal, and the conversion between AB and Vega magnitudes.
 
-        i0 = np.trapz(self.transmission*np.log(self.wavelength), np.log(self.wavelength))
-        i1 = np.trapz(self.transmission, np.log(self.wavelength))
-        i2 = np.trapz(self.transmission*self.wavelength, self.wavelength)
-        i3 = np.trapz(self.transmission, self.wavelength)
-        i4 = np.trapz(self.transmission*( np.log(self.wavelength) )**2.0, np.log(self.wavelength))
+        See Fukugita et al. (1996) AJ 111, 1748 for discussion and
+        definition of many of these quantities.
+        """
+        # Calculate some useful integrals
+        i0 = np.trapz(self.transmission * np.log(self.wavelength),
+                      np.log(self.wavelength))
+        i1 = np.trapz(self.transmission,
+                      np.log(self.wavelength))
+        i2 = np.trapz(self.transmission * self.wavelength,
+                      self.wavelength)
+        i3 = np.trapz(self.transmission,
+                       self.wavelength)
         
         self.wave_effective = np.exp(i0/i1)
         self.wave_pivot = np.sqrt(i2/i1)
         self.wave_mean = self.wave_effective
         self.wave_average = i2/i3
-
-        self.gauss_width = (i4/i1)**(0.5)
-        self.effective_width = 2.0*np.sqrt( 2.0*np.log(2.0) )*self.gauss_width*self.wave_mean
         self.rectangular_width = i3/self.transmission.max()
+
+        i4 = np.trapz(self.transmission * (np.log(self.wavelength/self.wave_effective))**2.0,
+                      np.log(self.wavelength))
+        self.gauss_width = (i4/i1)**(0.5)
+        self.effective_width = (2.0*np.sqrt( 2.0*np.log(2.0) ) * self.gauss_width *
+                                self.wave_effective)
         #self.norm  = np.trapz(transmission,wavelength)
 
-        self.ab_counts = self.objCounts( self.wavelength,self.ab_gnu*lightspeed/(self.wavelength**2) )
-        self.vega_counts = self.objCounts(vega[:,0],vega[:,1]) 
-        self.ab_to_vega = -2.5*np.log10(self.ab_counts/self.vega_counts)
-        if self. wave_mean < 1e5:
-            self.solar_ab_mag = self.ABMag(solar[:,0],solar[:,1])
+        # Get zero points and AB to Vega  conversion
+        self.ab_zero_counts = self.obj_counts( self.wavelength,
+                                              self.ab_gnu*lightspeed/(self.wavelength**2) )
+        self.vega_zero_counts = self.obj_counts(vega[:,0],vega[:,1]) 
+        self.ab_to_vega = -2.5*np.log10(self.ab_zero_counts/self.vega_zero_counts)
+        if self.wave_mean < 1e5:
+            self.solar_ab_mag = self.ab_mag(solar[:,0],solar[:,1])
         else:
             self.solar_ab_mag = float('NaN')
             
@@ -183,7 +194,7 @@ class Filter(object):
             plt.plot(self.wavelength,self.transmission)
             plt.title(self.name)
 
-    def objCounts(self, sourcewave, sourceflux, sourceflux_unc=0):
+    def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
         """
         Project source spectrum onto filter and return the detector
         signal.
@@ -200,21 +211,21 @@ class Filter(object):
         """
         
         #interpolate filter transmission to source spectrum
-        newtrans = np.interp(sourcewave, self.wavelength,self.transmission, 
-                                left=0.,right=0.)
-            #print(self.name,sourcewave.shape,self.wavelength.shape,newtrans.shape)
+        newtrans = np.interp(sourcewave, self.wavelength, self.transmission,
+                             left=0., right=0.)
         
         #integrate lambda*f_lambda*R
         if True in (newtrans > 0.):
             ind = np.where(newtrans > 0.)
             ind=ind[0]
-            counts = np.trapz(sourcewave[ind]*newtrans[ind]*sourceflux[...,ind], sourcewave[ind],axis=-1)
+            counts = np.trapz(sourcewave[ind] * newtrans[ind] * sourceflux[...,ind],
+                              sourcewave[ind], axis=-1)
             #if  np.isinf(counts).any() : print(self.name, "Warn for inf value")
             return np.squeeze(counts)
         else:
             return float('NaN')
 
-    def ABMag(self, sourcewave, sourceflux, sourceflux_unc=0):
+    def ab_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
         """
         Project source spectrum onto filter and return the AB
         magnitude,
@@ -230,9 +241,9 @@ class Filter(object):
             AB magnitude of the source.
         """
         
-        return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.ab_counts)
+        return -2.5*np.log10(self.obj_counts(sourcewave, sourceflux) / self.ab_zero_counts)
 
-    def vegaMag(self, sourcewave, sourceflux, sourceflux_unc=0):
+    def vega_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
         """
         Project source spectrum onto filter and return the Vega
         magnitude.
@@ -248,7 +259,7 @@ class Filter(object):
             Vega magnitude of the source.
         """
 
-        return 0-2.5*np.log10(self.objCounts(sourcewave, sourceflux)/self.vega_counts)        
+        return -2.5*np.log10(self.obj_counts(sourcewave, sourceflux) / self.vega_zero_counts)        
 
 
 ###Useful utilities#####
@@ -265,11 +276,7 @@ def load_filters(filternamelist):
         A list of filter objects.
     """
     
-    filterlist = []
-    for f in filternamelist:
-        #print(f)
-        filterlist.append(Filter(f))
-    return filterlist
+    return [Filter(f) for f in filternamelist]
 
 def getSED(sourcewave, sourceflux, filterlist):
     """
@@ -296,7 +303,7 @@ def getSED(sourcewave, sourceflux, filterlist):
     sedshape = [sourceflux.shape[0], len(filterlist)]
     sed = np.zeros(sedshape)
     for i,f in enumerate(filterlist):
-        sed[:,i] = f.ABMag(sourcewave,sourceflux)
+        sed[:,i] = f.ab_mag(sourcewave,sourceflux)
     return np.squeeze(sed)
 
 def filter_dict(filterlist):

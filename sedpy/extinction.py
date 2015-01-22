@@ -3,7 +3,6 @@ import warnings, sys
 import scipy.interpolate as interp
 from numpy.random import normal 
 
-
 thismod = sys.modules[__name__]
 
 class Attenuator(object):
