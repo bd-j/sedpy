@@ -372,6 +372,32 @@ def vac2air(vac):
     air = vac / (1.0 + 2.735182e-4 + 131.4182/vac**2 + 2.76249e8 / vac**4)
     return air
 
+def smooth_vel(wave, spec, sigma, outwave=None, inres=0):
+    """
+    :param sigma:
+        Desired total output velocity resolution (km/s), including
+        input velocity resolution
+    """
+    sigma_eff = np.sqrt(sigma**2-inres**2)/2.998e5
+    if outwave is None:
+        outwave = wave
+    if sigma <= inres:
+        if inres > 0.0:
+            print("observate.smooth_vel warning: You requested a "
+                  "total output velocity dispersion {0} that is lower "
+                  "than the input velocity dispersion {1}.  Returning "
+                  "the interpolated input spectrum".format(sigma, inres))
+        return np.interp(wave, outwave, flux)
+    
+    lnwave = np.log(wave)
+    flux = np.zeros(len(outwave))
+    norm = 1/np.sqrt(2 * np.pi)/sigma
+    
+    for i, w in enumerate(outwave):
+        x = np.log(w) - lnwave
+        f = np.exp( -0.5*(x/sigma_eff)**2 )
+        flux[i] = np.trapz( f * spec, x) / np.trapz(f, x)
+    return flux
 
 
 def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
@@ -414,6 +440,48 @@ def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
 def vel_broaden_fast(sourcewave, sourceflux, sigma):
     pass
 
+def smooth_wave(wave, spec, sigma, outwave=None,
+                inres=0, in_vel=False, **extras):
+    """
+    :param sigma:
+        Desired reolution in wavelength units
+        
+    :param inres:
+        Resolution of the input, in either wavelength units or
+        lambda/dlambda (c/v)
+        
+    :param in_vel:
+        If True, the input spectrum has been smoothed in velocity
+        space, and inres is in dlambda/lambda.
+    """
+    if outwave is None:
+        outwave = wave
+    if inres <= 0:
+        sigma_eff = sigma
+    elif in_vel:
+        sigma_min = np.max(outwave)/inres
+        if sigma < sigma_min:
+            raise ValueError("Desired wavelength sigma is lower "
+                             "than the value possible for this input "
+                             "spectrum ({0}).".format(sigma_min))
+        # Make an approximate correction for the intrinsic wavelength
+        # dependent dispersion.  This doesn't really work.
+        sigma_eff = np.sqrt(sigma**2 - (wave/inres)**2)
+    else:
+        if sigma < inres:
+            raise ValueError("Desired wavelength sigma is lower "
+                             "than the value possible for this input "
+                             "spectrum ({0}).".format(sigma_min))
+        sigma_eff = np.sqrt(sigma**2- inres**2)
+
+    flux = np.zeros(len(outwave))
+    for i, w in enumerate(outwave):
+        #if in_vel:
+        #    sigma_eff = np.sqrt(sigma**2 - (w/inres)**2)
+        x = (wave-w)/sigma_eff
+        f = np.exp( -0.5*(x)**2 )
+        flux[i] = np.trapz( f * spec, wave) / np.trapz(f, wave)
+    return flux
     
 def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0=0, outwave=None,
                  nsig=5.0, minusewave=0, maxusewave=1e8):
@@ -459,6 +527,11 @@ def broaden(sourcewave, sourceflux, width, width0=0, stype = 'vel', **kwargs):
 #    return,broadflux
 
 #def redshift(sourcewave,sourceflux, z):
+def smooth(wave, spec, sigma, smooth_velocity=True, **kwargs):
+    if smooth_velocity:
+        return smooth_vel(wave, spec, sigma, **kwargs)
+    else:
+        return smooth_wave(wave, spec, sigma, **kwargs)
 
 def selftest():
     """Compare to the values obtained from the K-correct code
