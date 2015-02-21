@@ -28,18 +28,30 @@ class Region(object):
         self.parse(defstring)
 
     def parse(self, defstring):
-        pass
-    
+        raise(NotImplementedError)
+
+    @property
+    def unparse(self):
+        raise(NotImplementedError)        
+            
     def plate_scale(self, wcs):
         try:
             pscale = 3600. *np.sqrt((wcs.wcs.cd**2).sum(axis = 1))
         except (AttributeError):
             pscale = 3600. * np.abs(wcs.wcs.cdelt)
         return pscale.mean()
+    
+    def print_to(self, fileobj=None, color='green', label=''):
+        fstring = 'fk5;{0}({1}) # color={2} text={{{3}}}\n'
+        line = fstring.format(self.shape, self.unparse, color, label)
+        if fileobj is None:
+            print(line)
+        else:
+            fileobj.write(line)
 
 class Circle(Region):
 
-    name = 'circle'
+    shape = 'circle'
 
     def parse(self, defstring):
         bits = defstring.split(',')
@@ -47,6 +59,10 @@ class Circle(Region):
         self.dec = float(bits[1])
         self.radius = float(bits[2])
 
+    @property
+    def unparse(self):
+        return ','.join([str(a) for a in [self.ra, self.dec, self.radius]])
+        
     def contains(self, x, y, wcs = None):
         if wcs is not None:
             #should actually do the plate scale separately for x and y
@@ -61,7 +77,7 @@ class Circle(Region):
         
 class Ellipse(Region):
 
-    name = 'ellipse'
+    shape = 'ellipse'
 
     def parse(self, defstring):
         bits = defstring.split(',')
@@ -75,7 +91,10 @@ class Ellipse(Region):
         if self.b > self.a:
             self.a, self.b = self.b, self.a
             self.pa = self.pa + 90.
-    
+    @property
+    def unparse(self):
+        return ','.join([str(a) for a in [self.ra, self.dec, self.a, self.b, self.pa]])
+
     def contains(self, x, y, wcs = None):
         """
         Determine whether pixel locations x,y are within the ellipse.
@@ -98,7 +117,7 @@ class Ellipse(Region):
             
 class Polygon(Region):
 
-    name = 'polygon'
+    shape = 'polygon'
 
     def parse(self, defstring):
         bits = defstring.split(',')
@@ -109,11 +128,16 @@ class Polygon(Region):
         self.ra = bits[np.arange(self.n_vertices) * 2]       #degrees 
         self.dec = bits[np.arange(self.n_vertices) * 2 + 1]  #degrees 
 
+    @property
+    def unparse(self):
+        return ','.join([ str(val) for pair in zip(self.ra, self.dec) for val in pair])
+        
     def contains(self, x, y, wcs = None):
         """
         Determine whether pixel locations x,y are within the polygon.
         Requires that a WCS be given.  Uses Path objects from matlib,
-        should probably use Shapely.
+        should probably use Shapely, or better yet a real spherical
+        coordinates implementation
         """
         if wcs is not None:
             vv = wcs.wcs_world2pix(self.ra, self.dec, 1)
@@ -123,7 +147,7 @@ class Polygon(Region):
             
         vertices = [(r,d) for r,d in zip(vv[0], vv[1])]
         vertices += [vertices[0]]
-        poly = path.Path(vertices, closed =True)
+        poly = path.Path(vertices, closed=True)
         points = np.vstack((x,y)).T
         is_in = poly.contains_points(points)
         #flux = (self.image - background)[is_in].sum()
