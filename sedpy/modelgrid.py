@@ -1,11 +1,13 @@
 import numpy as np
+from scipy.spatial import Delaunay
 try:
     import astropy.io.fits as pyfits
 except (ImportError):
     import pyfits
-import scipy.spatial
-import sklearn.neighbors
-
+try:
+    import sklearn.neighbors
+except(ImportError):
+    pass
 try:
     import observate
 except (ImportError):
@@ -196,10 +198,12 @@ class ModelLibrary(object):
         self.graphed_parameters = parnames
         self.triangle_dirtiness = 0
         #delaunay triangulate
-        self.dtri = scipy.spatial.Delaunay(model_points)
+        self.dtri = Delaunay(model_points)
         #kdtree
-        self.kdt = sklearn.neighbors.KDTree(model_points)
-
+        try:
+            self.kdt = sklearn.neighbors.KDTree(model_points)
+        except(NameError):
+            pass
     def weightsDT(self, target_points):
         """
         The interpolation weights are determined from barycenter

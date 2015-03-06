@@ -27,5 +27,5 @@ setup(
                     + open("HISTORY.rst").read(),
     package_data={"sedpy": ["data/*fits", "data/filters/*par"]},
     include_package_data=True,
-    install_requires=["numpy", "scipy >= 0.9", "astropy", "matplotlib", "scikit-learn"],
+    #install_requires=["numpy", "scipy >= 0.9", "astropy", "matplotlib", "scikit-learn"],
 )

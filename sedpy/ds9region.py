@@ -1,7 +1,10 @@
 ### VERY PRELIMINARY!!!! #####
 
 import numpy as np
-import matplotlib.path as path
+try:
+    from matplotlib import path
+except(ImportError):
+    pass
 
 region_types = ['circle', 'ellipse', 'polygon', 'box']
 

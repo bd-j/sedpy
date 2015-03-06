@@ -4,12 +4,6 @@
 #
 # Assumed input units are erg/s/cm^2/AA and AA
 
-#To Do: -- Add methods for obtaining magnitude uncertainties
-#          given an error spectrum along with the source spectrum
-#       -- Add index measurements
-#       -- Test the broadening functions for accuracy and speed.
-#       -- Add some redshifting methods/classes?
-
 
 import numpy as np
 import os
@@ -36,7 +30,7 @@ lightspeed = 2.998e18 #AA/s
 sedpydir, f = os.path.split(__file__)
 sedpydir = sedpydir
 try:
-    vega_file = resource_filename('data', 'alpha_lyr_stis_005.fits')
+    vega_file = resource_filename('sedpy', 'data/alpha_lyr_stis_005.fits')
 except:
     vega_file = os.path.join(sedpydir, 'data','alpha_lyr_stis_005.fits')
     
@@ -49,7 +43,7 @@ else:
     raise ValueError('Could not find Vega spectrum at {0}'.format(vega_file))
 
 try:
-    solar_file = resource_filename('data','sun_kurucz93.fits')
+    solar_file = resource_filename('sedpy','data/sun_kurucz93.fits')
 except:
     solar_file = os.path.join(sedpydir,'data','sun_kurucz93.fits')
 
@@ -57,7 +51,8 @@ rat = (1.0/(3600*180/np.pi*10))**2.0 # conversion to d=10 pc from 1 AU
 # This file should be in AA and erg/s/cm^2/AA at 1AU
 if os.path.isfile( solar_file ):
     fits = pyfits.open( solar_file )
-    solar = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')*rat) )
+    solar = np.column_stack( (fits[1].data.field('WAVELENGTH'),
+                              fits[1].data.field('FLUX')*rat) )
     fits.close()
 else:
     raise ValueError('Could not find Solar spectrum at {0}'.format(solar_file))
@@ -94,7 +89,7 @@ class Filter(object):
             self.nick = nick
 
         try:
-            self.filename = resource_filename('/data/filters/',kname + '.par')
+            self.filename = resource_filename('sedpy','/data/filters/',kname + '.par')
         except:
             self.filename = sedpydir + '/data/filters/' + kname + '.par'
         if type( self.filename ) == type( '' ):
@@ -218,8 +213,8 @@ class Filter(object):
         if True in (newtrans > 0.):
             ind = np.where(newtrans > 0.)
             ind=ind[0]
-            counts = np.trapz(sourcewave[ind] * newtrans[ind] * sourceflux[...,ind],
-                              sourcewave[ind], axis=-1)
+            counts = np.trapz(sourcewave[ind]*newtrans[ind]*sourceflux[...,ind],
+                              sourcewave[ind],axis=-1)
             #if  np.isinf(counts).any() : print(self.name, "Warn for inf value")
             return np.squeeze(counts)
         else:
