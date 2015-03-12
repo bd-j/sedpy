@@ -35,7 +35,7 @@ class Photometer(object):
         yy, xx = np.indices(self.nx, self.ny)
         if wcs is not None:
             self._x, self._y = wcs.wcs_pix2world(xx, yy, 0)
-        else
+        else:
             self._x, self._y = xx, yy
             
     def measure_flux(self, aperture, background):
