@@ -367,11 +367,12 @@ def vac2air(vac):
     air = vac / (1.0 + 2.735182e-4 + 131.4182/vac**2 + 2.76249e8 / vac**4)
     return air
 
-def lsf_broaden(wave, spec, lsf=None, return_kernel=False, fwhm=False):
+def lsf_broaden(wave, spec, lsf=None, outwave=None,
+                return_kernel=False, fwhm=False):
     """Broaden a spectrum using a wavelength dependent line spread
     function.  This function is only approximate because it doesn't
-    actually do the integration, so for sparsely sampled points you'll
-    have problems.
+    actually do the integration over pixels, so for sparsely sampled
+    points you'll have problems.
 
     :param wave:
         input wavelengths
@@ -379,19 +380,26 @@ def lsf_broaden(wave, spec, lsf=None, return_kernel=False, fwhm=False):
         A function that returns the gaussian dispersion at each
         wavelength.  This is assumed to be in simga unless ``fwhm`` is
         ``True``
-
+    :param outwave:
+        Optional output wavelengths
+        
     :returns newspec:
         The broadened spectrum
         
     """
+    if outwave is None:
+        outwave = wave
     if lsf is None:
-        return spec
+        return np.interp(outwave, wave, spec)
+    dw = np.gradient(wave)
     sigma = lsf(wave)
     if fwhm:
         sigma = sigma/2.35
-    kernel = wave[:,None] - wave[None,:]
+    kernel = outwave[:,None] - wave[None,:]
     kernel = (1/(sigma * np.sqrt(np.pi * 2))[None, :] *
-              np.exp(-kernel**2/(2*sigma[None,:]**2)))
+              np.exp(-kernel**2/(2*sigma[None,:]**2)) *
+              dw[None,:])
+    #should this be axis=0 or axis=1?
     kernel = kernel/kernel.sum(axis=0)
     newspec = np.dot(kernel, spec)
     if return_kernel:
