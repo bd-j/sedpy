@@ -37,10 +37,12 @@ except:
 # This file should be in AA and erg/s/cm^2/AA
 if os.path.isfile( vega_file ):
     fits = pyfits.open( vega_file )
-    vega = np.column_stack( (fits[1].data.field('WAVELENGTH'), fits[1].data.field('FLUX')) )
+    vega = np.column_stack( (fits[1].data.field('WAVELENGTH'),
+                             fits[1].data.field('FLUX')) )
     fits.close()
 else:
-    raise ValueError('Could not find Vega spectrum at {0}'.format(vega_file))
+    raise ValueError('Could not find Vega '
+                     'spectrum at {0}'.format(vega_file))
 
 try:
     solar_file = resource_filename('sedpy','data/sun_kurucz93.fits')
@@ -55,7 +57,8 @@ if os.path.isfile( solar_file ):
                               fits[1].data.field('FLUX')*rat) )
     fits.close()
 else:
-    raise ValueError('Could not find Solar spectrum at {0}'.format(solar_file))
+    raise ValueError('Could not find Solar '
+                     'spectrum at {0}'.format(solar_file))
 
 
 class Filter(object):
@@ -89,12 +92,14 @@ class Filter(object):
             self.nick = nick
 
         try:
-            self.filename = resource_filename('sedpy','/data/filters/',kname + '.par')
+            self.filename = resource_filename('sedpy','/data/filters/' +
+                                              kname + '.par')
         except:
             self.filename = sedpydir + '/data/filters/' + kname + '.par'
         if type( self.filename ) == type( '' ):
             if not os.path.isfile( self.filename ):
-                raise ValueError( 'Filter transmission file {0} does not exist!'.format(self.filename) )
+                raise ValueError( 'Filter transmission file {0} does '
+                                  ' not exist!'.format(self.filename) )
             self.load_kfilter(self.filename)
 
     def load_kfilter(self, filename):
@@ -118,7 +123,7 @@ class Filter(object):
         #    if len(cols) > 2 and cols[0].find('KFILTER') > -1:
         #        wave.append(float(cols[1]))
         #        if cols[0].find('SDSS') > -1:
-        #            trans.append(float(cols[4])) #use airmass=1.3 passband.  HACKY
+        #            trans.append(float(cols[4])) #use airmass=1.3 passband. HACKY
         #        else:
         #            trans.append(float(cols[2]))
         #f.close()
@@ -164,18 +169,22 @@ class Filter(object):
         self.wave_average = i2/i3
         self.rectangular_width = i3/self.transmission.max()
 
-        i4 = np.trapz(self.transmission * (np.log(self.wavelength/self.wave_effective))**2.0,
+        i4 = np.trapz(self.transmission *
+                      (np.log(self.wavelength/self.wave_effective))**2.0,
                       np.log(self.wavelength))
         self.gauss_width = (i4/i1)**(0.5)
-        self.effective_width = (2.0 * np.sqrt( 2.0*np.log(2.0) ) * self.gauss_width *
+        self.effective_width = (2.0 * np.sqrt( 2.0*np.log(2.0) ) *
+                                self.gauss_width *
                                 self.wave_effective)
         #self.norm  = np.trapz(transmission,wavelength)
 
         # Get zero points and AB to Vega conversion
         self.ab_zero_counts = self.obj_counts(self.wavelength,
-                                              self.ab_gnu * lightspeed / (self.wavelength**2))
+                                              self.ab_gnu * lightspeed /
+                                              (self.wavelength**2))
         self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1]) 
-        self.ab_to_vega = -2.5 * np.log10(self.ab_zero_counts/self.vega_zero_counts)
+        self.ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
+                                          self.vega_zero_counts)
         if self.wave_mean < 1e5:
             self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1])
         else:
@@ -236,7 +245,8 @@ class Filter(object):
             AB magnitude of the source.
         """
         
-        return -2.5*np.log10(self.obj_counts(sourcewave, sourceflux) / self.ab_zero_counts)
+        return -2.5*np.log10(self.obj_counts(sourcewave, sourceflux) /
+                             self.ab_zero_counts)
 
     def vega_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
         """
@@ -254,7 +264,8 @@ class Filter(object):
             Vega magnitude of the source.
         """
 
-        return -2.5*np.log10(self.obj_counts(sourcewave, sourceflux) / self.vega_zero_counts)        
+        return -2.5*np.log10(self.obj_counts(sourcewave, sourceflux) /
+                             self.vega_zero_counts)        
 
 
 ###Useful utilities#####
@@ -345,7 +356,8 @@ def air2vac(air):
         The corresponding vacuum wavelengths.
     """
     ss = 1e4/air
-    vac = air * (1 + 6.4328e-5 + 2.94981e-2 / (146 - ss**2) + 2.5540e-4 / (41 - ss**2))
+    vac = air * (1 + 6.4328e-5 + 2.94981e-2 / (146 - ss**2) +
+                 2.5540e-4 / (41 - ss**2))
     return vac
 
 def vac2air(vac):
@@ -368,7 +380,7 @@ def vac2air(vac):
     return air
 
 def lsf_broaden(wave, spec, lsf=None, outwave=None,
-                return_kernel=False, fwhm=False):
+                return_kernel=False, fwhm=False, **kwargs):
     """Broaden a spectrum using a wavelength dependent line spread
     function.  This function is only approximate because it doesn't
     actually do the integration over pixels, so for sparsely sampled
@@ -382,6 +394,9 @@ def lsf_broaden(wave, spec, lsf=None, outwave=None,
         ``True``
     :param outwave:
         Optional output wavelengths
+
+    :param kwargs:
+        Passed to lsf()
         
     :returns newspec:
         The broadened spectrum
@@ -392,7 +407,7 @@ def lsf_broaden(wave, spec, lsf=None, outwave=None,
     if lsf is None:
         return np.interp(outwave, wave, spec)
     dw = np.gradient(wave)
-    sigma = lsf(wave)
+    sigma = lsf(wave, **kwargs)
     if fwhm:
         sigma = sigma/2.35
     kernel = outwave[:,None] - wave[None,:]
@@ -400,7 +415,7 @@ def lsf_broaden(wave, spec, lsf=None, outwave=None,
               np.exp(-kernel**2/(2*sigma[None,:]**2)) *
               dw[None,:])
     #should this be axis=0 or axis=1?
-    kernel = kernel/kernel.sum(axis=0)
+    kernel = kernel/kernel.sum(axis=1)
     newspec = np.dot(kernel, spec)
     if return_kernel:
         return newspec, kernel
@@ -453,7 +468,8 @@ def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
     minw, maxw = outwave.min(), outwave.max()
     maxw  *= (1 + nsig * sigma/lightspeed)
     minw  *= (1 - nsig * sigma/lightspeed)
-    use = (sourcewave > np.max([minw, minusewave])) & (sourcewave < np.min([maxw, maxusewave]))
+    use = ((sourcewave > np.max([minw, minusewave])) &
+           (sourcewave < np.min([maxw, maxusewave])))
     
     K = 1 / (sigma * np.sqrt(2 * np.pi)) #don't need since renormalizing weights
     wr = outwave[:,None] / sourcewave[None, use ]
@@ -465,8 +481,11 @@ def vel_broaden(sourcewave, sourceflux, sigma_in, sigma0=0,
     flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:], x= v[None,:,:], axis = -1)
 
     #H = lightspeed/1e13/sigma
-    #flux = np.trapz( sourceflux[:,None,use] * np.exp(-0.5 * (H * (1 - outwave[:,None] / sourcewave[None, use ]))**2),
-    #                 x= lightspeed/1e13 * (1 - outwave[None,:,None]/sourcewave[None,None,:]), axis = -1)
+    #flux = np.trapz( sourceflux[:,None,use] *
+    #                 np.exp(-0.5 * (H * (1 - outwave[:,None] /
+    #                                     sourcewave[None, use ]))**2),
+    #                 x= lightspeed/1e13 * (1 - outwave[None,:,None]/
+    #                                       sourcewave[None,None,:]), axis = -1)
     
     return  flux #* K
 
@@ -534,21 +553,25 @@ def wave_broaden(sourcewave, sourceflux, fwhm, fwhm0=0, outwave=None,
     minw, maxw = outwave.min(), outwave.max()
     maxw  *= (1 + nsig * sigma)
     minw  *= (1 - nsig * sigma)
-    use = (sourcewave > np.max([minw, minusewave])) & (sourcewave < np.min([maxw, maxusewave]))
+    use = ((sourcewave > np.max([minw, minusewave])) &
+           (sourcewave < np.min([maxw, maxusewave])))
 
     dl = outwave[:,None] - sourcewave[None, use]
     ee = np.exp(-0.5 * dl**2 / sigma**2)
     ee /= np.trapz(ee, x = dl, axis=-1)[:,None]
-    flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:], x= dl[None,:,:], axis=-1)
+    flux = np.trapz( sourceflux[:,None,use] * ee[None,:,:],
+                     x=dl[None,:,:], axis=-1)
 
     return flux
 
 
 def broaden(sourcewave, sourceflux, width, width0=0, stype = 'vel', **kwargs):
     if stype is 'vel':
-        return vel_broaden(sourcewave, sourceflux, width, sigma0=width0, **kwargs)
+        return vel_broaden(sourcewave, sourceflux, width,
+                           sigma0=width0, **kwargs)
     elif stype is 'wave':
-        return wave_broaden(sourcewave, sourceflux, width, fwhm0=width0, **kwargs)
+        return wave_broaden(sourcewave, sourceflux, width,
+                            fwhm0=width0, **kwargs)
 
 
 #    K=(sigma*sqrt(2.*!PI))^(-1.)
@@ -578,7 +601,8 @@ def selftest():
 
     filterlist=loadFilters(filternames)
     for i in range(len(filterlist)):
-        print(filterlist[i].wave_effective, filterlist[i].solar_ab_mag, filterlist[i].ab_to_vega)
+        print(filterlist[i].wave_effective, filterlist[i].solar_ab_mag,
+              filterlist[i].ab_to_vega)
         assert abs(filterlist[i].wave_effective-weff_kcorr[i]) < weff_kcorr[i]*0.01
         assert abs(filterlist[i].solar_ab_mag-msun_kcorr[i]) < 0.05
         #assert abs(filterlist[i].ab_to_vega+ab2vega_kcorr[i]) < 0.05 #this fails because of the vega spectrum used by k_correct

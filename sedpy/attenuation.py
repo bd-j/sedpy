@@ -3,7 +3,7 @@ import warnings, sys
 
 ###### ATTENUATION CURVES ###########
 
-def powerlaw(wave, tau_v = 1, alpha = 1.0, **kwargs):
+def powerlaw(wave, tau_v=1, alpha=1.0, **kwargs):
     """
     Simple power-law attenuation, normalized to 5500\AA.
 
@@ -19,7 +19,7 @@ def powerlaw(wave, tau_v = 1, alpha = 1.0, **kwargs):
     """
     return tau_v * (wave/5500)**(0-alpha)
 
-def calzetti(wave, tau_v = 1, R_v = 4.05, **kwargs):
+def calzetti(wave, tau_v=1, R_v=4.05, **kwargs):
     """
     Calzetti et al. 2000 starburst attenuation curve, with
     extrapolations to the FUV and NIR.
@@ -59,7 +59,7 @@ def calzetti(wave, tau_v = 1, R_v = 4.05, **kwargs):
     tau_lambda=tau_v*ff/R_v/0.999479
     return tau_lambda
 
-def chevallard(wave, tau_v = 1, **kwargs):
+def chevallard(wave, tau_v=1, **kwargs):
     """
     \tau_v dependent attenuation curves matched to disk RT models, as
     in Chevallard et al. 2013.  No UV bump (or indeed tests in the UV
@@ -83,7 +83,7 @@ def chevallard(wave, tau_v = 1, **kwargs):
     tau_lambda = tau_v*(wave/5500.0)**(0-alpha)
     return tau_lambda
 
-def conroy(wave, tau_v =1, R_v=3.1, f_bump=0.6, **kwargs):
+def conroy(wave, tau_v=1, R_v=3.1, f_bump=0.6, **kwargs):
     """
     Conroy & Schiminovich 2010 dust attenuation curves including a
     decreased UV bump.
@@ -153,7 +153,7 @@ def conroy(wave, tau_v =1, R_v=3.1, f_bump=0.6, **kwargs):
 
     return tau_v*alam
 
-def broken_powerlaw(wave, tau_v =1, alpha=[0.7,0.7,0.7],
+def broken_powerlaw(wave, tau_v=1, alpha=[0.7,0.7,0.7],
                     breaks=[0,3000,10000,4e4], **kwargs):
     """
     Attenuation curve as in V. Wild et al. 2011, i.e. power-law slope
@@ -188,7 +188,7 @@ def wg00(wave,tau_v =1, geometry = 'SHELL', composition = 'MW',
 
 ##### EXTINCTION CURVES ########
 
-def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
+def cardelli(wave, tau_v=1, R_v=3.1, **kwargs):
     """
     Cardelli, Clayton, and Mathis 1998 Milky Way extinction curve,
     with an update in the near-UV from O'Donnell 1994
@@ -256,7 +256,7 @@ def cardelli(wave, tau_v = 1, R_v=3.1, **kwargs):
     tau = a + b / R_v
     return tau_v*tau
 
-def smc(wave, tau_v =1, **kwargs):
+def smc(wave, tau_v=1, **kwargs):
     """
     Pei 1992 SMC extinction curve.
 
@@ -289,7 +289,7 @@ def smc(wave, tau_v =1, **kwargs):
 
     return tau_v * (abs_ab/norm_v)
 
-def lmc(wave, tau_v =1, **kwargs):
+def lmc(wave, tau_v=1, **kwargs):
     """
     Pei 1992 LMC extinction curve.
 
