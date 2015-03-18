@@ -193,7 +193,6 @@ def cardelli(wave, tau_v=1, R_v=3.1, **kwargs):
     Cardelli, Clayton, and Mathis 1998 Milky Way extinction curve,
     with an update in the near-UV from O'Donnell 1994
 
-    
     :param wave:
         The wavelengths at which optical depth estimates are desired.
 

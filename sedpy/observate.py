@@ -390,7 +390,7 @@ def lsf_broaden(wave, spec, lsf=None, outwave=None,
         input wavelengths
     :param lsf:
         A function that returns the gaussian dispersion at each
-        wavelength.  This is assumed to be in simga unless ``fwhm`` is
+        wavelength.  This is assumed to be in sigma unless ``fwhm`` is
         ``True``
     :param outwave:
         Optional output wavelengths
@@ -409,11 +409,11 @@ def lsf_broaden(wave, spec, lsf=None, outwave=None,
     dw = np.gradient(wave)
     sigma = lsf(wave, **kwargs)
     if fwhm:
-        sigma = sigma/2.35
-    kernel = outwave[:,None] - wave[None,:]
+        sigma = sigma / 2.35
+    kernel = outwave[:, None] - wave[None, :]
     kernel = (1/(sigma * np.sqrt(np.pi * 2))[None, :] *
-              np.exp(-kernel**2/(2*sigma[None,:]**2)) *
-              dw[None,:])
+              np.exp(-kernel**2/(2*sigma[None, :]**2)) *
+              dw[None, :])
     #should this be axis=0 or axis=1?
     kernel = kernel/kernel.sum(axis=1)
     newspec = np.dot(kernel, spec)

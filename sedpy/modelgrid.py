@@ -258,7 +258,8 @@ class ModelLibrary(object):
         weights = weights/weights.sum(axis=-1)
         return inds, weights
 
-    def weights_1DLinear(self, model_points, target_points, extrapolate=False):
+    def weights_1DLinear(self, model_points, target_points,
+                         extrapolate=False, left=0.0, right=0.0):
         """
         The interpolation weights are determined from 1D linear
         interpolation.
@@ -290,12 +291,17 @@ class ModelLibrary(object):
         w_hi = (target_points - x_lo)/width
 
         if extrapolate is False:
-            above_scale = w_lo < 0 #fidn places where target is above or below the model range
+            # find places where target is above or below the model range
+            above_scale = w_lo < 0 
             below_scale = w_hi < 0
-            lo[above_scale] = hi[above_scale] #set the indices to be indentical in these cases
+            # set the indices to be indentical in these cases
+            lo[above_scale] = hi[above_scale] 
             hi[below_scale] = lo[below_scale]
-            w_lo[above_scale] = 1 - w_hi[above_scale] #make the combined weights sum to one
-            w_hi[below_scale] = 1 - w_lo[below_scale]
+            # make the combined weights sum to ``left`` or ``right``
+            w_lo[above_scale] = 0 
+            w_hi[above_scale] = left
+            w_hi[below_scale] = 0
+            w_lo[below_scale] = right
 
         inds = np.vstack([lo,hi]).T
         weights = np.vstack([w_lo, w_hi]).T
