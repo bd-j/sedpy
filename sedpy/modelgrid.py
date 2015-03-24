@@ -14,10 +14,9 @@ except (ImportError):
     print('Warning - observate not imported, SpecLibrary class unavailable')
     
 class ModelLibrary(object):
-    """
-    Class to deal with (irregular) grids of models.  Primary attribute
-    is `pars`: a structured array of parameter values of shape
-    (ngrid).  Methods are provided to manipulate the parameter
+    """Class to deal with (irregular) grids of models.  Primary
+    attribute is `pars`: a structured array of parameter values of
+    shape (ngrid).  Methods are provided to manipulate the parameter
     structure, and to obtain interpolation weights for specific points
     within the grid using a variety of methods.
     """
@@ -60,7 +59,7 @@ class ModelLibrary(object):
         :returns struct:
             A numpy structured array.
         """
-        
+        #shape coercion
         values = np.atleast_2d(values)
         if values.shape[-1] != len(fieldnames):
             if values.shape[0] == len(fieldnames):
@@ -103,7 +102,7 @@ class ModelLibrary(object):
         return newrecarray
 
     def model_weights(self, target_points, parnames=None, subinds=None,
-                      itype='dt', force_triangulation=False):
+                      itype='dt', force_triangulation=False, **extras):
         """
         Given an array of target coordinates and optionally a list of
         parnames, return the indices and weights of the model grid
@@ -167,23 +166,24 @@ class ModelLibrary(object):
             targets = target_points
         targets = np.atleast_2d(targets)
 
-        #if necessary rebuild the model delauynay triangulation and KDTree
-        #pull the grid points out of the model record data and make an (nmodel,ndim) array of
-        #model grid parameter values.  need to loop to make sure order is correct.
+        # If necessary rebuild the model delauynay triangulation and
+        # KDTree.  Pull the grid points out of the model record data
+        # and make an (nmodel,ndim) array of model grid parameter
+        # values.  Need to loop to make sure order is correct.
         #if subinds is not None:
         #    force_triangulation = True
         #print( subinds) 
         self.triangle_dirtiness += force_triangulation
         if self.triangle_dirtiness > 0:
-            self.refresh_graphs(parnames, subinds = subinds)
+            self.refresh_graphs(parnames, subinds=subinds)
 
         #pass the result to weightsDT
         if itype.lower() == 'dt':
-            inds, weights =  self.weightsDT(targets)
+            inds, weights = self.weightsDT(targets)
         elif itype.lower() == 'idw':
-            inds, weights =  self.weights_kNN_inverse_dist(targets, k = targets.shape[1])
+            inds, weights = self.weights_kNN_inverse_dist(targets, k=targets.shape[1])
         elif itype.lower() == 'nearest':
-            inds, weights =  self.weights_kNN_inverse_dist(targets, k = 1)
+            inds, weights = self.weights_kNN_inverse_dist(targets, k=1)
         return inds, weights
 
     def refresh_graphs(self, parnames, subinds=None):
@@ -204,9 +204,9 @@ class ModelLibrary(object):
             self.kdt = sklearn.neighbors.KDTree(model_points)
         except(NameError):
             pass
+        
     def weightsDT(self, target_points):
-        """
-        The interpolation weights are determined from barycenter
+        """The interpolation weights are determined from barycenter
         coordinates of the vertices of the enclosing Delaunay
         triangulation simplex. This allows for the use of irregular Nd
         grids. See also weights_1DLinear and
@@ -223,18 +223,23 @@ class ModelLibrary(object):
              interpolates.
         """
         
-        #find the encompassing (hyper)triangle(s) for the desired points, given a delauynay triangulation        
+        # Find the encompassing (hyper)triangle(s) for the desired
+        # points, given a delauynay triangulation
         ndim = target_points.shape[-1]
-        #output triangle_inds is an (ntarg) array of simplex indices
+        # Output triangle_inds is an (ntarg) array of simplex indices
         triangle_inds = self.dtri.find_simplex(target_points)
-        #and get model indices of (hyper)triangle vertices. inds has shape (ntarg,ndim+1)
+        # And get model indices of (hyper)triangle vertices. inds has
+        # shape (ntarg,ndim+1)
         inds = self.dtri.vertices[triangle_inds,:]
-        #get the barycenter coordinates through matrix multiplication and dimensional juggling
+        # get the barycenter coordinates through matrix multiplication
+        # and dimensional juggling
         bary = np.dot( self.dtri.transform[triangle_inds,:ndim,:ndim],
                        (target_points - self.dtri.transform[triangle_inds,ndim,:]).reshape(-1,ndim,1) )
         oned = np.arange(triangle_inds.shape[0])
-        bary = np.atleast_2d(np.squeeze(bary[oned,:,oned,:])) #ok.  in np 1.7 can add an axis to squeeze
-        last = 1 - bary.sum(axis=-1) #the last bary coordinate is 1-sum of the other coordinates
+        #ok.  in np 1.7 can add an axis to squeeze
+        bary = np.atleast_2d(np.squeeze(bary[oned,:,oned,:]))
+        #the last bary coordinate is 1-sum of the other coordinates 
+        last = 1 - bary.sum(axis=-1) 
         weights = np.hstack((bary,last[:,np.newaxis]))
 
         outside = (triangle_inds == -1)
@@ -250,6 +255,23 @@ class ModelLibrary(object):
         #                       (target_points-dtri.transform[triangle_inds[i],ndim,:])
 
     def weights_kNN_inverse_dist(self, target_points, k=1):
+        """The interpolation weights are determined from the inverse
+        distance to the k nearest neighbors.
+        
+        :param target_points: ndarray, shape(ntarg,npar)
+            The coordinates to which you wish to interpolate.
+
+        :param k:
+            The number of nearest neighbors to use.
+            
+        :returns inds: ndarray, shape(ntarg,npar+1)
+             The model indices of the interpolates.
+             
+        :returns weights: narray, shape (ntarg,npar+1)
+             The weights of each model given by ind in the
+             interpolates.
+        """
+
         dists, inds = self.kdt.query(target_points, k=k, return_distance=True)
         if k == 1:
             return inds, np.ones(inds.shape)
@@ -327,14 +349,23 @@ class SpecLibrary(ModelLibrary):
     def __init__(self):
         pass
 
+    def spectra_from_pars(self):
+        """This should take a numpy structured array of parameters of
+        length nobj and return an (nobj, nwave) array of spectra
+        """
+        raise(NotImplementedError)
+
     def generateSEDs(self, pars, filterlist, wave_min=90, wave_max=1e7,
                      keepspec=False, intspec=False, attenuator=None, **extras):
         """
-        :returns sed: ndarray of shape (nobj,nfilter)
+        :returns sed:
+            ndarray of shape (nobj,nfilter)
 
-        :returns lbol: ndarray of shape (nobj)
+        :returns lbol:
+            ndarray of shape (nobj)
 
-        :returns outspectra: ndarray of shape (nobj,nwave)
+        :returns outspectra:
+            ndarray of shape (nobj,nwave)
         
         """
         
@@ -354,9 +385,11 @@ class SpecLibrary(ModelLibrary):
             s1, s2 = int((i)*maxmod), int(np.min( [(i+1)*maxmod-1,ngrid] ))
             spec = self.spectra_from_pars(pars[int(s1):int(s2)], **extras)
             if attenuator is not None:
-                spec  = attenuator.attenuate_spectrum(self.wavelength, spec, pars[s1:s2], **extras)
+                spec  = attenuator.attenuate_spectrum(self.wavelength, spec,
+                                                      pars[s1:s2], **extras)
             sed[s1:s2,:] = observate.getSED(self.wavelength, spec, filterlist)
-            lbol[s1:s2] = observate.Lbol(self.wavelength, spec, wave_min=wave_min, wave_max=wave_max)
+            lbol[s1:s2] = observate.Lbol(self.wavelength, spec, wave_min=wave_min,
+                                         wave_max=wave_max)
             i += 1
             if keepspec:
                 outspectra[s1:s2,:] = spec
@@ -365,8 +398,8 @@ class SpecLibrary(ModelLibrary):
                 
         return sed, lbol, outspectra
 
-    def interpolate_to_pars(self, target_points, parnames=None, subinds=None,
-                            itype='dt', **extras):
+    def interpolate_to_pars(self, target_points, parnames=None,
+                            subinds=None, itype='dt', **extras):
         """
         Method to obtain the model spectrum for a given set of
         parameter values via interpolation of the model grid. The
@@ -395,9 +428,9 @@ class SpecLibrary(ModelLibrary):
         return self.combine_weighted_spectra(inds, weights)
 
     def combine_weighted_spectra(self, inds, weights):
-        """
-        Weight self.spectra using broadcasting, then sum the weighted
-        spectra
+        """Weight self.spectra using broadcasting, then sum the
+        weighted spectra.  Should add a switch to sum the weights
+        first so that the output is a single spectrum.
 
         :param inds: shape (ntarg,nint)
             Indices of the models to sum
@@ -412,18 +445,23 @@ class SpecLibrary(ModelLibrary):
 
 
     def read_model_from_fitsbinary(self, filename, parnames, 
-                                   wavename = 'WAVE', fluxname = 'F_LAMBDA'):
+                                   wavename='WAVE', fluxname='F_LAMBDA'):
+        """Read spectra from a fits binary table in a certain format.
+        """
         #if os.ispath(filename) is False: raise IOError('read_model_from_fitsbinary: ',filename,' does not exist')
         fits = pyfits.open( filename )
-        #parse the FITS recarray and assign ModelGrid parameter, spectra, and wavelength attributes
+        # Parse the FITS recarray and assign ModelGrid parameter,
+        # spectra, and wavelength attributes
         wavelength = fits[1].data[0][wavename]
         spectra = fits[1].data[fluxname]  #(nmod,nwave)
-        #need to loop over pars and restruct to get the desired order.  Really?  Not really.  order is unimportant
+        # Need to loop over pars and restruct to get the desired
+        # order.  Really?  Not really.  order is unimportant
         pars, partype = [], []
         for pname in parnames:
             pars.append(np.squeeze(fits[1].data[pname]))
             partype.append(fits[1].data[pname].dtype) #fix
-        pars = self.structure_array(np.array(pars).transpose(),parnames,types=partype) #list ->(nmod, npar) -> Structured array
+        #list ->(nmod, npar) -> Structured array
+        pars = self.structure_array(np.array(pars).transpose(),parnames,types=partype) 
 
         fits.close()
         return wavelength, spectra, pars
