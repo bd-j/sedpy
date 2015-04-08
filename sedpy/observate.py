@@ -407,16 +407,18 @@ def lsf_broaden(wave, spec, lsf=None, outwave=None,
     if lsf is None:
         return np.interp(outwave, wave, spec)
     dw = np.gradient(wave)
-    sigma = lsf(wave, **kwargs)
+    sigma = lsf(outwave, **kwargs)
     if fwhm:
         sigma = sigma / 2.35
     kernel = outwave[:, None] - wave[None, :]
-    kernel = (1/(sigma * np.sqrt(np.pi * 2))[None, :] *
-              np.exp(-kernel**2/(2*sigma[None, :]**2)) *
+    kernel = (1/(sigma * np.sqrt(np.pi * 2))[:, None] *
+              np.exp(-kernel**2/(2*sigma[:, None]**2)) *
               dw[None, :])
     #should this be axis=0 or axis=1?
-    kernel = kernel/kernel.sum(axis=1)
+    kernel = kernel / kernel.sum(axis=1)[:,None]
     newspec = np.dot(kernel, spec)
+    #kernel /= np.trapz(kernel, wave, axis=1)[:, None]
+    #newspec = np.trapz(kernel * spec[None, :], wave, axis=1)
     if return_kernel:
         return newspec, kernel
     return newspec
