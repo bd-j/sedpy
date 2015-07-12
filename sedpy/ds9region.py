@@ -135,7 +135,8 @@ class Polygon(Region):
     def unparse(self):
         return ','.join([ str(val) for pair in zip(self.ra, self.dec) for val in pair])
         
-    def contains(self, x, y, wcs = None):
+    def contains(self, points=None, x=None, y=None, wcs=None,
+                 fast=False, pad=[0,0]):
         """
         Determine whether pixel locations x,y are within the polygon.
         Requires that a WCS be given.  Uses Path objects from matlib,
@@ -151,7 +152,16 @@ class Polygon(Region):
         vertices = [(r,d) for r,d in zip(vv[0], vv[1])]
         vertices += [vertices[0]]
         poly = path.Path(vertices, closed=True)
-        points = np.vstack((x,y)).T
-        is_in = poly.contains_points(points)
-        #flux = (self.image - background)[is_in].sum()
+        if points is None:
+            points = np.vstack((x,y)).T
+
+        if fast:
+            sub = ((points[:,0] > vv[0].min()-pad[0]) & (points[:,0] < vv[0].max()+pad[0]) &
+                   (points[:,1] > vv[1].min()-pad[1]) &  (points[:,1] < vv[1].max()+pad[1]) )
+            sub_is_in = poly.contains_points(points[sub,:])
+            is_in = np.zeros(points.shape[0], dtype= bool)
+            is_in[sub] = sub_is_in
+        else:
+            is_in = poly.contains_points(points)
+            #flux = (self.image - background)[is_in].sum()
         return is_in
