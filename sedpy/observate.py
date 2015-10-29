@@ -15,10 +15,10 @@ try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    pass
+#try:
+#    import matplotlib.pyplot as plt
+#except ImportError:
+#    pass
 
 lightspeed = 2.998e18  # AA/s
 
@@ -189,8 +189,9 @@ class Filter(object):
         """Plot the filter transmission curve.
         """
         if self.npts > 0:
-            plt.plot(self.wavelength, self.transmission)
-            plt.title(self.name)
+            pass
+            #plt.plot(self.wavelength, self.transmission)
+            #plt.title(self.name)
 
     def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector
