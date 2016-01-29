@@ -1,6 +1,5 @@
-# Python module for storing filter information and tools for
-# projecting spectra onto filters.  Also includes tools for convolving
-# spectra.
+# Python module for storing filter information and tools for projecting spectra
+# onto filters.  Also includes tools for convolving spectra.
 #
 # Assumed input units are erg/s/cm^2/AA and AA
 
@@ -18,10 +17,10 @@ lightspeed = 2.998e18  # AA/s
 
 class Filter(object):
     """This class operates on filter transmission files.  It reads SDSS-style
-    yanny files containing filter transmission curves (these are easy to
-    create) and determines a number of useful filter quantities.  Methods are
-    provided to project a source spectrum onto the filter and return the
-    magnitude, AB or Vega.
+    yanny files (these are easy to create) or simple 2-column ascii files
+    containing filter transmission curves and caches a number of useful
+    filter quantities.  Methods are provided to project a source spectrum onto
+    the filter and return the magnitude, AB or Vega.
 
     :param kname: (default: 'sdss_r0')
         The kcorrect style name of the filter, excluing '.par',
@@ -103,15 +102,15 @@ class Filter(object):
         self.transmission = trans[ind[order]]        
         
     def get_properties(self):
-        """Determine and store a number of properties of the filter
-        and store them in the object.  These properties include
-        several 'effective' wavelength definitions and several width
-        definitions, as well as the in-band absolute AB solar
-        magnitude, the Vega and AB reference zero-point detector
-        signal, and the conversion between AB and Vega magnitudes.
+        """Determine and store a number of properties of the filter and store
+        them in the object.  These properties include several 'effective'
+        wavelength definitions and several width definitions, as well as the
+        in-band absolute AB solar magnitude, the Vega and AB reference
+        zero-point detector signal, and the conversion between AB and Vega
+        magnitudes.
 
-        See Fukugita et al. (1996) AJ 111, 1748 for discussion and
-        definition of many of these quantities.
+        See Fukugita et al. (1996) AJ 111, 1748 for discussion and definition
+        of many of these quantities.
         """
         # Calculate some useful integrals
         i0 = np.trapz(self.transmission * np.log(self.wavelength),
@@ -159,15 +158,14 @@ class Filter(object):
             pl.title(self.nick)
 
     def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """Project source spectrum onto filter and return the detector
-        signal.
+        """Project source spectrum onto filter and return the detector signal.
 
         :param sourcewave:
-            Apectrum wavelength (in AA), ndarray of shape (nwave).
+            Spectrum wavelength (in AA), ndarray of shape (nwave).
 
         :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray
-            of shape (nspec,nwave).
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            (nspec,nwave).
 
         :returns counts:
             Detector signal(s) (nspec).
@@ -188,15 +186,14 @@ class Filter(object):
             return float('NaN')
 
     def ab_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """Project source spectrum onto filter and return the AB
-        magnitude.
+        """Project source spectrum onto filter and return the AB magnitude.
 
         :param sourcewave:
             Spectrum wavelength (in AA), ndarray of shape (nwave).
 
         :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray
-            of shape (nobj,nwave).
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            (nobj,nwave).
 
         :returns mag:
             AB magnitude of the source.
@@ -205,15 +202,14 @@ class Filter(object):
                                self.ab_zero_counts)
 
     def vega_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
-        """Project source spectrum onto filter and return the Vega
-        magnitude.
+        """Project source spectrum onto filter and return the Vega magnitude.
 
         :param sourcewave:
             Spectrum wavelength (in AA), ndarray of shape (nwave).
 
         :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray
-            of shape (nobj,nwave).
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            (nobj,nwave).
 
         :returns mag:
             Vega magnitude of the source.
@@ -247,8 +243,8 @@ def getSED(sourcewave, sourceflux, filterlist=None):
         Spectrum wavelength (in AA), ndarray of shape (nwave).
 
     :param sourceflux:
-        Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of
-        shape (nsource,nwave).
+        Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+        (nsource,nwave).
 
     :param filterlist:
         List of filter objects, of length nfilt.
@@ -284,7 +280,7 @@ def Lbol(wave, spec, wave_min=90, wave_max=1e6):
        The wavelength vector of length nwave.
 
     :param spec:
-       The spectra, of shape (...,nsource, nwave).
+       The spectra, of shape (...,nsource, nwave), in F_lambda.
 
     :param wave_min:
        Minimum wavelength for the integral.
@@ -293,16 +289,16 @@ def Lbol(wave, spec, wave_min=90, wave_max=1e6):
        Maximum wavelength for the integral
 
     :returns lbol:
-       The bolometric luminosity, integrated from wave_min to
-       wave_max.  Array of length (...nsource)
+       The bolometric luminosity, integrated from wave_min to wave_max.  Array
+       of length (...nsource)
     """
     inds = np.where(np.logical_and(wave < wave_max, wave >= wave_min))
     return np.trapz(spec[..., inds[0]], wave[inds])
 
 
 def air2vac(air):
-    """Convert from in-air wavelengths to vacuum wavelengths.  Based
-    on Allen's Astrophysical Quantities.
+    """Convert from in-air wavelengths to vacuum wavelengths.  Based on Allen's
+    Astrophysical Quantities.
 
     :param air:
         The in-air wavelengths.
@@ -317,11 +313,11 @@ def air2vac(air):
 
 
 def vac2air(vac):
-    """Convert from vacuum wavelengths to in-air wavelengths.  Follows
-    the SDSS statement of the IAU standard from Morton 1991 ApJS.
+    """Convert from vacuum wavelengths to in-air wavelengths.  Follows the SDSS
+    statement of the IAU standard from Morton 1991 ApJS.
 
-    vac2air(air2vac(wave)) yields wave to within 1 part in a million
-    over the optical range.
+    vac2air(air2vac(wave)) yields wave to within 1 part in a million over the
+    optical range.
 
     :param vac:
         The vacuum wavelengths.
