@@ -12,15 +12,18 @@ except ImportError:
 from yanny import read as yanny_read
 from .reference_spectra import vega, solar
 
+__all__ = ["Filter", "load_filters", "getSED",
+           "air2vac", "vac2air", "Lbol"]
+
 lightspeed = 2.998e18  # AA/s
 
 
 class Filter(object):
     """This class operates on filter transmission files.  It reads SDSS-style
     yanny files (these are easy to create) or simple 2-column ascii files
-    containing filter transmission curves and caches a number of useful
-    filter quantities.  Methods are provided to project a source spectrum onto
-    the filter and return the magnitude, AB or Vega.
+    containing filter transmission curves. It caches a number of useful filter
+    quantities.  Methods are provided to project a source spectrum onto the
+    filter and return the magnitude, AB or Vega.
 
     :param kname: (default: 'sdss_r0')
         The kcorrect style name of the filter, excluing '.par',
@@ -142,13 +145,21 @@ class Filter(object):
                                               self.ab_gnu * lightspeed /
                                               (self.wavelength**2))
         self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1])
-        self.ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
-                                          self.vega_zero_counts)
+        self._ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
+                                           self.vega_zero_counts)
         if self.wave_mean < 1e5:
             self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1])
         else:
             self.solar_ab_mag = float('NaN')
 
+    @property
+    def ab_to_vega(self):
+        """The conversion from AB to Vega systems for this filter.  It has the sense
+
+        :math:`m_{Vega} = m_{AB} + Filter().ab_to_vega`
+        """
+        return self._ab_to_vega
+            
     def display(self):
         """Plot the filter transmission curve.
         """
