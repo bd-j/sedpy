@@ -1,3 +1,5 @@
+build/
+dist/
 sedpy/data/filters/hst/
 sedpy/data/filters/uvot/
 sedpy/data/filters/*
