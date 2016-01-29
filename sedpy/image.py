@@ -1,13 +1,13 @@
 import sys, os, glob
 import subprocess
 import numpy as np
-
+from . import photometer
 from astropy import wcs as pywcs
-import astropy.io.fits as pyfits
 try:
-    from sedpy import photometer
-except:
-    print('Point source photometry not enabled - get sedpy!')
+    import astropy.io.fits as pyfits
+except(ImportError):
+    import pyfits
+
 
 def run_command(cmd):
     """Open a child process, and return its exit status and stdout"""

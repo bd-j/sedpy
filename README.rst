@@ -7,12 +7,11 @@ Installation & setup:
 
 0. ``cd <download_dir>``
 1. ``git clone https://github.com/bd-j/sedpy``
-3. copy any desired filters from the ``k_correct`` filter directory
-   (or your own filter transmission curves) to ``sedpy/data/filters/``
+3. copy any desired filters from the ``k_correct`` filter directory (or your own filter transmission curves) to ``sedpy/data/filters/``
 2. ``cd sedpy; python setup.py install``
 4. then in python, e.g., ``from sedpy import observate``
 
-see the [FAQ](docs/faq)
+see the [FAQ](docs/faq.rst)
    
 Description:
 

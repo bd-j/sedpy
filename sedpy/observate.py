@@ -11,63 +11,17 @@ try:
 except ImportError:
     pass
 from yanny import read as yanny_read
-try:
-    import astropy.io.fits as pyfits
-except ImportError:
-    import pyfits
-#try:
-#    import matplotlib.pyplot as plt
-#except ImportError:
-#    pass
+from .reference_spectra import vega, solar
 
 lightspeed = 2.998e18  # AA/s
 
-# ----------
-# Load useful reference spectra
-# ----------
-
-sedpydir, f = os.path.split(__file__)
-sedpydir = sedpydir
-try:
-    vega_file = resource_filename('sedpy', 'data/alpha_lyr_stis_005.fits')
-except:
-    vega_file = os.path.join(sedpydir, 'data', 'alpha_lyr_stis_005.fits')
-
-# This file should be in AA and erg/s/cm^2/AA
-if os.path.isfile(vega_file):
-    fits = pyfits.open(vega_file)
-    vega = np.column_stack((fits[1].data.field('WAVELENGTH'),
-                            fits[1].data.field('FLUX')))
-    fits.close()
-else:
-    raise ValueError('Could not find Vega '
-                     'spectrum at {0}'.format(vega_file))
-
-try:
-    solar_file = resource_filename('sedpy', 'data/sun_kurucz93.fits')
-except:
-    solar_file = os.path.join(sedpydir, 'data', 'sun_kurucz93.fits')
-
-# conversion to d=10 pc from 1 AU
-rat = (1.0 / (3600 * 180 / np.pi * 10))**2.0
-
-# This file should be in AA and erg/s/cm^2/AA at 1AU
-if os.path.isfile(solar_file):
-    fits = pyfits.open(solar_file)
-    solar = np.column_stack((fits[1].data.field('WAVELENGTH'),
-                             fits[1].data.field('FLUX') * rat))
-    fits.close()
-else:
-    raise ValueError('Could not find Solar '
-                     'spectrum at {0}'.format(solar_file))
-
 
 class Filter(object):
-    """This class operates on filter transmission files.  It reads
-    SDSS-style yanny files containing filter transmissions (these are
-    easy to create) and determines a number of useful filter
-    quantities.  Methods are provided to convolve a source spectrum
-    with the filter and return the magnitude.
+    """This class operates on filter transmission files.  It reads SDSS-style
+    yanny files containing filter transmission curves (these are easy to
+    create) and determines a number of useful filter quantities.  Methods are
+    provided to project a source spectrum onto the filter and return the
+    magnitude, AB or Vega.
 
     :param kname: (default: 'sdss_r0')
         The kcorrect style name of the filter, excluing '.par',
@@ -75,11 +29,15 @@ class Filter(object):
 
     :param nick: (optional)
         A nickname to associate with the filter.
+
+    :param directory: (optional)
+        The path to the directory containing the filter file.  If not given
+        then the sedpy/data/filters/ directory will be searched.
     """
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
     npts = 0
 
-    def __init__(self, kname='sdss_r0', nick=None):
+    def __init__(self, kname='sdss_r0', nick=None, directory=None, **extras):
         """Constructor.
         """
         self.name = kname
@@ -88,42 +46,34 @@ class Filter(object):
         else:
             self.nick = nick
 
-        try:
-            self.filename = resource_filename('sedpy', '/data/filters/' +
+        if directory is None:
+            try:
+                self.filename = resource_filename('sedpy', '/data/filters/' +
                                               kname + '.par')
-        except:
-            self.filename = sedpydir + '/data/filters/' + kname + '.par'
+            except:
+                self.filename = sedpydir + '/data/filters/' + kname + '.par'
+        else:
+            self.filename = os.path.join(directory, kname+'.par')
+
         if isinstance(self.filename, str):
             if not os.path.isfile(self.filename):
                 raise ValueError('Filter transmission file {0} does '
                                  'not exist!'.format(self.filename))
-            self.load_kfilter(self.filename)
+            try:
+                self.load_kfilter(self.filename)
+            except:
+                self.load_filter(self.filename)
 
+        self.get_properties()
+                
     def load_kfilter(self, filename):
-        """Read a filter in kcorrect (yanny) format and populate the
-        wavelength and transmission arrays.  Then determine a number
-        of filter properties and store in the object.
+        """Read a filter in kcorrect (yanny) format and populate the wavelength
+        and transmission arrays.
 
         :param filename:
-            The fully qualified path and filename of the yanny file
-            that contains the filter transmission.
+            The fully qualified path and filename of the yanny file that
+            contains the filter transmission.
         """
-
-        # This should be replaced with the sdsspy yanny file readers
-        # Done, code kept here in case reversion required
-        # f=open(filename,'rU')
-        # wave=[]
-        # trans=[]
-        # for line in f:
-        #     cols=line.split()
-        #     if len(cols) > 2 and cols[0].find('KFILTER') > -1:
-        #         wave.append(float(cols[1]))
-        #         if cols[0].find('SDSS') > -1:
-        #             #use airmass=1.3 passband. HACKY
-        #             trans.append(float(cols[4]))
-        #         else:
-        #             trans.append(float(cols[2]))
-        # f.close()
 
         ff = yanny_read(filename, one=True)
         wave = ff['lambda']
@@ -135,8 +85,23 @@ class Filter(object):
         self.wavelength = wave[ind[order]]
         self.transmission = trans[ind[order]]
 
-        self.get_properties()
-
+    def load_filter(self, filename):
+        """Read a filter in simple two column ascii format and populate the
+        wavelength and transmission arrays.  The first column is wavelength in
+        AA and the second column is transmission (detector signal per photon)
+        
+        :param filename:
+            The fully qualified path and filename of the file that contains the
+            filter transmission.
+        """
+        wave, trans = np.genfromtext(filename, usecols=(0,1), unpack=true)
+        ind = np.where(np.isfinite(trans) & (trans >= 0.0))[0]
+        order = wave[ind].argsort()
+        # Clean negatives, NaNs, and Infs, then sort, then store
+        self.npts = ind.shape[0]
+        self.wavelength = wave[ind[order]]
+        self.transmission = trans[ind[order]]        
+        
     def get_properties(self):
         """Determine and store a number of properties of the filter
         and store them in the object.  These properties include
@@ -189,9 +154,9 @@ class Filter(object):
         """Plot the filter transmission curve.
         """
         if self.npts > 0:
-            pass
-            #plt.plot(self.wavelength, self.transmission)
-            #plt.title(self.name)
+            import matplotlib.pyplot as pl
+            pl.plot(self.wavelength, self.transmission)
+            pl.title(self.nick)
 
     def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector
@@ -261,9 +226,9 @@ class Filter(object):
 # -------------
 
 
-def load_filters(filternamelist):
-    """Given a list of filter names, this method returns a list of
-    Filter objects.
+def load_filters(filternamelist, **kwargs):
+    """Given a list of filter names, this method returns a list of Filter
+    objects.
 
     :param filternamelist:
         List of strings giving names of the filters.
@@ -271,12 +236,12 @@ def load_filters(filternamelist):
     :returns filterlist:
         A list of filter objects.
     """
-    return [Filter(f) for f in filternamelist]
+    return [Filter(f, **kwargs) for f in filternamelist]
 
 
-def getSED(sourcewave, sourceflux, filterlist):
-    """Takes wavelength vector, a flux array and list of Filter
-    objects and returns the SED in AB magnitudes.
+def getSED(sourcewave, sourceflux, filterlist=None):
+    """Takes wavelength vector, a flux array and list of Filter objects and
+    returns the SED in AB magnitudes.
 
     :param sourcewave:
         Spectrum wavelength (in AA), ndarray of shape (nwave).
