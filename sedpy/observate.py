@@ -96,7 +96,7 @@ class Filter(object):
             The fully qualified path and filename of the file that contains the
             filter transmission.
         """
-        wave, trans = np.genfromtxt(filename, usecols=(0,1), unpack=true)
+        wave, trans = np.genfromtxt(filename, usecols=(0,1), unpack=True)
         ind = np.where(np.isfinite(trans) & (trans >= 0.0))[0]
         order = wave[ind].argsort()
         # Clean negatives, NaNs, and Infs, then sort, then store
