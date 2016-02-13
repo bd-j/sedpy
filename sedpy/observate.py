@@ -6,11 +6,11 @@
 import numpy as np
 import os
 try:
-    from pkg_resources import resource_filename
+    from pkg_resources import resource_filename, resource_listdir
 except ImportError:
     pass
 from yanny import read as yanny_read
-from .reference_spectra import vega, solar
+from .reference_spectra import vega, solar, sedpydir
 
 __all__ = ["Filter", "load_filters", "getSED",
            "air2vac", "vac2air", "Lbol"]
@@ -53,7 +53,7 @@ class Filter(object):
                 self.filename = resource_filename('sedpy', '/data/filters/' +
                                               kname + '.par')
             except:
-                self.filename = sedpydir + '/data/filters/' + kname + '.par'
+                self.filename = os.path.join(sedpydir, '/data/filters/', kname + '.par')
         else:
             self.filename = os.path.join(directory, kname+'.par')
 
@@ -271,6 +271,19 @@ def getSED(sourcewave, sourceflux, filterlist=None):
     for i, f in enumerate(filterlist):
         sed[:, i] = f.ab_mag(sourcewave, sourceflux)
     return np.squeeze(sed)
+
+
+def list_available_filters():
+    """Return a list of filter names that are available by default, i.e. which
+    have been installed in the sedpy/data/filters/ directory.
+    """
+    try:
+        names = resource_listdir('sedpy', '/data/filters/')
+    except:
+        names = os.listdir(os.path.join(sedpydir, '/data/filters/'))
+
+    parfiles = [n.replace('.par', '') for n in names if n[-4:] == '.par']
+    return parfiles
 
 
 def filter_dict(filterlist):

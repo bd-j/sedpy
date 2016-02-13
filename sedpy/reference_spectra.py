@@ -9,7 +9,7 @@ try:
 except ImportError:
     import pyfits
 
-__all__ = ["vega", "solar"]
+__all__ = ["vega", "solar", "sedpydir"]
 
 # ----------
 # Load useful reference spectra
