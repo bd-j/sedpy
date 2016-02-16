@@ -160,19 +160,26 @@ class Filter(object):
         """
         return self._ab_to_vega
             
-    def display(self):
+    def display(self, normalize=False, ax=None):
         """Plot the filter transmission curve.
         """
         if self.npts > 0:
-            import matplotlib.pyplot as pl
-            pl.plot(self.wavelength, self.transmission)
-            pl.title(self.nick)
+            if ax is None:
+                import matplotlib.pyplot as pl
+                fig, ax = pl.subplots()
+                ax.title(self.nick)
+                fig.show()
+            if normalize:
+                ax.plot(self.wavelength, self.transmission / self.transmission.max())
+            else:
+                ax.plot(self.wavelength, self.transmission)
 
     def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector signal.
 
         :param sourcewave:
-            Spectrum wavelength (in AA), ndarray of shape (nwave).
+            Spectrum wavelength (in AA), ndarray of shape (nwave).  Must be
+            monotonic increasing.
 
         :param sourceflux:
             Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
@@ -181,14 +188,17 @@ class Filter(object):
         :returns counts:
             Detector signal(s) (nspec).
         """
+        assert sourcewave[1] > sourcewave[0], "``sourcewave`` not in ascending order."
         # Interpolate filter transmission to source spectrum
         newtrans = np.interp(sourcewave, self.wavelength, self.transmission,
                              left=0., right=0.)
 
         # Integrate lambda*f_lambda*R
         if True in (newtrans > 0.):
-            ind = np.where(newtrans > 0.)
-            ind = ind[0]
+            positive = np.where(newtrans > 0.)[0]
+            noedge = (positive.min() > 0) & (positive.max() < (len(newtrans) - 1))
+            assert noedge, "Sourcewave does not span filter width."
+            ind = slice(positive.min() - 1, positive.max() + 2)
             counts = np.trapz(sourcewave[ind] * newtrans[ind] *
                               sourceflux[..., ind],
                               sourcewave[ind], axis=-1)
