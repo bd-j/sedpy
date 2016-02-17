@@ -97,12 +97,12 @@ class Filter(object):
             filter transmission.
         """
         wave, trans = np.genfromtxt(filename, usecols=(0,1), unpack=True)
-        ind = np.where(np.isfinite(trans) & (trans >= 0.0))[0]
-        order = wave[ind].argsort()
         # Clean negatives, NaNs, and Infs, then sort, then store
+        ind = np.isfinite(trans) & (trans >= 0.0)
+        order = wave[ind].argsort()
         self.npts = ind.shape[0]
         self.wavelength = wave[ind[order]]
-        self.transmission = trans[ind[order]]        
+        self.transmission = trans[ind[order]]
         
     def get_properties(self):
         """Determine and store a number of properties of the filter and store
@@ -143,10 +143,16 @@ class Filter(object):
         # Get zero points and AB to Vega conversion
         self.ab_zero_counts = self.obj_counts(self.wavelength,
                                               self.ab_gnu * lightspeed /
-                                              (self.wavelength**2))
-        self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1])
-        self._ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
-                                           self.vega_zero_counts)
+                                              self.wavelength**2)
+        # If blue enough get AB mag of vega
+        if self.wave_mean < 1e6:
+            self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1])
+            self._ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
+                                               self.vega_zero_counts)
+        else:
+            self.vega_zero_counts = float('NaN')
+            self._ab_to_vega = float('NaN')
+        # If blue enough get absolute solar magnitude
         if self.wave_mean < 1e5:
             self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1])
         else:
@@ -154,7 +160,8 @@ class Filter(object):
 
     @property
     def ab_to_vega(self):
-        """The conversion from AB to Vega systems for this filter.  It has the sense
+        """The conversion from AB to Vega systems for this filter.  It has the
+        sense
 
         :math:`m_{Vega} = m_{AB} + Filter().ab_to_vega`
         """
@@ -173,6 +180,7 @@ class Filter(object):
                 ax.plot(self.wavelength, self.transmission / self.transmission.max())
             else:
                 ax.plot(self.wavelength, self.transmission)
+            return ax
 
     def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector signal.
@@ -196,9 +204,10 @@ class Filter(object):
         # Integrate lambda*f_lambda*R
         if True in (newtrans > 0.):
             positive = np.where(newtrans > 0.)[0]
-            noedge = (positive.min() > 0) & (positive.max() < (len(newtrans) - 1))
-            assert noedge, "Sourcewave does not span filter width."
-            ind = slice(positive.min() - 1, positive.max() + 2)
+            edge = (positive.min() < 1) | (positive.max() >= (len(newtrans)-1))
+            # assert ~edge, "Source spectrum does not span filter."
+            ind = slice(max(positive.min() - 1, 0),
+                        min(positive.max() + 2, len(sourcewave)))
             counts = np.trapz(sourcewave[ind] * newtrans[ind] *
                               sourceflux[..., ind],
                               sourcewave[ind], axis=-1)
@@ -206,7 +215,40 @@ class Filter(object):
         else:
             return float('NaN')
 
-    def ab_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
+    def obj_counts_lores(self, sourcewave, sourceflux, sourceflux_unc=0):
+        """Project source spectrum onto filter and return the detector
+        signal. This method differs from ``obj_counts`` in that the source
+        spectrum is interpolated onto the transmission spectrum instead of
+        vice-versa, which is necessary with the source spectrum does not
+        adequately sample features in the transmission spectrum.
+
+        :param sourcewave:
+            Spectrum wavelength (in AA), ndarray of shape (nwave).  Must be
+            monotonic increasing.
+
+        :param sourceflux:
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            (nspec,nwave).
+
+        :returns counts:
+            Detector signal(s) (nspec).
+        """
+        sourceflux = np.squeeze(sourceflux)
+        assert sourceflux.ndim == 1, "Only a single source allowed."
+        assert sourcewave[1] > sourcewave[0], "``sourcewave`` not in ascending order."
+        # Interpolate source spectrum to filter transmission
+        newflux = np.interp(self.wavelength, sourcewave, sourceflux,
+                            left=0., right=0.)
+
+        # Integrate lambda*f_lambda*R
+        if True in (newflux > 0.):
+            counts = np.trapz(self.wavelength * self.transmission * newflux,
+                              self.wavelength)
+            return np.squeeze(counts)
+        else:
+            return float('NaN')
+    
+    def ab_mag(self, sourcewave, sourceflux, lores=False, **extras):
         """Project source spectrum onto filter and return the AB magnitude.
 
         :param sourcewave:
@@ -219,10 +261,13 @@ class Filter(object):
         :returns mag:
             AB magnitude of the source.
         """
-        return -2.5 * np.log10(self.obj_counts(sourcewave, sourceflux) /
-                               self.ab_zero_counts)
+        if not lores:
+            counts = self.obj_counts(sourcewave, sourceflux, **extras)
+        else:
+            counts = self.obj_counts_lores(sourcewave, sourceflux, **extras)
+        return -2.5 * np.log10(counts / self.ab_zero_counts)
 
-    def vega_mag(self, sourcewave, sourceflux, sourceflux_unc=0):
+    def vega_mag(self, sourcewave, sourceflux, lores=False, **extras):
         """Project source spectrum onto filter and return the Vega magnitude.
 
         :param sourcewave:
@@ -235,8 +280,11 @@ class Filter(object):
         :returns mag:
             Vega magnitude of the source.
         """
-        return -2.5 * np.log10(self.obj_counts(sourcewave, sourceflux) /
-                               self.vega_zero_counts)
+        if not lores:
+            counts = self.obj_counts(sourcewave, sourceflux, **extras)
+        else:
+            counts = self.obj_counts_lores(sourcewave, sourceflux, **extras)
+        return -2.5 * np.log10(counts / self.vega_zero_counts)
 
 # ------------
 # Useful utilities
@@ -256,7 +304,7 @@ def load_filters(filternamelist, **kwargs):
     return [Filter(f, **kwargs) for f in filternamelist]
 
 
-def getSED(sourcewave, sourceflux, filterlist=None):
+def getSED(sourcewave, sourceflux, filterlist=None, **kwargs):
     """Takes wavelength vector, a flux array and list of Filter objects and
     returns the SED in AB magnitudes.
 
@@ -279,7 +327,7 @@ def getSED(sourcewave, sourceflux, filterlist=None):
     sedshape = [sourceflux.shape[0], len(filterlist)]
     sed = np.zeros(sedshape)
     for i, f in enumerate(filterlist):
-        sed[:, i] = f.ab_mag(sourcewave, sourceflux)
+        sed[:, i] = f.ab_mag(sourcewave, sourceflux, **kwargs)
     return np.squeeze(sed)
 
 
