@@ -67,7 +67,10 @@ class Filter(object):
                 self.load_filter(self.filename)
 
         self.get_properties()
-                
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__, self.name)
+                        
     def load_kfilter(self, filename):
         """Read a filter in kcorrect (yanny) format and populate the wavelength
         and transmission arrays.
