@@ -23,46 +23,102 @@ def powerlaw(wave, tau_v=1, alpha=1.0, **kwargs):
 
 
 def calzetti(wave, tau_v=1, R_v=4.05, **kwargs):
-    """ Calzetti et al. 2000 starburst attenuation curve, with
+    """Calzetti et al. 2000 starburst attenuation curve, with
     extrapolations to the FUV and NIR.
 
     :param wave:
         The wavelengths at which optical depth estimates are desired.
 
     :param tau_v: (default: 1)
-        The optical depth at 5500\AA, used to normalize the
-        attenuation curve.
+        The optical depth at 5500\AA, used to normalize the attenuation curve.
 
     :param R_v: (default: 4.05)
-        The ratio of total selective extinction, parameterizing the
-        slope of the attenuation curve.  A_v = R_v * E(B-V)
+        The ratio of total selective extinction, parameterizing the slope of
+        the attenuation curve.  A_v = R_v * E(B-V)
 
     :returns tau:
         The optical depth at each wavelength.
     """
-    p11 = 1 / 0.11
-    ff11 = 2.659 * (-2.156 + 1.509 * p11 - 0.198 * p11**2. +
-                    0.011 * p11**3.0) + R_v
-    p12 = 1 / 0.12
-    ff12 = 2.659 * (-2.156 + 1.509 * p12 - 0.198 * p12**2. +
-                    0.011 * p12**3) + R_v
-    slope1 = (ff12 - ff11) / 100.
-    ff99 = 2.659 * (-1.857 + 1.040 / 2.19) + R_v
-    ff100 = 2.659 * (-1.857 + 1.040 / 2.2) + R_v
-    slope2 = (ff100 - ff99) / 100.
+    # optical/NIR
+    k1 = lambda x: 2.659 * (-1.857 + 1.040 * x)
+    # UV
+    k2 = lambda x: 2.659 * (-2.156 + 1.509 * x - 0.198 * x**2. + 0.011 * x**3.)
+
+    # get slopes at edges and k(5500)
+    uv = np.array([0.12, 0.13]) * 1e4
+    kuv = k2(1e4 / uv) + R_v
+    uv_slope = np.diff(kuv) / np.diff(uv)
+    ir = np.array([2.19, 2.20]) * 1e4
+    kir = k1(1e4 / ir) + R_v
+    ir_slope = np.diff(kir) / np.diff(ir)
+    k_v = k2(1e4 / 5500.) + R_v
+
+    # define segments
+    uinds = (wave >= 1200.) & (wave < 6300)  # uv
+    oinds = (wave >= 6300.) & (wave <= 22000)  # optical
+    xinds = (wave < 1200.)  # xuv
+    iinds = (wave > 22000.)  # ir
+
     # do it
     x = 1e4 / wave
-    ff = (((wave >= 6300.) & (wave <= 22000)) *
-          (2.659 * (-1.857 + 1.040 * x) + R_v))
-    ff += (((wave >= 1200.) & (wave < 6300)) *
-           (2.659 * (-2.156 + 1.509 * x - 0.198 * x**2. +
-                     0.011 * x**3.) + R_v))
-    ff += (wave < 1200.) * (ff11 + (wave - 1100.) * slope1)
-    ff += (wave > 22000.) * (ff99 + (wave - 21900.) * slope2)
+    ktot =  oinds * (k1(x) + R_v)
+    ktot += uinds * (k2(x) + R_v)
+    ktot += xinds * (kuv[0] + (wave - uv[0]) * uv_slope)
+    ktot += iinds * (kir[1] + (wave - ir[1]) * ir_slope)
 
-    ff[ff < 0] = 0
-    tau_lambda = tau_v * ff / R_v / 0.999479
+    ktot[ktot < 0] = 0
+    tau_lambda = tau_v * (ktot / k_v)
     return tau_lambda
+
+def drude(x, x0=4.59, gamma=0.90, **extras):
+    """Drude profile for the 2175AA bump.
+
+    :param x:
+        Inverse wavelength (inverse microns) at which values for the drude
+        profile are requested.
+
+    :param gamma:
+        Width of the Drude profile (inverse microns).
+
+    :param x0:
+       Center of the Drude profile (inverse microns).
+
+    :returns k_lambda:
+       The value of the Drude profile at x, normalized such that the peak is 1.
+     """
+    #return (w * gamma)**2 / ((w**2 - w0**2)**2 + (w * gamma)**2)
+    return (x*gamma)**2 / ((x**2 - x0**2)**2 + (x * gamma)**2)
+
+
+def noll(wave, tau_v=1, delta=0.0, c_r=0.0, Ebump=0.0, **kwargs):
+    """Noll 2009 attenuation curve. This is based on the Calzetti curve, with
+    added variable bump (as Drude) and overall slope change.  Any extra
+    keywords are passed to the Drude (e.g. x0, gamma, both in inverse microns).
+
+    :param wave:
+        The wavelengths at which optical depth estimates are desired.
+
+    :param tau_v: (default: 1)
+        The optical depth at 5500\AA, used to normalize the attenuation curve.
+
+    :param Ebump: (default: 0.0)
+        Stength of the 2175\AA bump.  Normalizes the Drude profile.
+
+    :param delta: (default 0.)
+        Slope of the power-law that modifies the Calzetti curve.
+
+    :param c_r:
+        Constant used to alter R_v=A_V/E(B-V) of the curve.  To maintain the
+        Calzetti R_v=4.05, use c_r = -delta.  Note that even with c_r = -delta
+        the calzetti curve will not be recovered unless delta=0
+    
+    :returns tau:
+        The optical depth at each wavelength.
+    """
+    kcalz = calzetti(wave, tau_v=1.0, R_v=4.05) - 1
+    k = kcalz + Ebump / 4.05 * drude(1e4 / wave, **kwargs)
+    a = (k * (1 - 1.12 * c_r) + 1) * (wave / 5500.)**delta
+    return a * tau_v
 
 
 def chevallard(wave, tau_v=1, **kwargs):
