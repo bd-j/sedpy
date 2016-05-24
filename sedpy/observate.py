@@ -327,10 +327,10 @@ def getSED(sourcewave, sourceflux, filterlist=None, **kwargs):
     if filterlist is None:
         return None
     sourceflux = np.atleast_2d(sourceflux)
-    sedshape = [sourceflux.shape[0], len(filterlist)]
+    sedshape = list(sourceflux.shape[:-1]) + [len(filterlist)]
     sed = np.zeros(sedshape)
     for i, f in enumerate(filterlist):
-        sed[:, i] = f.ab_mag(sourcewave, sourceflux, **kwargs)
+        sed[..., i] = f.ab_mag(sourcewave, sourceflux, **kwargs)
     return np.squeeze(sed)
 
 
