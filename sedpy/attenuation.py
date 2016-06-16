@@ -239,7 +239,7 @@ def broken_powerlaw(wave, tau_v=1, alpha=[0.7, 0.7, 0.7],
         The optical depth at each wavelength.
     """
     if len(breaks) == len(alpha)+1:
-        print "make sure of your power law breaks"
+        print("make sure of your power law breaks")
     tau = np.array(len(wave))
     for i in range(alpha):
         inds = (wave > breaks[i]) & (wave <= breaks[i+1])

@@ -494,7 +494,7 @@ class Yanny():
                     # find opening and closing { }
                     typedef = self.get_full_typedef(line)
                     if self.verbose:
-                        print 'typedef is:\n',typedef
+                        print('typedef is:{}\n'.format(typedef))
                     name, descr = self.typedef2dtype(typedef)
                     allnames.append(name)
                     structs[name] = {}
@@ -557,7 +557,7 @@ class Yanny():
         n = len( struct['lines'] )
         descr = struct['descr']
         if self.verbose:
-            print 'descr:',descr
+            print('descr:{}'.format(descr))
         data = numpy.zeros(n, dtype=descr)
         # now run through the lines and interpret in terms of the given data type
 
@@ -701,7 +701,7 @@ class Yanny():
                 line = line.strip()
 
         if self.verbose and verbose:
-            print "line: '%s'" % line
+            print("line: {}".format(line))
         return line
 
 
@@ -826,13 +826,13 @@ class Yanny():
 
          
         if self.verbose:
-            print "struct name: '%s'" % name
-            print "field defs:"
+            print("struct name: {}".format(name))
+            print("field defs:")
         descr = []
         for f in field_defs:
             d = self.get_yanny_def_as_descr(f)
             if self.verbose:
-                print '  ',f,'descr:',d
+                print('  {} descr:{}'.format(f, d))
 
             descr.append(d)
 

@@ -9,7 +9,7 @@ try:
     from pkg_resources import resource_filename, resource_listdir
 except ImportError:
     pass
-from yanny import read as yanny_read
+from .yanny import read as yanny_read
 from .reference_spectra import vega, solar, sedpydir
 
 __all__ = ["Filter", "load_filters", "getSED",
