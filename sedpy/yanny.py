@@ -260,7 +260,7 @@ class Yanny():
         self.open(self._fname, self._mode)
 
     def open(self, fname=None, mode='r'):
-        if isinstance(self._fobj, file):
+        if hasattr(self._fobj, 'read'):
             self._fobj.close()
 
         self._fname = fname
