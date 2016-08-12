@@ -1,4 +1,4 @@
-### VERY PRELIMINARY!!!! #####
+# -- VERY PRELIMINARY!!!! -----
 
 import numpy as np
 try:
@@ -6,7 +6,9 @@ try:
 except(ImportError):
     pass
 
+
 region_types = ['circle', 'ellipse', 'polygon', 'box']
+
 
 def load_regfile(regfile):
     reglist = []
@@ -15,15 +17,16 @@ def load_regfile(regfile):
         istype = [r in line for r in region_types]
         if True in istype:
             rtype = region_types[np.where(istype)[0][0]]
-            numstring = line[line.find("(")+1:line.find(")")].replace('"','')
+            numstring = line[line.find("(")+1:line.find(")")].replace('"', '')
             if rtype == 'ellipse':
-                reglist.append( Ellipse(numstring) )
+                reglist.append(Ellipse(numstring))
             elif rtype == 'circle':
-                reglist.append( Circle(numstring) )
+                reglist.append(Circle(numstring))
             elif rtype =='polygon':
-                reglist.append( Polygon(numstring) )
+                reglist.append(Polygon(numstring))
     f.close()
     return reglist
+
     
 class Region(object):
     
@@ -39,7 +42,7 @@ class Region(object):
             
     def plate_scale(self, wcs):
         try:
-            pscale = 3600. *np.sqrt((wcs.wcs.cd**2).sum(axis = 1))
+            pscale = 3600. *np.sqrt((wcs.wcs.cd**2).sum(axis=1))
         except (AttributeError):
             pscale = 3600. * np.abs(wcs.wcs.cdelt)
         return pscale.mean()
@@ -66,18 +69,22 @@ class Circle(Region):
     def unparse(self):
         return ','.join([str(a) for a in [self.ra, self.dec, self.radius]])
         
-    def contains(self, x, y, wcs = None):
+    def contains(self, points=None, x=None, y=None, wcs=None, **extras):
         if wcs is not None:
-            #should actually do the plate scale separately for x and y
+            # Should actually do the plate scale separately for x and y
             # and use great circle distances?
             plate_scale = self.plate_scale(wcs)
-            r = self.radius/plate_scale
+            r = self.radius / plate_scale
             cx, cy = wcs.wcs_world2pix(self.ra, self.dec, 0)
         else:
             raise ValueError('No WCS given!!!')
+        if points is not None:
+            x, y = points.T
+
         dx, dy = x-cx, y-cy
         return (dx**2 + dy**2) <= r**2
-        
+
+
 class Ellipse(Region):
 
     shape = 'ellipse'
@@ -98,7 +105,7 @@ class Ellipse(Region):
     def unparse(self):
         return ','.join([str(a) for a in [self.ra, self.dec, self.a, self.b, self.pa]])
 
-    def contains(self, x, y, wcs = None):
+    def contains(self, points=None, x=None, y=None, wcs=None, **extras):
         """
         Determine whether pixel locations x,y are within the ellipse.
         Requires that a WCS be given.  Assumes tangent projection, and
@@ -109,15 +116,19 @@ class Ellipse(Region):
             #should actually do the plate scale separately for x and y
             # and use great circle distances?
             plate_scale = self.plate_scale(wcs)
-            a, b = self.a/plate_scale, self.b/plate_scale
+            a, b = self.a / plate_scale, self.b / plate_scale
             cx, cy = wcs.wcs_world2pix(self.ra, self.dec, 0)
         else:
             raise ValueError('No WCS given!!!')
-        dx, dy = x-cx, y-cy
+        if points is not None:
+            x, y = points.T
+
+        dx, dy = x - cx, y - cy
         side1 = ((dx * np.cos(np.deg2rad(self.pa-90)) - dy * np.sin(np.deg2rad(self.pa-90))) / a)**2
         side2 = ((dx * np.sin(np.deg2rad(self.pa-90)) + dy * np.cos(np.deg2rad(self.pa-90))) / b)**2
         return np.sqrt(side1 + side2) <= 1
-            
+
+
 class Polygon(Region):
 
     shape = 'polygon'
@@ -136,7 +147,7 @@ class Polygon(Region):
         return ','.join([ str(val) for pair in zip(self.ra, self.dec) for val in pair])
         
     def contains(self, points=None, x=None, y=None, wcs=None,
-                 fast=False, pad=[0,0]):
+                 fast=False, pad=[0,0], **extras):
         """
         Determine whether pixel locations x,y are within the polygon.
         Requires that a WCS be given.  Uses Path objects from matlib,
