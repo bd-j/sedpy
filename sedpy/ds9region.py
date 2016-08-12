@@ -27,7 +27,23 @@ def load_regfile(regfile):
     f.close()
     return reglist
 
-    
+
+def get_image_angle(wcs, at_coord=None):
+    """
+    :returns angle:
+       In radians, degrees East of North
+    """
+    if at_coord is None:
+        lon, lat = wcs.wcs.crval
+    else:
+        lon, lat = at_coord
+    x, y = wcs.wcs_world2pix(lon, lat, 0)
+    lat_offset = lat + 1./3600.
+    xoff, yoff = wcs.wcs_world2pix(lon, lat_offset, 0)
+    angle = np.arctan2(xoff-x, yoff-y)
+    return angle
+
+
 class Region(object):
     
     def __init__(self, defstring):
@@ -54,6 +70,7 @@ class Region(object):
             print(line)
         else:
             fileobj.write(line)
+
 
 class Circle(Region):
 
@@ -95,7 +112,7 @@ class Ellipse(Region):
         self.dec = float(bits[1])  #degrees
         self.a = float(bits[2])    #arcsec
         self.b = float(bits[3])    #arcsec
-        self.pa = float(bits[4])   #degrees East of North
+        self.pa = float(bits[4])   #degrees East of North for a
         
         #swap a and b if poorly defined
         if self.b > self.a:
@@ -111,6 +128,9 @@ class Ellipse(Region):
         Requires that a WCS be given.  Assumes tangent projection, and
         will fail for large ellipses/images. Assumes N is up and E to
         the left.
+
+        x, and y are zero indexed, and can be produced by flattened versions of
+        `y, x = np.indices(image)`
         """
         if wcs is not None:
             #should actually do the plate scale separately for x and y
@@ -123,10 +143,23 @@ class Ellipse(Region):
         if points is not None:
             x, y = points.T
 
+        # --- Translate ---
         dx, dy = x - cx, y - cy
-        side1 = ((dx * np.cos(np.deg2rad(self.pa-90)) - dy * np.sin(np.deg2rad(self.pa-90))) / a)**2
-        side2 = ((dx * np.sin(np.deg2rad(self.pa-90)) + dy * np.cos(np.deg2rad(self.pa-90))) / b)**2
-        return np.sqrt(side1 + side2) <= 1
+        # --- Rotate ---
+        theta_image = get_image_angle(wcs)
+        #  convert to radians from positive x
+        theta = np.deg2rad(self.pa) - theta_image + np.pi
+        # construct rotation matrix
+        R = np.array([[np.cos(theta), -np.sin(theta)],
+                      [np.sin(theta), np.cos(theta)]])
+        # We flip dx and dy here because why?
+        # it seems to work.... something to do with column-major/row-major
+        prime = np.dot(R, np.vstack([dy, dx]))
+
+        r = np.hypot(prime[0, :] / a, prime[1, :] / b)
+        #side1 = ((dx * np.cos(np.deg2rad(self.pa-90)) - dy * np.sin(np.deg2rad(self.pa-90))) / a)**2
+        #side2 = ((dx * np.sin(np.deg2rad(self.pa-90)) + dy * np.cos(np.deg2rad(self.pa-90))) / b)**2
+        return r <= 1
 
 
 class Polygon(Region):
@@ -155,8 +188,8 @@ class Polygon(Region):
         coordinates implementation
         """
         if wcs is not None:
-            vv = wcs.wcs_world2pix(self.ra, self.dec, 1)
-            vv[0] -= 1 #convert to numpy indexing
+            vv = wcs.wcs_world2pix(self.ra, self.dec, 0)
+            #vv[0] -= 1 #convert to numpy indexing
         else:
             vv = (self.ra, self.dec)
             
