@@ -34,14 +34,26 @@ def get_image_angle(wcs, at_coord=None):
        In radians, degrees East of North
     """
     if at_coord is None:
-        lon, lat = wcs.wcs.crval
+        lon, lat = wcs.wcs.crval[:2]
     else:
         lon, lat = at_coord
-    x, y = wcs.wcs_world2pix(lon, lat, 0)
+    x, y = world2pix(wcs, lon, lat)
     lat_offset = lat + 1./3600.
-    xoff, yoff = wcs.wcs_world2pix(lon, lat_offset, 0)
+    xoff, yoff = world2pix(wcs, lon, lat_offset)
     angle = np.arctan2(xoff-x, yoff-y)
-    return angle
+    try:
+        return angle[0]
+    except(TypeError, IndexError):
+        return angle
+
+def world2pix(wcs, lon, lat, **extras):
+    """Wrap the wcs world2pix method to be less finicky and take our defaults.
+    """
+    try:
+        x, y = wcs.wcs_world2pix(lon, lat, 0)
+    except(TypeError):
+        x, y, _ = wcs.wcs_world2pix(lon, lat, np.array([0]), 0)
+    return x, y
 
 
 class Region(object):
@@ -58,9 +70,9 @@ class Region(object):
             
     def plate_scale(self, wcs):
         try:
-            pscale = 3600. *np.sqrt((wcs.wcs.cd**2).sum(axis=1))
+            pscale = 3600. *np.sqrt((wcs.wcs.cd[:2, :2]**2).sum(axis=1))
         except (AttributeError):
-            pscale = 3600. * np.abs(wcs.wcs.cdelt)
+            pscale = 3600. * np.abs(wcs.wcs.cdelt[:2])
         return pscale.mean()
     
     def print_to(self, fileobj=None, color='green', label=''):
@@ -92,7 +104,7 @@ class Circle(Region):
             # and use great circle distances?
             plate_scale = self.plate_scale(wcs)
             r = self.radius / plate_scale
-            cx, cy = wcs.wcs_world2pix(self.ra, self.dec, 0)
+            cx, cy = world2pix(wcs, self.ra, self.dec)
         else:
             raise ValueError('No WCS given!!!')
         if points is not None:
@@ -133,11 +145,12 @@ class Ellipse(Region):
         `y, x = np.indices(image)`
         """
         if wcs is not None:
-            #should actually do the plate scale separately for x and y
+            cx, cy = world2pix(wcs, self.ra, self.dec)
+            # should actually do the plate scale separately for x and y
             # and use great circle distances?
             plate_scale = self.plate_scale(wcs)
             a, b = self.a / plate_scale, self.b / plate_scale
-            cx, cy = wcs.wcs_world2pix(self.ra, self.dec, 0)
+            theta_image = get_image_angle(wcs)
         else:
             raise ValueError('No WCS given!!!')
         if points is not None:
@@ -146,7 +159,6 @@ class Ellipse(Region):
         # --- Translate ---
         dx, dy = x - cx, y - cy
         # --- Rotate ---
-        theta_image = get_image_angle(wcs)
         #  convert to radians from positive x
         theta = np.deg2rad(self.pa) - theta_image + np.pi
         # construct rotation matrix
@@ -188,7 +200,7 @@ class Polygon(Region):
         coordinates implementation
         """
         if wcs is not None:
-            vv = wcs.wcs_world2pix(self.ra, self.dec, 0)
+            vv = world2pix(wcs, self.ra, self.dec)
             #vv[0] -= 1 #convert to numpy indexing
         else:
             vv = (self.ra, self.dec)
