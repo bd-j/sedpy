@@ -103,10 +103,10 @@ class Filter(object):
         # Clean negatives, NaNs, and Infs, then sort, then store
         ind = np.isfinite(trans) & (trans >= 0.0)
         order = wave[ind].argsort()
-        self.npts = ind.shape[0]
-        self.wavelength = wave[ind[order]]
-        self.transmission = trans[ind[order]]
-        
+        self.npts = ind.sum()
+        self.wavelength = wave[ind][order]
+        self.transmission = trans[ind][order]
+
     def get_properties(self):
         """Determine and store a number of properties of the filter and store
         them in the object.  These properties include several 'effective'
