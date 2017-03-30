@@ -12,7 +12,7 @@ except ImportError:
 from .yanny import read as yanny_read
 from .reference_spectra import vega, solar, sedpydir
 
-__all__ = ["Filter", "load_filters", "getSED",
+__all__ = ["Filter", "load_filters", "list_available_filters", "getSED",
            "air2vac", "vac2air", "Lbol"]
 
 lightspeed = 2.998e18  # AA/s
@@ -89,6 +89,7 @@ class Filter(object):
         self.npts = ind.shape[0]
         self.wavelength = wave[ind[order]]
         self.transmission = trans[ind[order]]
+        self._remove_extra_zeros()
 
     def load_filter(self, filename):
         """Read a filter in simple two column ascii format and populate the
@@ -106,8 +107,38 @@ class Filter(object):
         self.npts = ind.sum()
         self.wavelength = wave[ind][order]
         self.transmission = trans[ind][order]
+        self._remove_extra_zeros()
 
-    def get_properties(self):
+    def _remove_extra_zeros(self):
+        """Remove extra leading or trailing zero transmission points.
+        """
+        v = np.argwhere(self.transmission)
+        lo, hi = max(v.min() - 1 , 0), min(v.max() + 1, len(self.transmission))
+        self.wavelength = self.wavelength[lo:hi]
+        self.transmission = self.transmission[lo:hi]
+
+
+    def gridify_transmission(self, dlnlam, wmin=1e2, wmax=1e7):
+
+        # find min and max of the filter in a global wavelength grid given by
+        # wmin, wmax, and dlnlam
+        ind_min = int(np.floor((np.log(self.wavelength.min()) - np.log(wmin)) / dlnlam))
+        ind_max = int(np.ceil((np.log(self.wavelength.max()) - np.log(wmin)) / dlnlam))
+        lnlam = np.linspace(ind_min * dlnlam + np.log(wmin),
+                            ind_max * dlnlam + np.log(wmin), ind_max - ind_min)
+        lam = np.exp(lnlam)
+        trans = np.interp(lam, self.wavelength, self.transmission,
+                          left=0., right=0.)
+
+        valid = slice(self.ind_wmin, self.ind_wmax)
+        self.wavelength = lam[valid]
+        self.transmission = trans[valid]
+        self.dwave = np.gradient(lam)[valid]
+
+        self.get_properties(gridded=True)
+
+
+    def get_properties(self, **extras):
         """Determine and store a number of properties of the filter and store
         them in the object.  These properties include several 'effective'
         wavelength definitions and several width definitions, as well as the
@@ -146,10 +177,10 @@ class Filter(object):
         # Get zero points and AB to Vega conversion
         self.ab_zero_counts = self.obj_counts(self.wavelength,
                                               self.ab_gnu * lightspeed /
-                                              self.wavelength**2)
+                                              self.wavelength**2, **extras)
         # If blue enough get AB mag of vega
         if self.wave_mean < 1e6:
-            self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1])
+            self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1], **extras)
             self._ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
                                                self.vega_zero_counts)
         else:
@@ -157,10 +188,11 @@ class Filter(object):
             self._ab_to_vega = float('NaN')
         # If blue enough get absolute solar magnitude
         if self.wave_mean < 1e5:
-            self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1])
+            self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1], **extras)
         else:
             self.solar_ab_mag = float('NaN')
 
+            
     @property
     def ab_to_vega(self):
         """The conversion from AB to Vega systems for this filter.  It has the
@@ -185,7 +217,7 @@ class Filter(object):
                 ax.plot(self.wavelength, self.transmission)
             return ax
 
-    def obj_counts(self, sourcewave, sourceflux, sourceflux_unc=0):
+    def obj_counts_hires(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector signal.
 
         :param sourcewave:
@@ -220,9 +252,9 @@ class Filter(object):
 
     def obj_counts_lores(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector
-        signal. This method differs from ``obj_counts`` in that the source
-        spectrum is interpolated onto the transmission spectrum instead of
-        vice-versa, which is necessary with the source spectrum does not
+        signal. This method differs from ``obj_counts_hires`` in that the
+        source spectrum is interpolated onto the transmission spectrum instead
+        of vice-versa, which is necessary with the source spectrum does not
         adequately sample features in the transmission spectrum.
 
         :param sourcewave:
@@ -250,8 +282,46 @@ class Filter(object):
             return np.squeeze(counts)
         else:
             return float('NaN')
+
+
+
+    def obj_counts_grid(self, sourceflux):
+        """Project source spectrum onto filter and return the detector
+        signal. This method differs from ``obj_counts_*res`` in that the source
+        spectrum is assumed to be interpolated onto a logarithmic grid in
+        lambda with spacing, min and max given by ...
+
+        :param sourceflux:
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            (nspec,nwave).
+
+        :returns counts:
+            Detector signal(s) (nspec).
+        """
+        assert len(sourceflux) == 
+
+        valid = slice(self.ind_wmin, self.ind_wmax)
+        counts = np.sum(sourceflux[valid] * self.transmission *
+                        self.wavelength * self.dwave)
+        
+        raise(NotImplementedError)
     
-    def ab_mag(self, sourcewave, sourceflux, lores=False, **extras):
+
+    
+
+    def obj_counts(self, sourcewave, sourceflux, lores=False, gridded=False, **extras):
+        """Project a spectrum onto a filter and return the detector signal.
+        This method uses the keywords `lores` and `gridded` to choose between
+        the various projection algorithms.
+        """
+        if gridded:
+            counts = self.obj_counts_grid(sourceflux, **extras)
+        elif lores:
+            counts = self.obj_counts_lores(sourcewave, sourceflux, **extras)
+        else:
+            counts = self.obj_counts_hires(sourcewave, sourceflux, **extras)
+    
+    def ab_mag(self, sourcewave, sourceflux, **extras):
         """Project source spectrum onto filter and return the AB magnitude.
 
         :param sourcewave:
@@ -264,13 +334,10 @@ class Filter(object):
         :returns mag:
             AB magnitude of the source.
         """
-        if not lores:
-            counts = self.obj_counts(sourcewave, sourceflux, **extras)
-        else:
-            counts = self.obj_counts_lores(sourcewave, sourceflux, **extras)
+        counts = self.obj_counts(sourcewave, sourceflux, **extras)
         return -2.5 * np.log10(counts / self.ab_zero_counts)
 
-    def vega_mag(self, sourcewave, sourceflux, lores=False, **extras):
+    def vega_mag(self, sourcewave, sourceflux, **extras):
         """Project source spectrum onto filter and return the Vega magnitude.
 
         :param sourcewave:
@@ -283,10 +350,7 @@ class Filter(object):
         :returns mag:
             Vega magnitude of the source.
         """
-        if not lores:
-            counts = self.obj_counts(sourcewave, sourceflux, **extras)
-        else:
-            counts = self.obj_counts_lores(sourcewave, sourceflux, **extras)
+        counts = self.obj_counts(sourcewave, sourceflux, **extras)
         return -2.5 * np.log10(counts / self.vega_zero_counts)
 
 # ------------
