@@ -118,7 +118,7 @@ class Filter(object):
         self.transmission = self.transmission[lo:hi]
 
 
-    def gridify_transmission(self, dlnlam, wmin=1e2, wmax=1e7):
+    def gridify_transmission(self, dlnlam, wmin=1e2):
 
         # find min and max of the filter in a global wavelength grid given by
         # wmin, wmax, and dlnlam
@@ -130,15 +130,14 @@ class Filter(object):
         trans = np.interp(lam, self.wavelength, self.transmission,
                           left=0., right=0.)
 
-        valid = slice(self.ind_wmin, self.ind_wmax)
-        self.wavelength = lam[valid]
-        self.transmission = trans[valid]
-        self.dwave = np.gradient(lam)[valid]
+        self.wmin = wmin
+        self.dlnlam = dlnlam
+        self.inds = slice(ind_min, ind_max)
+        self.wavelength = lam
+        self.transmission = trans
+        self.dwave = np.gradient(lam)
 
-        self.get_properties(gridded=True)
-
-
-    def get_properties(self, **extras):
+    def get_properties(self):
         """Determine and store a number of properties of the filter and store
         them in the object.  These properties include several 'effective'
         wavelength definitions and several width definitions, as well as the
@@ -177,10 +176,10 @@ class Filter(object):
         # Get zero points and AB to Vega conversion
         self.ab_zero_counts = self.obj_counts(self.wavelength,
                                               self.ab_gnu * lightspeed /
-                                              self.wavelength**2, **extras)
+                                              self.wavelength**2)
         # If blue enough get AB mag of vega
         if self.wave_mean < 1e6:
-            self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1], **extras)
+            self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1])
             self._ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
                                                self.vega_zero_counts)
         else:
@@ -188,7 +187,7 @@ class Filter(object):
             self._ab_to_vega = float('NaN')
         # If blue enough get absolute solar magnitude
         if self.wave_mean < 1e5:
-            self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1], **extras)
+            self.solar_ab_mag = self.ab_mag(solar[:,0], solar[:,1])
         else:
             self.solar_ab_mag = float('NaN')
 
@@ -283,8 +282,6 @@ class Filter(object):
         else:
             return float('NaN')
 
-
-
     def obj_counts_grid(self, sourceflux):
         """Project source spectrum onto filter and return the detector
         signal. This method differs from ``obj_counts_*res`` in that the source
@@ -293,21 +290,18 @@ class Filter(object):
 
         :param sourceflux:
             Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nspec,nwave).
+            (nspec,nwave), assumed to be on the logarithmic grid defined by
+            wmin and dlnlam.
 
         :returns counts:
             Detector signal(s) (nspec).
         """
         assert len(sourceflux) == 
 
-        valid = slice(self.ind_wmin, self.ind_wmax)
-        counts = np.sum(sourceflux[valid] * self.transmission *
+        valid = self.inds
+        counts = np.sum(sourceflux[..., valid] * self.transmission *
                         self.wavelength * self.dwave)
-        
-        raise(NotImplementedError)
-    
-
-    
+        return np.squeeze(counts)
 
     def obj_counts(self, sourcewave, sourceflux, lores=False, gridded=False, **extras):
         """Project a spectrum onto a filter and return the detector signal.
