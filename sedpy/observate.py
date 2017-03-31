@@ -39,7 +39,8 @@ class Filter(object):
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
     npts = 0
 
-    def __init__(self, kname='sdss_r0', nick=None, directory=None, **extras):
+    def __init__(self, kname='sdss_r0', nick=None, directory=None,
+                 dlnlam=None, wmin=1e2, **extras):
         """Constructor.
         """
         self.name = kname
@@ -65,6 +66,9 @@ class Filter(object):
                 self.load_kfilter(self.filename)
             except:
                 self.load_filter(self.filename)
+
+        if dlnlam is not None:
+            self.gridify_transmission(dlnlam, wmin=wmin)
 
         self.get_properties()
 
@@ -110,16 +114,29 @@ class Filter(object):
         self._remove_extra_zeros()
 
     def _remove_extra_zeros(self):
-        """Remove extra leading or trailing zero transmission points.
+        """Remove extra leading or trailing zero transmission points.  This
+        leaves one zero before (after) the first (last) non-zero transmission
+        point, if they were present in the original transmission function.
         """
         v = np.argwhere(self.transmission)
         lo, hi = max(v.min() - 1 , 0), min(v.max() + 1, len(self.transmission))
         self.wavelength = self.wavelength[lo:hi]
         self.transmission = self.transmission[lo:hi]
 
-
     def gridify_transmission(self, dlnlam, wmin=1e2):
+        """Place the transmission function on a regular grid in lnlam
+        (angstroms) defined by a lam_min and dlnlam.  Note that only the
+        non-zero values of the transmission on this grid stored.  The indices
+        corresponding to these values are stored as the `inds` attribute (a slice
+        object). (with possibly a zero at either end.)
 
+        :param dlnlam:
+            The spacing in log lambda of the regular wavelength grid onto which
+            the filter is to be placed.
+
+        :param wmin:
+            The starting wavelength (angstroms) for the regular grid.
+        """
         # find min and max of the filter in a global wavelength grid given by
         # wmin, wmax, and dlnlam
         ind_min = int(np.floor((np.log(self.wavelength.min()) - np.log(wmin)) / dlnlam))
@@ -282,31 +299,67 @@ class Filter(object):
         else:
             return float('NaN')
 
-    def obj_counts_grid(self, sourceflux):
+    def obj_counts_grid(self, sourceflux, source_offset=None):
         """Project source spectrum onto filter and return the detector
         signal. This method differs from ``obj_counts_*res`` in that the source
         spectrum is assumed to be interpolated onto a logarithmic grid in
-        lambda with spacing, min and max given by ...
+        lambda with spacing and minimum wavelength given by `dlnlam` and `wmin`
+        filter attributes.
 
         :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            Source flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
             (nspec,nwave), assumed to be on the logarithmic grid defined by
-            wmin and dlnlam.
+            wmin and dlnlam, with wavelength ascending.
+
+        :param source_offset:
+            The (hypothetical) element of the sourceflux array corresponding to
+            observed frame wavelength of wmin.  Should be negative if the first
+            element of sourcewave corresponds to a wavelength > wmin.  
 
         :returns counts:
             Detector signal(s) (nspec).
         """
-        assert len(sourceflux) == 
+        # Note that redshifting can also be incorporated using negative `source_offset`,
+        # modulo factors of (1+z).  I think.
 
-        valid = self.inds
+        if source_offset is None:
+            valid = self.inds
+        else:
+            valid = slice(self.inds.start + source_offset,
+                          self.inds.stop + source_offset)
         counts = np.sum(sourceflux[..., valid] * self.transmission *
-                        self.wavelength * self.dwave)
+                        self.wavelength * self.dwave, axis=-1)
         return np.squeeze(counts)
 
     def obj_counts(self, sourcewave, sourceflux, lores=False, gridded=False, **extras):
         """Project a spectrum onto a filter and return the detector signal.
         This method uses the keywords `lores` and `gridded` to choose between
         the various projection algorithms.
+
+        :param sourcewave:
+            Spectrum wavelength (in AA), ndarray of shape (nwave).  Must be
+            monotonic increasing.
+
+        :param sourceflux:
+            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
+            (nspec,nwave).
+
+        :param lores: (optional, default: False) 
+            Switch to interpolate the source spectrum onto the wavelength grid
+            of the filter transmission curve, instead of the vice-versa (which
+            is the default).  Useful for a spectrum with sparse sampling in
+            wavelength compared to the filter transmission curve (e.g. narrow
+            bands and BaSeL lores spectra)
+
+        :param gridded: (optional, default: False) 
+            Switch to accomplish the filter projection via simple sums.  This
+            can be faster, but assumes the sourcewave and sourceflux are on a
+            logarithmic wavelength grid given by the dlnlam and wmin attributes
+            of the Filter object.
+
+        :returns counts:
+            Detector signal(s) (nspec).
+
         """
         if gridded:
             counts = self.obj_counts_grid(sourceflux, **extras)
