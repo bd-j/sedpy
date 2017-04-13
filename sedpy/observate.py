@@ -35,19 +35,36 @@ class Filter(object):
     :param directory: (optional)
         The path to the directory containing the filter file.  If not given
         then the sedpy/data/filters/ directory will be searched.
+
+    :param dlnlam: (optional)
+        If given, interpolate the transmission curve onto a grid in
+        ln(wavelength) with this spacing (and begining at wmin)
+
+    :param wmin: (optional, default 100.)
+        If `dlnlam` is supplied then `wmin` gives the minimum wavelength
+        (in angstroms) for the grid.
+
+    :param min_trans: (optional, default 1e-5)
+        The minimum transmission value (as fraction of the maximum
+        transmission value) to consider as a useful positive value.  Useful
+        for curves calculated with insane low amplitude components far from
+        the main part of the filter.
     """
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
     npts = 0
 
     def __init__(self, kname='sdss_r0', nick=None, directory=None,
-                 dlnlam=None, wmin=1e2, **extras):
-        """Constructor.
+                 dlnlam=None, wmin=1e2, min_trans=1e-5, **extras):
+        """Read in the filter data, calculate and cache some properties of the
+        filters.
         """
         self.name = kname
         if nick is None:
             self.nick = kname
         else:
             self.nick = nick
+
+        self.min_trans = min_trans
 
         if directory is None:
             try:
@@ -93,7 +110,7 @@ class Filter(object):
         self.npts = ind.shape[0]
         self.wavelength = wave[ind[order]]
         self.transmission = trans[ind[order]]
-        self._remove_extra_zeros()
+        self._remove_extra_zeros(self.min_trans)
 
     def load_filter(self, filename):
         """Read a filter in simple two column ascii format and populate the
@@ -111,17 +128,21 @@ class Filter(object):
         self.npts = ind.sum()
         self.wavelength = wave[ind][order]
         self.transmission = trans[ind][order]
-        self._remove_extra_zeros()
+        self._remove_extra_zeros(self.min_trans)
 
-    def _remove_extra_zeros(self):
+    def _remove_extra_zeros(self, min_trans=0):
         """Remove extra leading or trailing zero transmission points.  This
         leaves one zero before (after) the first (last) non-zero transmission
         point, if they were present in the original transmission function.
+
+        :param min_trans:
+            Defines zero, in terms of fraction of the maximum transmission.
         """
-        v = np.argwhere(self.transmission)
-        lo, hi = max(v.min() - 1 , 0), min(v.max() + 1, len(self.transmission))
-        self.wavelength = self.wavelength[lo:hi]
-        self.transmission = self.transmission[lo:hi]
+        v = np.argwhere(self.transmission > (self.transmission.max() * min_trans))
+        inds = slice(max(v.min() - 1 , 0), min(v.max() + 1, len(self.transmission)))
+        self.wavelength = self.wavelength[inds]
+        self.transmission = self.transmission[inds]
+        self.npts = len(self.wavelength)
 
     def gridify_transmission(self, dlnlam, wmin=1e2):
         """Place the transmission function on a regular grid in lnlam
@@ -196,7 +217,7 @@ class Filter(object):
                                               self.wavelength**2)
         # If blue enough get AB mag of vega
         if self.wave_mean < 1e6:
-            self.vega_zero_counts = self.obj_counts(vega[:,0], vega[:,1])
+            self.vega_zero_counts = self.obj_counts(vega[:, 0], vega[:, 1])
             self._ab_to_vega = -2.5 * np.log10(self.ab_zero_counts /
                                                self.vega_zero_counts)
         else:
@@ -367,6 +388,8 @@ class Filter(object):
             counts = self.obj_counts_lores(sourcewave, sourceflux, **extras)
         else:
             counts = self.obj_counts_hires(sourcewave, sourceflux, **extras)
+
+        return counts
     
     def ab_mag(self, sourcewave, sourceflux, **extras):
         """Project source spectrum onto filter and return the AB magnitude.
@@ -523,32 +546,3 @@ def vac2air(vac):
     """
     conv = (1.0 + 2.735182e-4 + 131.4182 / vac**2 + 2.76249e8 / vac**4)
     return vac / conv
-
-
-
-def selftest():
-    """Compare to the values obtained from the K-correct code
-    (which uses a slightly different Vega spectrum)
-    """
-    filternames = ['galex_FUV',
-                   'sdss_u0','sdss_g0','sdss_r0','sdss_i0',
-                   'spitzer_irac_ch2']
-    weff_kcorr = [1528.0,
-                  3546.0, 4669.6, 6156.25, 7471.57,
-                  44826.]
-    msun_kcorr = [18.8462,
-                  6.38989, 5.12388, 4.64505, 4.53257,
-                  6.56205]
-    ab2vega_kcorr = [2.3457,
-                     0.932765, -0.0857, 0.155485, 0.369598,
-                     3.2687]
-
-    filterlist = loadFilters(filternames)
-    for i in range(len(filterlist)):
-        print(filterlist[i].wave_effective, filterlist[i].solar_ab_mag,
-              filterlist[i].ab_to_vega)
-        assert (abs(filterlist[i].wave_effective - weff_kcorr[i]) <
-                (weff_kcorr[i] * 0.01))
-        assert abs(filterlist[i].solar_ab_mag - msun_kcorr[i]) < 0.05
-        # the below fails because of the vega spectrum used by k_correct
-        # assert abs(filterlist[i].ab_to_vega+ab2vega_kcorr[i]) < 0.05
