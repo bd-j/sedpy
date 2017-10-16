@@ -54,7 +54,7 @@ class Filter(object):
     npts = 0
 
     def __init__(self, kname='sdss_r0', nick=None, directory=None,
-                 dlnlam=None, wmin=1e2, min_trans=1e-5, **extras):
+                 dlnlam=None, wmin=1e2, min_trans=1e-5, data=None, **extras):
         """Read in the filter data, calculate and cache some properties of the
         filters.
         """
@@ -75,6 +75,12 @@ class Filter(object):
         else:
             self.filename = os.path.join(directory, kname+'.par')
 
+        # Load wave, tran directly from data arrays
+        if data is not None:
+            wave, trans = data
+            self._process_filter_data(wave, trans)
+            self.filename = None
+            
         if isinstance(self.filename, str):
             if not os.path.isfile(self.filename):
                 raise ValueError('Filter transmission file {0} does '
@@ -105,12 +111,7 @@ class Filter(object):
         wave = ff['lambda']
         trans = ff['pass']
         # Clean negatives, NaNs, and Infs, then sort, then store
-        ind = np.where(np.isfinite(trans) & (trans >= 0.0))[0]
-        order = wave[ind].argsort()
-        self.npts = ind.shape[0]
-        self.wavelength = wave[ind[order]]
-        self.transmission = trans[ind[order]]
-        self._remove_extra_zeros(self.min_trans)
+        self._process_filter_data(wave, trans)
 
     def load_filter(self, filename):
         """Read a filter in simple two column ascii format and populate the
@@ -123,13 +124,26 @@ class Filter(object):
         """
         wave, trans = np.genfromtxt(filename, usecols=(0,1), unpack=True)
         # Clean negatives, NaNs, and Infs, then sort, then store
+        self._process_filter_data(wave, trans)
+    
+    def _process_filter_data(self, wave, trans):
+        """
+        Clean up transmission data
+        
+        :param wave:
+            Wavelength, in Angstroms.
+        
+        :param trans:
+            Filter transmission
+            
+        """
         ind = np.isfinite(trans) & (trans >= 0.0)
         order = wave[ind].argsort()
         self.npts = ind.sum()
         self.wavelength = wave[ind][order]
         self.transmission = trans[ind][order]
         self._remove_extra_zeros(self.min_trans)
-
+        
     def _remove_extra_zeros(self, min_trans=0):
         """Remove extra leading or trailing zero transmission points.  This
         leaves one zero before (after) the first (last) non-zero transmission
