@@ -8,3 +8,5 @@ sedpy/*~
 sedpy/*.pyc
 junk*
 *~
+
+*.egg-info/
