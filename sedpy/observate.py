@@ -260,8 +260,7 @@ class Filter(object):
             if ax is None:
                 import matplotlib.pyplot as pl
                 fig, ax = pl.subplots()
-                ax.title(self.nick)
-                fig.show()
+                ax.set_title(self.nick)
             if normalize:
                 ax.plot(self.wavelength, self.transmission / self.transmission.max())
             else:
