@@ -5,12 +5,10 @@ Modules for storing and operating on astronomical source spectral energy distrib
 
 Installation & setup:
 
-0. ``cd <download_dir>``
-   
 1. ``git clone https://github.com/bd-j/sedpy``
    
-2. copy any desired filters from the ``k_correct`` filter directory (or your
-   own filter transmission curves) to ``sedpy/data/filters/``
+2. copy any desired filters from the ``kcorrect`` filter directory (or your
+   own filter transmission curves) to ``sedpy/sedpy/data/filters/``
    
 3. ``cd sedpy; python setup.py install``
    
@@ -22,8 +20,8 @@ Description:
 
 * ``observate`` has methods for generating synthetic photometry through any filters,
   and classes for dealing with filters generally.
-  Functionality for spectra is being added slowly.
-  With a huge debt to Mike Blanton's `Kcorrect <http://howdy.physics.nyu.edu/index.php/Kcorrect>`_ code .
+ There is some functionality for spectra (vaccum to air conversions).
+  With a huge debt to Mike Blanton's `kcorrect <https://github.com/blanton144/kcorrect>`_ code .
   
 * ``attenuation`` contains simple dust attenuation methods.
 
@@ -39,3 +37,6 @@ Description:
 * ``ds9region`` has some simple ds9 region classes.
 
 * ``yanny`` (from Erin Sheldon) is for reading filter curves, included here for convenience
+
+* ``smoothing.py`` contains obsolete methods for spectral smoothing.  See
+  `prospect.utils.smoothing <https://github.com/bd-j/prospector/blob/master/prospect/utils/smoothing.py>`_ instead.
