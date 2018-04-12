@@ -4,23 +4,32 @@ sedpy
 Modules for storing and operating on astronomical source spectral energy distributions.
 
 Installation & setup:
+--------------
 
-1. ``git clone https://github.com/bd-j/sedpy``
-   
-2. copy any desired filters from the ``kcorrect`` filter directory (or your
-   own filter transmission curves) to ``sedpy/sedpy/data/filters/``
-   
-3. ``cd sedpy; python setup.py install``
-   
-4. then in python, e.g., ``from sedpy import observate``
+.. code-block:: shell
 
-see the [FAQ](docs/faq.rst)
+		git clone https://github.com/bd-j/sedpy
+		cp /path/to/your/favorite/filters/*par sedpy/sedpy/data/filters/
+		cd sedpy
+		python setup.py install
    
+Then in python, e.g.,
+
+.. code-block:: python
+
+		from sedpy import observate
+		filter = observate.Filter("sdss_r0")
+
+see the `FAQ`_
+
+.. _FAQ: docs/faq.rst
+
+
 Description:
+---------------
 
 * ``observate`` has methods for generating synthetic photometry through any filters,
-  and classes for dealing with filters generally.
- There is some functionality for spectra (vaccum to air conversions).
+  and classes for dealing with filters generally. There is some functionality for spectra (vaccum to air conversions).
   With a huge debt to Mike Blanton's `kcorrect <https://github.com/blanton144/kcorrect>`_ code .
   
 * ``attenuation`` contains simple dust attenuation methods.
