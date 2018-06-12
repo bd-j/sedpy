@@ -18,7 +18,12 @@ Then in python, e.g.,
 .. code-block:: python
 
 		from sedpy import observate
-		filter = observate.Filter("sdss_r0")
+		# get magnitude from a spectrum:
+		filt = observate.Filter("sdss_r0")
+		mag = filt.ab_mag(angstroms, f_lambda_cgs)
+		# or get several magnitudes at once
+		filterlist = observate.load_filters(["galex_NUV", "sdss_r0"])
+		mags = observate.getSED(angstroms, f_lambda_cgs, filterlist=filters)
 
 see the `FAQ`_
 
@@ -37,15 +42,11 @@ Description:
 * ``extinction`` contains classes for a detailed modeling of extinction curves,
   following the Fitzpatrick and Massa parameterizations.
 
-* ``modelgrid`` is a module with classes for the storage and interpolation of
-  model SEDs (using numpy structured arrays, usually, and Delaunay triangulation or
-  inverse distance weighting of the k-nearest neighbors and KD-trees)
-
 * ``photometer`` has some basic aperture photometry algorithms.
 
 * ``ds9region`` has some simple ds9 region classes.
 
-* ``yanny`` (from Erin Sheldon) is for reading filter curves, included here for convenience
+* ``modelgrid`` is a module with classes for the storage and interpolation of
+  model SEDs.  It is largely superceded by ``scipy.interpolate`` algorithms.
 
-* ``smoothing.py`` contains obsolete methods for spectral smoothing.  See
-  `prospect.utils.smoothing <https://github.com/bd-j/prospector/blob/master/prospect/utils/smoothing.py>`_ instead.
+* ``yanny`` (from Erin Sheldon) is for reading filter curves, included here for convenience.
