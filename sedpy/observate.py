@@ -80,7 +80,7 @@ class Filter(object):
             wave, trans = data
             self._process_filter_data(wave, trans)
             self.filename = None
-            
+
         if isinstance(self.filename, str):
             if not os.path.isfile(self.filename):
                 raise ValueError('Filter transmission file {0} does '
@@ -97,7 +97,7 @@ class Filter(object):
 
     def __repr__(self):
         return '{}({})'.format(self.__class__, self.name)
-                        
+
     def load_kfilter(self, filename):
         """Read a filter in kcorrect (yanny) format and populate the wavelength
         and transmission arrays.
@@ -117,7 +117,7 @@ class Filter(object):
         """Read a filter in simple two column ascii format and populate the
         wavelength and transmission arrays.  The first column is wavelength in
         AA and the second column is transmission (detector signal per photon)
-        
+
         :param filename:
             The fully qualified path and filename of the file that contains the
             filter transmission.
@@ -125,17 +125,17 @@ class Filter(object):
         wave, trans = np.genfromtxt(filename, usecols=(0,1), unpack=True)
         # Clean negatives, NaNs, and Infs, then sort, then store
         self._process_filter_data(wave, trans)
-    
+
     def _process_filter_data(self, wave, trans):
         """
         Clean up transmission data
-        
+
         :param wave:
             Wavelength, in Angstroms.
-        
+
         :param trans:
             Filter transmission
-            
+
         """
         ind = np.isfinite(trans) & (trans >= 0.0)
         order = wave[ind].argsort()
@@ -143,7 +143,7 @@ class Filter(object):
         self.wavelength = wave[ind][order]
         self.transmission = trans[ind][order]
         self._remove_extra_zeros(self.min_trans)
-        
+
     def _remove_extra_zeros(self, min_trans=0):
         """Remove extra leading or trailing zero transmission points.  This
         leaves one zero before (after) the first (last) non-zero transmission
@@ -153,7 +153,7 @@ class Filter(object):
             Defines zero, in terms of fraction of the maximum transmission.
         """
         v = np.argwhere(self.transmission > (self.transmission.max() * min_trans))
-        inds = slice(max(v.min() - 1 , 0), min(v.max() + 1, len(self.transmission)))
+        inds = slice(max(v.min() - 1 , 0), min(v.max() + 2, len(self.transmission)))
         self.wavelength = self.wavelength[inds]
         self.transmission = self.transmission[inds]
         self.npts = len(self.wavelength)
@@ -243,7 +243,7 @@ class Filter(object):
         else:
             self.solar_ab_mag = float('NaN')
 
-            
+
     @property
     def ab_to_vega(self):
         """The conversion from AB to Vega systems for this filter.  It has the
@@ -252,7 +252,7 @@ class Filter(object):
         :math:`m_{Vega} = m_{AB} + Filter().ab_to_vega`
         """
         return self._ab_to_vega
-            
+
     def display(self, normalize=False, ax=None):
         """Plot the filter transmission curve.
         """
@@ -348,7 +348,7 @@ class Filter(object):
         :param source_offset:
             The (hypothetical) element of the sourceflux array corresponding to
             observed frame wavelength of wmin.  Should be negative if the first
-            element of sourcewave corresponds to a wavelength > wmin.  
+            element of sourcewave corresponds to a wavelength > wmin.
 
         :returns counts:
             Detector signal(s) (nspec).
@@ -378,14 +378,14 @@ class Filter(object):
             Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
             (nspec,nwave).
 
-        :param lores: (optional, default: False) 
+        :param lores: (optional, default: False)
             Switch to interpolate the source spectrum onto the wavelength grid
             of the filter transmission curve, instead of the vice-versa (which
             is the default).  Useful for a spectrum with sparse sampling in
             wavelength compared to the filter transmission curve (e.g. narrow
             bands and BaSeL lores spectra)
 
-        :param gridded: (optional, default: False) 
+        :param gridded: (optional, default: False)
             Switch to accomplish the filter projection via simple sums.  This
             can be faster, but assumes the sourcewave and sourceflux are on a
             logarithmic wavelength grid given by the dlnlam and wmin attributes
@@ -403,7 +403,7 @@ class Filter(object):
             counts = self.obj_counts_hires(sourcewave, sourceflux, **extras)
 
         return counts
-    
+
     def ab_mag(self, sourcewave, sourceflux, **extras):
         """Project source spectrum onto filter and return the AB magnitude.
 
