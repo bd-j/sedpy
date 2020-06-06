@@ -6,6 +6,7 @@ sedpy/data/filters/*
 sedpy/data/extinction/
 sedpy/*~
 sedpy/*.pyc
+__pycache__
 junk*
 *~
 

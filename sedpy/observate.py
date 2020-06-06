@@ -89,6 +89,9 @@ class Filter(object):
                 self.load_kfilter(self.filename)
             except:
                 self.load_filter(self.filename)
+        else:
+            msg = "{} of type {} is not a valid transmission file name: check your string types?"
+            raise TypeError(msg.format(self.filename, type(self.filename)))
 
         if dlnlam is not None:
             self.gridify_transmission(dlnlam, wmin=wmin)
