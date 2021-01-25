@@ -49,6 +49,9 @@ class Filter(object):
         transmission value) to consider as a useful positive value.  Useful
         for curves calculated with insane low amplitude components far from
         the main part of the filter.
+
+    :param data: (optional, default None)
+        If provided, a 2-tuple of ndarrays giving wavelength and transmission.
     """
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
     npts = 0
@@ -89,6 +92,8 @@ class Filter(object):
                 self.load_kfilter(self.filename)
             except:
                 self.load_filter(self.filename)
+        elif isinstance(self.filename, type(None)):
+            pass
         else:
             msg = "{} of type {} is not a valid transmission file name: check your string types?"
             raise TypeError(msg.format(self.filename, type(self.filename)))
