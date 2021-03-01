@@ -12,7 +12,7 @@ region_types = ['circle', 'ellipse', 'polygon', 'box']
 
 def load_regfile(regfile):
     reglist = []
-    f = open(regfile,'r')
+    f = open(regfile, 'r')
     for line in f:
         istype = [r in line for r in region_types]
         if True in istype:
@@ -22,7 +22,7 @@ def load_regfile(regfile):
                 reglist.append(Ellipse(numstring))
             elif rtype == 'circle':
                 reglist.append(Circle(numstring))
-            elif rtype =='polygon':
+            elif rtype == 'polygon':
                 reglist.append(Polygon(numstring))
     f.close()
     return reglist
@@ -46,6 +46,7 @@ def get_image_angle(wcs, at_coord=None):
     except(TypeError, IndexError):
         return angle
 
+
 def world2pix(wcs, lon, lat, **extras):
     """Wrap the wcs world2pix method to be less finicky and take our defaults.
     """
@@ -57,7 +58,7 @@ def world2pix(wcs, lon, lat, **extras):
 
 
 class Region(object):
-    
+
     def __init__(self, defstring):
         self.parse(defstring)
 
@@ -66,15 +67,15 @@ class Region(object):
 
     @property
     def unparse(self):
-        raise(NotImplementedError)        
-            
+        raise(NotImplementedError)
+
     def plate_scale(self, wcs):
         try:
-            pscale = 3600. *np.sqrt((wcs.wcs.cd[:2, :2]**2).sum(axis=1))
+            pscale = 3600. * np.sqrt((wcs.wcs.cd[:2, :2]**2).sum(axis=1))
         except (AttributeError):
             pscale = 3600. * np.abs(wcs.wcs.cdelt[:2])
         return pscale.mean()
-    
+
     def print_to(self, fileobj=None, color='green', label=''):
         fstring = 'fk5;{0}({1}) # color={2} text={{{3}}}\n'
         line = fstring.format(self.shape, self.unparse, color, label)
@@ -97,7 +98,7 @@ class Circle(Region):
     @property
     def unparse(self):
         return ','.join([str(a) for a in [self.ra, self.dec, self.radius]])
-        
+
     def contains(self, points=None, x=None, y=None, wcs=None, **extras):
         if wcs is not None:
             # Should actually do the plate scale separately for x and y
@@ -120,16 +121,17 @@ class Ellipse(Region):
 
     def parse(self, defstring):
         bits = defstring.split(',')
-        self.ra = float(bits[0])   #degrees 
+        self.ra = float(bits[0])   #degrees
         self.dec = float(bits[1])  #degrees
         self.a = float(bits[2])    #arcsec
         self.b = float(bits[3])    #arcsec
         self.pa = float(bits[4])   #degrees East of North for a
-        
+
         #swap a and b if poorly defined
         if self.b > self.a:
             self.a, self.b = self.b, self.a
             self.pa = self.pa + 90.
+
     @property
     def unparse(self):
         return ','.join([str(a) for a in [self.ra, self.dec, self.a, self.b, self.pa]])
@@ -182,17 +184,17 @@ class Polygon(Region):
         bits = defstring.split(',')
         bits = np.array([float(b) for b in bits])
         #print( len(bits), bits)
-        assert( (len(bits) % 2) == 0)
+        assert (len(bits) % 2) == 0
         self.n_vertices = len(bits)/2
-        self.ra = bits[np.arange(self.n_vertices) * 2]       #degrees 
-        self.dec = bits[np.arange(self.n_vertices) * 2 + 1]  #degrees 
+        self.ra = bits[np.arange(self.n_vertices) * 2]       #degrees
+        self.dec = bits[np.arange(self.n_vertices) * 2 + 1]  #degrees
 
     @property
     def unparse(self):
-        return ','.join([ str(val) for pair in zip(self.ra, self.dec) for val in pair])
-        
+        return ','.join([str(val) for pair in zip(self.ra, self.dec) for val in pair])
+
     def contains(self, points=None, x=None, y=None, wcs=None,
-                 fast=False, pad=[0,0], **extras):
+                 fast=False, pad=[0, 0], **extras):
         """
         Determine whether pixel locations x,y are within the polygon.
         Requires that a WCS be given.  Uses Path objects from matlib,
@@ -204,18 +206,20 @@ class Polygon(Region):
             #vv[0] -= 1 #convert to numpy indexing
         else:
             vv = (self.ra, self.dec)
-            
-        vertices = [(r,d) for r,d in zip(vv[0], vv[1])]
+
+        vertices = [(r, d) for r, d in zip(vv[0], vv[1])]
         vertices += [vertices[0]]
         poly = path.Path(vertices, closed=True)
         if points is None:
-            points = np.vstack((x,y)).T
+            points = np.vstack((x, y)).T
 
         if fast:
-            sub = ((points[:,0] > vv[0].min()-pad[0]) & (points[:,0] < vv[0].max()+pad[0]) &
-                   (points[:,1] > vv[1].min()-pad[1]) &  (points[:,1] < vv[1].max()+pad[1]) )
-            sub_is_in = poly.contains_points(points[sub,:])
-            is_in = np.zeros(points.shape[0], dtype= bool)
+            sub = ((points[:, 0] > vv[0].min()-pad[0]) &
+                   (points[:, 0] < vv[0].max()+pad[0]) &
+                   (points[:, 1] > vv[1].min()-pad[1]) &
+                   (points[:, 1] < vv[1].max()+pad[1]))
+            sub_is_in = poly.contains_points(points[sub, :])
+            is_in = np.zeros(points.shape[0], dtype=bool)
             is_in[sub] = sub_is_in
         else:
             is_in = poly.contains_points(points)

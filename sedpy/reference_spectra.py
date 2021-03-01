@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+
+"""reference_spectra.py  - load and store Vega and Solar reference spectra.
+
+Units of the reference spectra are AA and erg/s/cm^2/AA
+"""
+
 import numpy as np
 import os
 try:
@@ -49,4 +56,3 @@ if os.path.isfile(solar_file):
 else:
     raise ValueError('Could not find Solar '
                      'spectrum at {0}'.format(solar_file))
-

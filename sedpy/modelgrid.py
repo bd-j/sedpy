@@ -1,7 +1,11 @@
-# Deprecated code for interpolating regular or irregular grids of models.  Use
-# scipy.interpolate.RegularGridInterpolator or scipy.interpolate.LinearNDInterpolator.
-#
-# Kept here since it is used by some other (old) packages of mine.
+# -*- coding: utf-8 -*-
+
+"""modelgrid.py  - Deprecated code for interpolating regular or irregular grids
+of models.  Use `scipy.interpolate.RegularGridInterpolator` or
+`scipy.interpolate.LinearNDInterpolator`.
+
+Kept here since it is used by some other (old) packages of mine.
+"""
 
 import numpy as np
 from scipy.spatial import Delaunay

@@ -1,7 +1,10 @@
-# Python module for storing filter information and tools for projecting spectra
-# onto filters.  Also includes tools for convolving spectra.
-#
-# Assumed input units are erg/s/cm^2/AA and AA
+# -*- coding: utf-8 -*-
+
+"""observate.py - Python module for storing filter information and tools for
+projecting spectra onto filters.  Also includes tools for convolving spectra.
+
+Assumed input units are erg/s/cm^2/AA and AA
+"""
 
 import numpy as np
 import os

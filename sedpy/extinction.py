@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+
+"""extinction.py  - Classes for implementing detailed dust extinction models.
+
+Old code, use with caution!
+"""
+
 import numpy as np
 import warnings, sys
 import scipy.interpolate as interp
@@ -12,7 +19,7 @@ class Attenuator(object):
     some generic methods. The Attenuator is composed of an (effective)
     DustLaw and a DustDistribution class, both of which can be easily
     extended.  The first takes wavelength and tau_v as arguments and
-    returns tau_\lambda. The second takes arguments that can be
+    returns \tau_\lambda. The second takes arguments that can be
     anything (e.g. stellar age, metallicity) and returns a
     distribution of tau_V
     """
@@ -52,9 +59,9 @@ class GenericCurve(object):
     def __init__(self, form='F07', var=False):
         self.default_pars(var=var)
 
-        if form is 'FM90':
+        if form == 'FM90':
             self._f = self.f_90
-        elif form is 'F07':
+        elif form == 'F07':
             self._f = self.f_07
 
     def fm_curve(self, x, c1=None, c2=None, c3=None, c4=None,

@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+"""attenuation.py  - A collection of simple functions implementing various
+proposed attenuation curves.
+"""
+
 import numpy as np
 import warnings, sys
 
@@ -111,7 +117,7 @@ def noll(wave, tau_v=1, delta=0.0, c_r=0.0, Ebump=0.0, **kwargs):
         Constant used to alter R_v=A_V/E(B-V) of the curve.  To maintain the
         Calzetti R_v=4.05, use c_r = -delta.  Note that even with c_r = -delta
         the calzetti curve will not be recovered unless delta=0
-    
+
     :returns tau:
         The optical depth at each wavelength.
     """
