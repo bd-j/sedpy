@@ -11,6 +11,10 @@ import warnings, sys
 # ATTENUATION CURVES
 # --------------------
 
+__all__ = ["calzetti", "chevallard", "conroy", "noll",
+           "powerlaw", "drude", "broken_powerlaw",
+           "cardelli", "smc", "lmc"]
+
 
 def powerlaw(wave, tau_v=1, alpha=1.0, **kwargs):
     """Simple power-law attenuation, normalized to 5500\AA.
@@ -29,8 +33,8 @@ def powerlaw(wave, tau_v=1, alpha=1.0, **kwargs):
 
 
 def calzetti(wave, tau_v=1, R_v=4.05, **kwargs):
-    """Calzetti et al. 2000 starburst attenuation curve, with
-    extrapolations to the FUV and NIR.
+    """Calzetti et al. 2000 starburst attenuation curve, with extrapolations to
+    the FUV and NIR.
 
     :param wave:
         The wavelengths at which optical depth estimates are desired.
@@ -67,7 +71,7 @@ def calzetti(wave, tau_v=1, R_v=4.05, **kwargs):
 
     # do it
     x = 1e4 / wave
-    ktot =  oinds * (k1(x) + R_v)
+    ktot = oinds * (k1(x) + R_v)
     ktot += uinds * (k2(x) + R_v)
     ktot += xinds * (kuv[0] + (wave - uv[0]) * uv_slope)
     ktot += iinds * (kir[1] + (wave - ir[1]) * ir_slope)
@@ -75,6 +79,7 @@ def calzetti(wave, tau_v=1, R_v=4.05, **kwargs):
     ktot[ktot < 0] = 0
     tau_lambda = tau_v * (ktot / k_v)
     return tau_lambda
+
 
 def drude(x, x0=4.59, gamma=0.90, **extras):
     """Drude profile for the 2175AA bump.
@@ -258,7 +263,7 @@ def wg00(wave, tau_v=1, geometry='SHELL', composition='MW',
     """ Witt+Gordon 2000 DIRTY radiative transfer results, for
     idealized geometries.
     """
-    pass
+    raise NotImplementedError
 
 # ------------------
 # EXTINCTION CURVES
