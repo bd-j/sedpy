@@ -41,15 +41,19 @@ Description:
 
 * ``extinction`` contains classes for a detailed modeling of extinction curves,
   following the Fitzpatrick and Massa parameterizations.
-  (Deprecated, see `dust_extinction <https://dust-extinction.readthedocs.io/en/stable/>`_)
+
+  (Deprecated, see `dust_extinction <https://dust-extinction.readthedocs.io/en/stable/>`_ )
 
 * ``photometer`` has some basic aperture photometry algorithms.
-   (Deprecated, see `photutils <https://photutils.readthedocs.io/en/stable/>`_)
+
+  (Deprecated, see `photutils <https://photutils.readthedocs.io/en/stable/>`_ )
 
 * ``ds9region`` has some simple ds9 region classes. (Deprecated)
 
 * ``modelgrid`` is a module with classes for the storage and interpolation of
-  model SEDs.  (Deprecated, largely superceded by ``scipy.interpolate`` algorithms)
+  model SEDs.
+
+  (Deprecated, largely superceded by ``scipy.interpolate`` algorithms)
 
 * ``yanny`` (from Erin Sheldon) is used internally for reading filter curves,
   included here for convenience.
