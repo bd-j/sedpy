@@ -9,9 +9,8 @@ Installation & setup:
 .. code-block:: shell
 
 		git clone https://github.com/bd-j/sedpy
-		cp /path/to/your/favorite/filters/*par sedpy/sedpy/data/filters/
 		cd sedpy
-		python setup.py install
+		pip install .
 
 Then in python, e.g.,
 
