@@ -6,20 +6,20 @@
 # Bandpass Name(s): H
 #
 # Instrument: 2MASS Cameras in Mt. Hopkins, AZ, and CTIO, Chile
-# 
+#
 # Determined by: Cohen et al 2003 notes on the web page are:
-# 			  
-# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (m) 	Bandwidth (m) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 m-1)
+#
+# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (micron) 	Bandwidth (micron) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 micron-1)
 #  J 	1.235  0.006 	0.162  0.001 	1594  27.8 	3.129E-13  5.464E-15
 #  H 	1.662  0.009 	0.251  0.002 	1024  20.0 	1.133E-13  2.212E-15
 #  Ks 	2.159  0.011 	0.262  0.002 	666.7  12.6 	4.283E-14  8.053E-16
-# 
-# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral 
-#  response curves (RSRs), peak-normalized to unity. These curves are 
-#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable 
-#  for integrating over stellar spectra when using or generating synthetic 
-#  photometry. These RSRs are consistent with the absolute calibration of 
-#  2MASS given in Table 1 above. "
+#
+# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral
+#  response curves (RSRs), peak-normalized to unity. These curves are
+#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable
+#  for integrating over stellar spectra when using or generating synthetic
+#  photometry. These RSRs are consistent with the absolute calibration of
+#  2MASS given in Table 1 above."
 #
 # The full reference is:
 #  Cohen, Wheaton & Megeath (2003), AJ, 126, 1090

@@ -6,20 +6,20 @@
 # Bandpass Name(s): J
 #
 # Instrument: 2MASS Cameras in Mt. Hopkins, AZ, and CTIO, Chile
-# 
+#
 # Determined by: Cohen et al 2003 notes on the web page are:
-# 			  
-# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (m) 	Bandwidth (m) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 m-1)
+#
+# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (micron) 	Bandwidth (micron) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 micron-1)
 #  J 	1.235  0.006 	0.162  0.001 	1594  27.8 	3.129E-13  5.464E-15
 #  H 	1.662  0.009 	0.251  0.002 	1024  20.0 	1.133E-13  2.212E-15
 #  Ks 	2.159  0.011 	0.262  0.002 	666.7  12.6 	4.283E-14  8.053E-16
-# 
-# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral 
-#  response curves (RSRs), peak-normalized to unity. These curves are 
-#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable 
-#  for integrating over stellar spectra when using or generating synthetic 
-#  photometry. These RSRs are consistent with the absolute calibration of 
-#  2MASS given in Table 1 above. "
+#
+# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral
+#  response curves (RSRs), peak-normalized to unity. These curves are
+#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable
+#  for integrating over stellar spectra when using or generating synthetic
+#  photometry. These RSRs are consistent with the absolute calibration of
+#  2MASS given in Table 1 above."
 #
 # The full reference is:
 #  Cohen, Wheaton & Megeath (2003), AJ, 126, 1090
@@ -133,10 +133,10 @@ KFILTER 1.388000e+04 7.204611e-09
 KFILTER 1.392000e+04 2.370690e-07
 KFILTER 1.395000e+04 2.150538e-08
 KFILTER 1.396000e+04 6.088825e-07
-KFILTER 1.398000e+04 8.884120e-06
 KFILTER 1.397000e+04 1.732283e-06
+KFILTER 1.398000e+04 8.884120e-06
 KFILTER 1.400000e+04 7.142857e-09
-KFILTER 1.400000e+04 7.142857e-09
+KFILTER 1.401000e+04 7.142857e-09
 KFILTER 1.402000e+04 3.716120e-06
 KFILTER 1.404000e+04 7.407407e-07
 KFILTER 1.406000e+04 3.399716e-06
@@ -147,6 +147,4 @@ KFILTER 1.416000e+04 6.073446e-07
 KFILTER 1.421000e+04 4.926108e-08
 KFILTER 1.426000e+04 2.103787e-08
 KFILTER 1.442000e+04 2.773925e-08
-KFILTER 1.459000e+04 2.056203e-08
-KFILTER 1.494000e+04 0.000000e+00
-KFILTER 1.500000e+04 0.000000e+00
+KFILTER 1.450000e+04 0.000000e+00

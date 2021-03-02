@@ -6,20 +6,20 @@
 # Bandpass Name(s): Ks
 #
 # Instrument: 2MASS Cameras in Mt. Hopkins, AZ, and CTIO, Chile
-# 
+#
 # Determined by: Cohen et al 2003 notes on the web page are:
-# 			  
-# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (m) 	Bandwidth (m) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 m-1)
+#
+# "Table 1 - 2MASS Isophotal Bandpasses and Fluxes-for-0-magnitude from Cohen et al. (2003) Band 	Lambda (m) 	Bandwidth (m) 	Fnu - 0 mag (Jy) 	Flambda - 0 mag (W cm-2 micron-1)
 #  J 	1.235  0.006 	0.162  0.001 	1594  27.8 	3.129E-13  5.464E-15
 #  H 	1.662  0.009 	0.251  0.002 	1024  20.0 	1.133E-13  2.212E-15
 #  Ks 	2.159  0.011 	0.262  0.002 	666.7  12.6 	4.283E-14  8.053E-16
-# 
-# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral 
-#  response curves (RSRs), peak-normalized to unity. These curves are 
-#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable 
-#  for integrating over stellar spectra when using or generating synthetic 
-#  photometry. These RSRs are consistent with the absolute calibration of 
-#  2MASS given in Table 1 above. "
+#
+# "Figures 1, 2, and 3 present the 2MASS J, H and Ks relative spectral
+#  response curves (RSRs), peak-normalized to unity. These curves are
+#  derived by Cohen et al. (2003) and are photon-counting RSRs suitable
+#  for integrating over stellar spectra when using or generating synthetic
+#  photometry. These RSRs are consistent with the absolute calibration of
+#  2MASS given in Table 1 above."
 #
 # The full reference is:
 #  Cohen, Wheaton & Megeath (2003), AJ, 126, 1090
@@ -69,7 +69,7 @@ KFILTER 2.089000e+04 3.916228e-05
 KFILTER 2.099000e+04 3.919962e-05
 KFILTER 2.106000e+04 4.099240e-05
 KFILTER 2.113000e+04 4.154283e-05
-KFILTER 2.124000e+04 4.215160e-05
+KFILTER 2.120000e+04 4.045610e-05
 KFILTER 2.124000e+04 4.228814e-05
 KFILTER 2.138000e+04 4.297942e-05
 KFILTER 2.145000e+04 4.320746e-05
@@ -117,5 +117,3 @@ KFILTER 2.370000e+04 1.265823e-07
 KFILTER 2.375000e+04 8.842105e-08
 KFILTER 2.384000e+04 1.677852e-08
 KFILTER 2.399000e+04 0.000000e+00
-KFILTER 2.429000e+04 1.646768e-08
-KFILTER 2.474000e+04 0.000000e+00
