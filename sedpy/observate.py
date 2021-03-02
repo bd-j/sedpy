@@ -120,15 +120,13 @@ class Filter(object):
         self._process_filter_data(wave, trans)
 
     def _process_filter_data(self, wave, trans):
-        """
-        Clean up transmission data
+        """Clean up transmission data and assign to attributes.
 
         :param wave:
             Wavelength, in Angstroms.
 
         :param trans:
             Filter transmission
-
         """
         ind = np.isfinite(trans) & (trans >= 0.0)
         order = wave[ind].argsort()
@@ -155,8 +153,8 @@ class Filter(object):
         """Place the transmission function on a regular grid in lnlam
         (angstroms) defined by a lam_min and dlnlam.  Note that only the
         non-zero values of the transmission on this grid stored.  The indices
-        corresponding to these values are stored as the `inds` attribute (a slice
-        object). (with possibly a zero at either end.)
+        corresponding to these values are stored as the `inds` attribute (a
+        slice object). (with possibly a zero at either end.)
 
         :param dlnlam:
             The spacing in log lambda of the regular wavelength grid onto which
@@ -252,7 +250,7 @@ class Filter(object):
         if self.npts > 0:
             if ax is None:
                 import matplotlib.pyplot as pl
-                fig, ax = pl.subplots()
+                _, ax = pl.subplots()
                 ax.set_title(self.nick)
             if normalize:
                 ax.plot(self.wavelength, self.transmission / self.transmission.max())

@@ -14,18 +14,15 @@ except ImportError:
 
 setup(
     name="sedpy",
-    version='0.1.0',
+    version='0.2.0',
     author="Ben Johnson",
-    author_email="bjohnso6@ucsc.edu",
+    author_email="benjamin.johnson@cfa.harvard.edu",
     packages=["sedpy"],
     url="",
     license="LICENSE",
     description="Tools for dealing with astronomical spectral energy distributions",
-    long_description=open("README.rst").read() + "\n\n"
-                    + "Changelog\n"
-                    + "---------\n\n"
-                    + open("HISTORY.rst").read(),
+    long_description=open("README.rst").read() + "\n\n",
     package_data={"sedpy": ["data/*fits", "data/filters/*par"]},
     include_package_data=True,
-    #install_requires=["numpy", "scipy >= 0.9", "astropy", "matplotlib", "scikit-learn"],
+    install_requires=["numpy", "scipy >= 0.9", "astropy"],
 )
