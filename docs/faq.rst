@@ -37,4 +37,3 @@ Finally, you can simply pass a tuple of ``(wavelength, transmission)``:
 
 		from sedpy import observate
 		filt = observate.Filter("filter_name", data=(wavelength, transmission)
-    

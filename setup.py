@@ -20,7 +20,7 @@ setup(
     packages=["sedpy"],
     url="",
     license="LICENSE",
-    description="Tools for dealing with astronomical spectral energy distributions",
+    description="Simple tools for dealing with astronomical spectral energy distributions, particularly filter projections",
     long_description=open("README.rst").read() + "\n\n",
     package_data={"sedpy": ["data/*fits", "data/filters/*par"]},
     include_package_data=True,
