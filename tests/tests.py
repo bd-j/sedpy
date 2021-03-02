@@ -1,24 +1,34 @@
-import numpy as np
+# -*- coding: utf-8 -*-
 
-from . import observate
+import numpy as np
+from numpy.testing import assert_allclose
+
+from sedpy import observate
 
 
 def _get_all_filters():
-    fnames = np.array(observate.list_available_filters())
+    fnames = observate.list_available_filters()
     allfilters = observate.load_filters(fnames)
     return allfilters
 
 
 def test_filter_load():
-    allfilters = _get_all_filters()
-    w = [f.wave_effective for f in allfilters]
-    
-    
+    fnames = observate.list_available_filters()
+    for fn in fnames:
+        try:
+            f = observate.Filter(fn)
+        except(IOError, ValueError, IndexError, AssertionError) as e:
+            print(f"Could not build `{fn}`")
+            raise(e)
+        w = f.wave_effective
+        assert np.isfinite(w), f"effective wavelength undefined for {fn}"
+
+
 def test_gridded_filters():
     allfilters = np.array(_get_all_filters())
     w = np.array([f.wave_effective for f in allfilters])
     fnames = np.array([f.name for f in allfilters])
-    
+
     good = w < 1e5
     obs = {}
     obs['filters'] = allfilters[good][0:40]
@@ -44,8 +54,8 @@ def test_gridded_filters():
     lnlam = np.exp(np.arange(np.log(wmin), np.log(wmax), dlnlam))
     lnspec = np.interp(lnlam, wave, spec)
 
-    m_grid = m = observate.getSED(lnlam, lnspec, obs['filters'],
-                                  gridded=True)
+    m_grid = observate.getSED(lnlam, lnspec, obs['filters'],
+                              gridded=True)
     # make sure good to 5% (most far better, hipparcos_B is a problem)
     assert np.allclose(m_grid, m_default, atol=5e-2)
 
@@ -55,7 +65,7 @@ def test_filter_properties():
     (which uses a slightly different Vega spectrum)
     """
     filternames = ['galex_FUV',
-                   'sdss_u0','sdss_g0','sdss_r0','sdss_i0',
+                   'sdss_u0', 'sdss_g0', 'sdss_r0', 'sdss_i0',
                    'spitzer_irac_ch2']
     weff_kcorr = [1528.0,
                   3546.0, 4669.6, 6156.25, 7471.57,

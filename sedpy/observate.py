@@ -10,23 +10,23 @@ import numpy as np
 import os
 try:
     from pkg_resources import resource_filename, resource_listdir
-except ImportError:
+except(ImportError):
     pass
-from .yanny import read as yanny_read
 from .reference_spectra import vega, solar, sedpydir
+
 
 __all__ = ["Filter", "load_filters", "list_available_filters", "getSED",
            "air2vac", "vac2air", "Lbol"]
+
 
 lightspeed = 2.998e18  # AA/s
 
 
 class Filter(object):
-    """This class operates on filter transmission files.  It reads SDSS-style
-    yanny files (these are easy to create) or simple 2-column ascii files
-    containing filter transmission curves. It caches a number of useful filter
-    quantities.  Methods are provided to project a source spectrum onto the
-    filter and return the magnitude, AB or Vega.
+    """This class operates on filter transmission files.  It reads simple
+    2-column ascii files containing filter transmission curves. It caches a
+    number of useful filter quantities.  Methods are provided to project a
+    source spectrum onto the filter and return the magnitude, AB or Vega.
 
     :param kname: (default: 'sdss_r0')
         The kcorrect style name of the filter, excluing '.par',
@@ -73,15 +73,15 @@ class Filter(object):
         self.min_trans = min_trans
 
         if directory is None:
+            loc = os.path.join('data', 'filters', kname + '.par')
             try:
-                self.filename = resource_filename('sedpy', '/data/filters/' +
-                                              kname + '.par')
+                self.filename = resource_filename("sedpy", loc)
             except:
-                self.filename = os.path.join(sedpydir, '/data/filters/', kname + '.par')
+                self.filename = os.path.join(sedpydir, loc)
         else:
             self.filename = os.path.join(directory, kname+'.par')
 
-        # Load wave, tran directly from data arrays
+        # Load wave, trans directly from data arrays
         if data is not None:
             wave, trans = data
             self._process_filter_data(wave, trans)
@@ -91,10 +91,7 @@ class Filter(object):
             if not os.path.isfile(self.filename):
                 raise ValueError('Filter transmission file {0} does '
                                  'not exist!'.format(self.filename))
-            try:
-                self.load_kfilter(self.filename)
-            except:
-                self.load_filter(self.filename)
+            self.load_filter(self.filename)
         elif isinstance(self.filename, type(None)):
             pass
         else:
@@ -109,21 +106,6 @@ class Filter(object):
     def __repr__(self):
         return '{}({})'.format(self.__class__, self.name)
 
-    def load_kfilter(self, filename):
-        """Read a filter in kcorrect (yanny) format and populate the wavelength
-        and transmission arrays.
-
-        :param filename:
-            The fully qualified path and filename of the yanny file that
-            contains the filter transmission.
-        """
-
-        ff = yanny_read(filename, one=True)
-        wave = ff['lambda']
-        trans = ff['pass']
-        # Clean negatives, NaNs, and Infs, then sort, then store
-        self._process_filter_data(wave, trans)
-
     def load_filter(self, filename):
         """Read a filter in simple two column ascii format and populate the
         wavelength and transmission arrays.  The first column is wavelength in
@@ -133,7 +115,7 @@ class Filter(object):
             The fully qualified path and filename of the file that contains the
             filter transmission.
         """
-        wave, trans = np.genfromtxt(filename, usecols=(0,1), unpack=True)
+        wave, trans = np.genfromtxt(filename, usecols=(0, 1), unpack=True)
         # Clean negatives, NaNs, and Infs, then sort, then store
         self._process_filter_data(wave, trans)
 
@@ -164,7 +146,7 @@ class Filter(object):
             Defines zero, in terms of fraction of the maximum transmission.
         """
         v = np.argwhere(self.transmission > (self.transmission.max() * min_trans))
-        inds = slice(max(v.min() - 1 , 0), min(v.max() + 2, len(self.transmission)))
+        inds = slice(max(v.min() - 1, 0), min(v.max() + 2, len(self.transmission)))
         self.wavelength = self.wavelength[inds]
         self.transmission = self.transmission[inds]
         self.npts = len(self.wavelength)
