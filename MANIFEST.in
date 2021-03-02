@@ -1,1 +1,4 @@
-include README.rst LICENSE HISTORY.rst
+include README.rst
+include LICENSE
+include sedpy/data/*fits
+include sedpy/data/filters/*par

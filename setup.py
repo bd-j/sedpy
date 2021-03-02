@@ -7,22 +7,27 @@ import re
 
 try:
     from setuptools import setup
-    setup
 except ImportError:
     from distutils.core import setup
-    setup
 
 setup(
-    name="sedpy",
+    name="astro-sedpy",
     version='0.2.0',
     author="Ben Johnson",
     author_email="benjamin.johnson@cfa.harvard.edu",
+    classifiers=["Development Status :: 4 - Beta",
+                 "Intended Audience :: Science/Research",
+                 "Programming Language :: Python",
+                 "License :: OSI Approved :: MIT License",
+                 "Natural Language :: English",
+                 "Topic :: Scientific/Engineering :: Astronomy"],
     packages=["sedpy"],
-    url="",
-    license="LICENSE",
-    description="Simple tools for dealing with astronomical spectral energy distributions, particularly filter projections",
+    url="https://github.com/bd-j/sedpy",
+    license="MIT",
+    description=("Simple tools for astronomical spectral energy distributions, "
+                 "particularly filter projections."),
     long_description=open("README.rst").read() + "\n\n",
-    package_data={"sedpy": ["data/*fits", "data/filters/*par"]},
     include_package_data=True,
-    install_requires=["numpy", "scipy >= 0.9", "astropy"],
+    package_data={"sedpy": ["data/*fits", "data/filters/*par"]},
+    install_requires=["numpy", "scipy", "astropy"],
 )

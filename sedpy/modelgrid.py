@@ -18,7 +18,7 @@ try:
 except(ImportError):
     pass
 try:
-    import observate
+    from . import observate
 except (ImportError):
     print('Warning - observate not imported, SpecLibrary class unavailable')
 
