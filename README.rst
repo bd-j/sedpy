@@ -5,6 +5,13 @@ Modules for storing and operating on astronomical source spectral energy distrib
 
 Installation & setup:
 ---------------------
+``sedpy`` is now pip installable:
+
+.. code-block:: shell
+
+		python -m pip install astro-sedpy
+
+Or you can install the latest version from github:
 
 .. code-block:: shell
 
