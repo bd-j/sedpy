@@ -35,6 +35,10 @@ see the `FAQ`_
 
 .. _FAQ: docs/faq.rst
 
+This code can be referenced as:
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4582723.svg
+   :target: https://doi.org/10.5281/zenodo.4582723
 
 Description:
 ------------
