@@ -1,4 +1,3 @@
 numpy
 scipy
-pyfits
-matplotlib
+astropy

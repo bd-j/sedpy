@@ -1,17 +1,16 @@
 sedpy
-======
+=====
 
 Modules for storing and operating on astronomical source spectral energy distributions.
 
 Installation & setup:
---------------
+---------------------
 
 .. code-block:: shell
 
 		git clone https://github.com/bd-j/sedpy
-		cp /path/to/your/favorite/filters/*par sedpy/sedpy/data/filters/
 		cd sedpy
-		python setup.py install
+		pip install .
 
 Then in python, e.g.,
 
@@ -31,29 +30,23 @@ see the `FAQ`_
 
 
 Description:
----------------
+------------
 
 * ``observate`` has methods for generating synthetic photometry through any filters,
-  and classes for dealing with filters generally. There is some functionality for spectra (vaccum to air conversions).
+  and classes for dealing with filters generally. There is some functionality for spectra
+  (vaccum to air conversions).
   With a huge debt to Mike Blanton's `kcorrect <https://github.com/blanton144/kcorrect>`_ code .
 
 * ``attenuation`` contains simple dust attenuation methods.
 
-* ``extinction`` contains classes for a detailed modeling of extinction curves,
-  following the Fitzpatrick and Massa parameterizations.
+* ``extinction`` (Deprecated) classes for a detailed modeling of extinction curves,
+  following the Fitzpatrick & Massa parameterizations.
+  See `dust_extinction <https://dust-extinction.readthedocs.io/en/stable/>`_ instead.
 
-  (Deprecated, see `dust_extinction <https://dust-extinction.readthedocs.io/en/stable/>`_ )
+* ``photometer`` (Deprecated) has some basic aperture photometry algorithms.
+  See `photutils <https://photutils.readthedocs.io/en/stable/>`_ instead.
 
-* ``photometer`` has some basic aperture photometry algorithms.
+* ``ds9region`` (Deprecated) has some simple ds9 region classes.
 
-  (Deprecated, see `photutils <https://photutils.readthedocs.io/en/stable/>`_ )
-
-* ``ds9region`` has some simple ds9 region classes. (Deprecated)
-
-* ``modelgrid`` is a module with classes for the storage and interpolation of
-  model SEDs.
-
-  (Deprecated, largely superceded by ``scipy.interpolate`` algorithms)
-
-* ``yanny`` (from Erin Sheldon) is used internally for reading filter curves,
-  included here for convenience.
+* ``modelgrid`` (Deprecated) is a module with classes for the storage and interpolation of
+  model SEDs. Largely superceded by ``scipy.interpolate`` algorithms.

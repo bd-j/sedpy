@@ -3,37 +3,34 @@
 # where it is stated that 
 # "The transmission curves have been adapted from AJ 75, 978 (1970)."
 # This paper, Crawford & Barnes, presents standard stars and transmission curves that define the Stromgren system.
-typedef struct {
-  double lambda;
-  double pass;
-} KFILTER;
-KFILTER   5125.0   0.000e+00
-KFILTER   5150.0   5.000e-01
-KFILTER   5175.0   1.000e+00
-KFILTER   5200.0   2.000e+00
-KFILTER   5225.0   3.000e+00
-KFILTER   5250.0   4.000e+00
-KFILTER   5275.0   6.000e+00
-KFILTER   5300.0   1.000e+01
-KFILTER   5325.0   1.500e+01
-KFILTER   5350.0   2.300e+01
-KFILTER   5375.0   3.300e+01
-KFILTER   5400.0   4.100e+01
-KFILTER   5425.0   4.600e+01
-KFILTER   5450.0   4.800e+01
-KFILTER   5475.0   5.000e+01
-KFILTER   5500.0   5.300e+01
-KFILTER   5525.0   5.200e+01
-KFILTER   5550.0   4.600e+01
-KFILTER   5575.0   3.500e+01
-KFILTER   5600.0   2.400e+01
-KFILTER   5625.0   1.600e+01
-KFILTER   5650.0   1.000e+01
-KFILTER   5675.0   6.000e+00
-KFILTER   5700.0   4.000e+00
-KFILTER   5725.0   3.000e+00
-KFILTER   5750.0   2.000e+00
-KFILTER   5775.0   1.500e+00
-KFILTER   5800.0   1.000e+00
-KFILTER   5825.0   5.000e-01
-KFILTER   5850.0   0.000e+00
+
+5125.0  0
+5150.0  0.5
+5175.0  1
+5200.0  2
+5225.0  3
+5250.0  4
+5275.0  6
+5300.0  10
+5325.0  15
+5350.0  23
+5375.0  33
+5400.0  41
+5425.0  46
+5450.0  48
+5475.0  50
+5500.0  53
+5525.0  52
+5550.0  46
+5575.0  35
+5600.0  24
+5625.0  16
+5650.0  10
+5675.0  6
+5700.0  4
+5725.0  3
+5750.0  2
+5775.0  1.5
+5800.0  1
+5825.0  0.5
+5850.0  0
