@@ -26,7 +26,7 @@ setup(
     license="MIT",
     description=("Simple tools for astronomical spectral energy distributions, "
                  "particularly filter projections."),
-    long_description=open("README.rst").read() + "\n\n",
+    long_description=open("README.rst").read(),
     include_package_data=True,
     package_data={"sedpy": ["data/*fits", "data/filters/*par"]},
     install_requires=["numpy", "scipy", "astropy"],
