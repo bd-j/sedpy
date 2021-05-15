@@ -15,7 +15,8 @@ except(ImportError):
 from .reference_spectra import vega, solar, sedpydir
 
 
-__all__ = ["Filter", "load_filters", "list_available_filters", "getSED",
+__all__ = ["Filter", "FilterSet",
+           "load_filters", "list_available_filters", "getSED",
            "air2vac", "vac2air", "Lbol"]
 
 
@@ -427,10 +428,135 @@ class Filter(object):
         counts = self.obj_counts(sourcewave, sourceflux, **extras)
         return -2.5 * np.log10(counts / self.vega_zero_counts)
 
+
+class FilterSet(object):
+    """
+    A class representing a set of filters, and enabling fast projections of
+    sources onto these filters via pre-computation, caching, and a global
+    wavelength array.
+    """
+
+    def __init__(self, filterlist, wmin=None, dlnlam=None):
+        """
+        :param filterlist: list of strings
+            The filters to include in this set, in order
+        """
+
+        self._set_filters(filterlist, wmin=wmin, dlnlam=dlnlam)
+        self._build_master_trans()
+
+    def _set_filters(self, filterlist, wmin=None, wmax=None, dlnlam=None):
+        """Set the filters and the wavelength grid
+        """
+        self.filternames = filterlist
+
+        # get the wavelength grid parameters
+        native = load_filters(self.filternames)
+        if dlnlam is None:
+            dlnlam_native = np.array([np.diff(np.log(f.wavelength)).min() for f in native])
+            dlnlam = dlnlam_native.min()
+        if wmin is None:
+            wmin = np.min([f.wavelength.min() for f in native])
+        if wmax is None:
+            wmax = np.max([f.wavelength.max() for f in native])
+        self.wmin = wmin
+        self.wmax = np.exp(np.log(wmax) + dlnlam)
+        self.dlnlam = dlnlam
+
+        self.lnlam = np.arange(np.log(self.wmin), np.log(self.wmax), self.dlnlam)
+        self.lam = np.exp(self.lnlam)
+
+        self.filters = load_filters(self.filternames, wmin=self.wmin, dlnlam=self.dlnlam)
+
+    def _build_master_trans(self):
+        """Build the master transmission array. Populates FilterSet.trans, which
+        is an array of shape (nfilters, nlam) giving :math:`T\times \lambda \times
+        d\lambda / Z` where `T` is the detector signal per photon and `Z` is the
+        detector signal for a 1 maggie source
+        """
+        # TODO: investigate using arrays that cover different wavelength
+        # intervals (but same number of elements) for each filter. Then when
+        # integrating (with dot or vectorized trapz) the source spectrum must be
+        # offset for each filter. This would remove the vast majority of zeros
+
+        ab_counts = np.array([f.ab_zero_counts for f in self.filters])
+
+        self.trans = np.zeros([len(self.filters), len(self.lam)])
+        for j, f in enumerate(self.filters):
+            dwave = np.gradient(self.lam[f.inds])
+            self.trans[j, f.inds] = f.transmission[:] * f.wavelength[:] * dwave / ab_counts[j]
+
+    def get_sed_maggies(self, sourceflux, sourcewave=None):
+        """Compute the flux in maggies of the source through the given filters
+
+        :param sourceflux: ndarray
+            Flux in erg/s/cm^2/AA
+
+        :param sourcewave: optional ndarray
+            If supplied, the wavelength in angstroms.  Else it is assumed to be
+            on the same grid as self.lam
+        """
+        #TODO: investigate using vecorized trapz, and using different wavelength
+        # intervals for each filter with offsets of the source spectrum
+
+        if sourcewave is not None:
+            flux = np.interp(self.lam, sourcewave, sourceflux, left=0, right=0)
+        else:
+            assert len(sourceflux) == len(self.lam)
+            flux = sourceflux
+        maggies = np.dot(self.trans, flux)
+
+        return maggies
+
+
+    def _build_trans_chunks(self):
+        # NOTE: For USE WITH vectorized TRAPZ
+        ab_counts = np.array([f.ab_zero_counts for f in self.filters])
+        self.fstart = np.array([f.inds.start for f in self.filters])
+        self.fstop = np.array([f.inds.stop for f in self.filters])
+        self.nf = self.fstop - self.fstart
+
+        # build an index array in lnlam that produces (nfilter, nf.max()) shape array
+        self.finds = self.fstart[:, None] + range(self.nf.max())
+        finds_right = self.fstop[:, None] - range(self.nf.max())[::-1]
+        right = self.finds.max(axis=-1) >= len(self.lam)
+        self.finds[right, :] = finds_right[right, :]
+
+        # fill the transmission arrays, shifting some to the right (i.e. zero padding on the left)
+        # to make them fit
+        self.trans = np.zeros([len(self.filters), self.nf.max()])
+        for j, f in enumerate(self.filters):
+            dwave = np.gradient(self.lam[f.inds])
+            t = f.transmission[:] * f.wavelength[:] / ab_counts[j]
+            if right[j]:
+                self.trans[j, -self.nf[j]:] = t
+            else:
+                self.trans[j, :self.nf[j]] = t
+        raise NotImplementedError
+
+    def get_sed_maggies_trapz(self, sourceflux, sourcewave=None):
+        # NOTE: THIS IS SLOWER THAN DOT
+        if sourcewave is not None:
+            flux = np.interp(self.lam, sourcewave, sourceflux, left=0, right=0)
+        else:
+            assert len(sourceflux) == len(self.lam)
+            flux = sourceflux
+        y = self.trans * flux[self.finds]
+        x = self.lam[self.finds]
+        maggies = np.trapz(y, x)
+        raise NotImplementedError
+
+
+
+
 # ------------
 # Useful utilities
 # -------------
 
+def rebin(bins, wave, trans):
+    """rebin transmission onto given bins
+    """
+    raise NotImplementedError
 
 def load_filters(filternamelist, **kwargs):
     """Given a list of filter names, this method returns a list of Filter

@@ -60,6 +60,13 @@ def test_gridded_filters():
     assert np.allclose(m_grid, m_default, atol=5e-2)
 
 
+def test_filterset():
+    from sedpy.observate import FilterSet
+    fnames = observate.list_available_filters()
+    filterset = FilterSet(fnames)
+    pass
+
+
 def test_filter_properties():
     """Compare to the values obtained from the K-correct code
     (which uses a slightly different Vega spectrum)
