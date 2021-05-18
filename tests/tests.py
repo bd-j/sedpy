@@ -62,9 +62,14 @@ def test_gridded_filters():
 
 def test_filterset():
     from sedpy.observate import FilterSet
-    fnames = observate.list_available_filters()
-    filterset = FilterSet(fnames)
-    pass
+    flist = [f for f in observate.list_available_filters()
+             if ("jw" in f) or ("wise" in f) or ("galex" in f)]
+    filterset = FilterSet(flist)
+    source = observate.vega.T
+
+    mags = observate.getSED(source[0], source[1], filterset)
+    omags = observate.getSED(source[0], source[1], observate.load_filters(flist))
+    assert np.allclose(mags, omags, 1e-3)
 
 
 def test_filter_properties():

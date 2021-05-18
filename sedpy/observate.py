@@ -445,6 +445,9 @@ class FilterSet(object):
         self._set_filters(filterlist, wmin=wmin, dlnlam=dlnlam)
         self._build_master_trans()
 
+    def __len__(self):
+        return len(self.filternames)
+
     def _set_filters(self, filterlist, wmin=None, wmax=None, dlnlam=None):
         """Set the filters and the wavelength grid
         """
@@ -463,9 +466,11 @@ class FilterSet(object):
         self.wmax = np.exp(np.log(wmax) + dlnlam)
         self.dlnlam = dlnlam
 
+        # Build the wavelength grid
         self.lnlam = np.arange(np.log(self.wmin), np.log(self.wmax), self.dlnlam)
         self.lam = np.exp(self.lnlam)
 
+        # build the filters on that grid
         self.filters = load_filters(self.filternames, wmin=self.wmin, dlnlam=self.dlnlam)
 
     def _build_master_trans(self):
@@ -486,28 +491,39 @@ class FilterSet(object):
             dwave = np.gradient(self.lam[f.inds])
             self.trans[j, f.inds] = f.transmission[:] * f.wavelength[:] * dwave / ab_counts[j]
 
+        # this is for the numba unequal inmplementation
+        self.trans_list = [self.trans[j, f.inds] for j, f in enumerate(self.filters)]
+        self.frange = np.array([(f.inds.start, f.inds.stop) for f in self.filters])
+
+    def interp_source(self, inwave, sourceflux):
+        """Returns interpolated flux of shape (nwave,) or (nwave, nsource) if nsource > 1
+        """
+        sourceflux = np.atleast_2d(sourceflux)
+        flux = np.array([np.interp(self.lam, inwave, s, left=0, right=0)
+                         for s in sourceflux])
+        return np.squeeze(flux.T)
+
     def get_sed_maggies(self, sourceflux, sourcewave=None):
-        """Compute the flux in maggies of the source through the given filters
+        """Compute the flux in maggies of the source through the given filters.
 
         :param sourceflux: ndarray
             Flux in erg/s/cm^2/AA
 
         :param sourcewave: optional ndarray
             If supplied, the wavelength in angstroms.  Else it is assumed to be
-            on the same grid as self.lam
+            on the same grid as FilterSet.lam, saving the cost of an interpolation.
         """
         #TODO: investigate using vecorized trapz, and using different wavelength
         # intervals for each filter with offsets of the source spectrum
 
         if sourcewave is not None:
-            flux = np.interp(self.lam, sourcewave, sourceflux, left=0, right=0)
+            flux = self.interp_source(sourcewave, sourceflux)
         else:
             assert len(sourceflux) == len(self.lam)
             flux = sourceflux
         maggies = np.dot(self.trans, flux)
 
         return maggies
-
 
     def _build_trans_chunks(self):
         # NOTE: For USE WITH vectorized TRAPZ
@@ -523,40 +539,69 @@ class FilterSet(object):
         self.finds[right, :] = finds_right[right, :]
 
         # fill the transmission arrays, shifting some to the right (i.e. zero padding on the left)
-        # to make them fit
-        self.trans = np.zeros([len(self.filters), self.nf.max()])
+        # to make them fit.  Note this is T \times \lambda, but *not* times dw
+        self.trans_dw = np.zeros([len(self.filters), self.nf.max()])
         for j, f in enumerate(self.filters):
             dwave = np.gradient(self.lam[f.inds])
             t = f.transmission[:] * f.wavelength[:] / ab_counts[j]
             if right[j]:
-                self.trans[j, -self.nf[j]:] = t
+                self.trans_dw[j, -self.nf[j]:] = t
             else:
-                self.trans[j, :self.nf[j]] = t
-        raise NotImplementedError
+                self.trans_dw[j, :self.nf[j]] = t
 
     def get_sed_maggies_trapz(self, sourceflux, sourcewave=None):
-        # NOTE: THIS IS SLOWER THAN DOT
+        """Use vectorized trapz to project filters.  This can be slower than the default get_sed_maggies
+        """
+        # NOTE: THIS IS SLOWER THAN GET_SED_MAGGIES
         if sourcewave is not None:
-            flux = np.interp(self.lam, sourcewave, sourceflux, left=0, right=0)
+            flux = self.interp_source(sourcewave, sourceflux)
         else:
             assert len(sourceflux) == len(self.lam)
             flux = sourceflux
-        y = self.trans * flux[self.finds]
+        y = self.trans_dw * flux[self.finds]
         x = self.lam[self.finds]
-        maggies = np.trapz(y, x)
-        raise NotImplementedError
+        maggies = np.trapz(y, x, axis=-1)
+        return maggies
 
+    def get_sed_maggies_numba(self, sourceflux, sourcewave=None):
+        if sourcewave is not None:
+            source = self.interp_source(sourcewave, sourceflux)
+        else:
+            source = sourceflux
 
+        # Allow for uneven transmission curve vectors
+        maggies = _project_filters_fast(len(self), self.frange, self.trans_list, source)
 
+        return maggies
+
+try:
+    import numba
+    @numba.njit
+    def _project_filters_fast(nfilt, filter_inds,
+                              trans_list, source_vector):
+        maggies = np.empty(nfilt)
+        for i in range(nfilt):
+            start, stop = filter_inds[i]
+            source = source_vector[start:stop]
+            maggies[i] = np.sum(trans_list[i] * source)
+        return maggies
+
+    #assert _project_filters_fast.nopython_signatures
+
+except(ImportError):
+    def _project_filters_fast(nfilt, filter_inds,
+                              trans_list, source_vector):
+        raise ImportError("Could not import numba")
 
 # ------------
 # Useful utilities
 # -------------
 
 def rebin(bins, wave, trans):
-    """rebin transmission onto given bins
+    """rebin transmission onto given bins, preserving total transmission.
     """
     raise NotImplementedError
+
 
 def load_filters(filternamelist, **kwargs):
     """Given a list of filter names, this method returns a list of Filter
@@ -571,7 +616,7 @@ def load_filters(filternamelist, **kwargs):
     return [Filter(f, **kwargs) for f in filternamelist]
 
 
-def getSED(sourcewave, sourceflux, filterlist=None, **kwargs):
+def getSED(sourcewave, sourceflux, filterlist=None, linear_flux=False, **kwargs):
     """Takes wavelength vector, a flux array and list of Filter objects and
     returns the SED in AB magnitudes.
 
@@ -580,22 +625,39 @@ def getSED(sourcewave, sourceflux, filterlist=None, **kwargs):
 
     :param sourceflux:
         Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-        (nsource,nwave).
+        (nsource, nwave).
 
     :param filterlist:
-        List of filter objects, of length nfilt.
+        List of filter objects, of length nfilt, or a FilterSet instance with
+        the method `get_sed_maggies`
+
+    :param linear_flux: bool, optional (default: True)
+        If True return maggies, else AB mags
 
     :returns sed:
-        array of broadband magnitudes, of shape (nsource, nfilter).
+        array of broadband magnitudes or maggies, of shape (nsource, nfilter).
     """
-    if filterlist is None:
+    if hasattr(filterlist, "get_sed_maggies"):
+        maggies = filterlist.get_sed_maggies(sourceflux, sourcewave=sourcewave)
+        if linear_flux:
+            return maggies
+        else:
+            return -2.5 * np.log10(maggies)
+
+    elif filterlist is None:
         return None
+
+    # standard loop over filters
     sourceflux = np.atleast_2d(sourceflux)
-    sedshape = list(sourceflux.shape[:-1]) + [len(filterlist)]
+    sedshape = sourceflux.shape[:-1] + (len(filterlist),)
     sed = np.zeros(sedshape)
     for i, f in enumerate(filterlist):
         sed[..., i] = f.ab_mag(sourcewave, sourceflux, **kwargs)
-    return np.squeeze(sed)
+    sed = np.squeeze(sed)
+    if linear_flux:
+        return 10**(-0.4 * sed)
+    else:
+        return sed
 
 
 def list_available_filters():
