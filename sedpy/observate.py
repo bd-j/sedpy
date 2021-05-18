@@ -235,7 +235,6 @@ class Filter(object):
         else:
             self.solar_ab_mag = float('NaN')
 
-
     @property
     def ab_to_vega(self):
         """The conversion from AB to Vega systems for this filter.  It has the
@@ -610,10 +609,45 @@ except(ImportError):
 # Useful utilities
 # -------------
 
-def rebin(bins, wave, trans):
-    """rebin transmission onto given bins, preserving total transmission.
+
+def rebin(outwave, wave, trans):
+    """Rebin (instead of interpolate) transmission onto given wavelength array,
+    preserving total transmission.  This is useful if the output wavelength array
+    is more coarseley sampled than the native transmission array, to avoid interpolating
+    over important sharp features in the transmission function
+
+    Stripped down version of specutils.FluxConservingResampler
+
+    FIXME: implement as NUFFT?  Do something about the jaggedness (high frequency noise)
+    introduced when the output is more finely sampled than the input?
     """
-    raise NotImplementedError
+    assert np.all(np.diff(wave) > 0)
+    assert np.all(np.diff(outwave) > 0)
+
+    # Assume input is based on centers, so we need to work out edges
+    edges = (wave[:-1] + wave[1:]) / 2
+    edges = np.concatenate([[2*edges[0]-edges[1]], edges, [2*edges[-1] - edges[-2]]])
+    inlo, inhi = edges[:-1], edges[1:]
+    edges = (outwave[:-1] + outwave[1:]) / 2
+    edges = np.concatenate([[2*edges[0]-edges[1]], edges, [2*edges[-1] - edges[-2]]])
+    outlo, outhi = edges[:-1], edges[1:]
+
+    # Make a huge matrix of the contribution of each input bin to each output bin
+    # Basically a brute force convolution with variable width square kernel
+    l_inf = np.where(inlo > outlo[:, None], inlo, outlo[:, None])
+    l_sup = np.where(inhi < outhi[:, None], inhi, outhi[:, None])
+    resamp_mat = (l_sup - l_inf).clip(0) * (inhi - inlo)
+
+    # remove any contribution to output bins that aren't totally within the interval of the original bins.
+    left_clip = np.where(outlo - inlo[0] < 0, 0, 1)
+    right_clip = np.where(inhi[-1] - outhi < 0, 0, 1)
+    keep_overlapping_matrix = left_clip * right_clip
+    resamp_mat *= keep_overlapping_matrix[:, None]
+
+    # Do the convolution
+    out = np.dot(resamp_mat, trans) / resamp_mat.sum(axis=-1)
+
+    return out
 
 
 def load_filters(filternamelist, **kwargs):
