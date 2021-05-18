@@ -72,6 +72,40 @@ def test_filterset():
     assert np.allclose(mags, omags, 1e-3)
 
 
+def test_shapes():
+
+    from sedpy.observate import FilterSet
+    flist = [f for f in observate.list_available_filters()
+             if ("jw" in f) or ("wise" in f) or ("galex" in f)]
+    sw, sf0 = observate.vega.T
+    assert sf0.ndim == 1
+
+    for fl in [flist[:1], flist]:
+        Nf = len(fl)
+        filterset = FilterSet(fl)
+
+        # test input flux of shape (nwave,)
+        mags = observate.getSED(sw, sf0, filterset)
+        assert mags.shape == (Nf,), "getSED with FilterSet gives {}, expected {}".format(mags.shape, (Nf,))
+        omags = observate.getSED(sw, sf0, observate.load_filters(fl))
+        assert omags.shape == (Nf,), "getSED with Filter list gives {}, expected {}".format(omags.shape, (Nf,))
+
+        # test vector inputs, though inputs of shape (1, nwave) get turned into (nfilt,)
+        for N in [1, 10]:
+            if N == 1:
+                truth = (Nf,)
+            else:
+                truth = (N, Nf)
+
+            sf = np.tile(sf0, (N, 1))
+            mags = observate.getSED(sw, sf, filterset)
+            assert mags.shape == truth, "getSED with FilterSet gives {}, expected {}".format(mags.shape, truth)
+            omags = observate.getSED(sw, sf, observate.load_filters(fl))
+            assert omags.shape == truth, "getSED with Filter list gives {}, expected {}".format(omags.shape, truth)
+
+            assert np.allclose(mags, omags, 1e-3)
+
+
 def test_filter_properties():
     """Compare to the values obtained from the K-correct code
     (which uses a slightly different Vega spectrum)
