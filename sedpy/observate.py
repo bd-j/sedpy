@@ -456,7 +456,7 @@ class FilterSet(object):
         native = load_filters(self.filternames)
         if dlnlam is None:
             dlnlam_native = np.array([np.diff(np.log(f.wavelength)).min() for f in native])
-            dlnlam = dlnlam_native.min()
+            dlnlam = min(dlnlam_native.min(), 1e-3)
         if wmin is None:
             wmin = np.min([f.wavelength.min() for f in native])
         if wmax is None:
