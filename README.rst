@@ -3,7 +3,7 @@ sedpy
 
 Modules for storing and operating on astronomical source spectral energy distributions.
 
-.. image:: https://github.com/bd-j/sedpy/actions/workflows/Tests/badge.svg
+.. image:: https://github.com/bd-j/sedpy/workflows/Tests/badge.svg
   :target: https://github.com/bd-j/sedpy/actions?query=workflow%3ATests
 
 Installation & setup:
