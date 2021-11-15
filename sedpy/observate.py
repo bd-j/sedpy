@@ -435,25 +435,26 @@ class FilterSet(object):
     wavelength array.
     """
 
-    def __init__(self, filterlist, wmin=None, dlnlam=None):
+    def __init__(self, filterlist, wmin=None, dlnlam=None,
+                 **loading_kwargs):
         """
         :param filterlist: list of strings
             The filters to include in this set, in order
         """
 
-        self._set_filters(filterlist, wmin=wmin, dlnlam=dlnlam)
+        self.filternames = filterlist
+        native = load_filters(self.filternames, **loading_kwargs)
+        self._set_filters(native, wmin=wmin, dlnlam=dlnlam, **loading_kwargs)
         self._build_super_trans()
 
     def __len__(self):
         return len(self.filternames)
 
-    def _set_filters(self, filterlist, wmin=None, wmax=None, dlnlam=None):
+    def _set_filters(self, native, wmin=None, wmax=None, dlnlam=None,
+                     **loading_kwargs):
         """Set the filters and the wavelength grid
         """
-        self.filternames = filterlist
-
         # get the wavelength grid parameters
-        native = load_filters(self.filternames)
         if dlnlam is None:
             dlnlam_native = np.array([np.diff(np.log(f.wavelength)).min() for f in native])
             dlnlam = min(dlnlam_native.min(), 1e-3)
@@ -470,7 +471,8 @@ class FilterSet(object):
         self.lam = np.exp(self.lnlam)
 
         # build the filters on that grid
-        self.filters = load_filters(self.filternames, wmin=self.wmin, dlnlam=self.dlnlam)
+        self.filters = load_filters(self.filternames, wmin=self.wmin,
+                                    dlnlam=self.dlnlam, **loading_kwargs)
 
     def _build_super_trans(self):
         """Build the global gridded transmission array. Populates FilterSet.trans, which
