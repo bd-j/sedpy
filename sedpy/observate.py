@@ -455,9 +455,10 @@ class FilterSet(object):
         """Set the filters and the wavelength grid
         """
         # get the wavelength grid parameters
+        self.dlnlam_native = np.array([np.diff(np.log(f.wavelength)).min()
+                                       for f in native])
         if dlnlam is None:
-            dlnlam_native = np.array([np.diff(np.log(f.wavelength)).min() for f in native])
-            dlnlam = min(dlnlam_native.min(), 1e-3)
+            dlnlam = min(self.dlnlam_native.min(), 1e-3)
         if wmin is None:
             wmin = np.min([f.wavelength.min() for f in native])
         if wmax is None:
@@ -534,7 +535,7 @@ class FilterSet(object):
             flux = self.interp_source(sourcewave, sourceflux)
         else:
             flux = sourceflux.T
-            assert len(sourceflux) == len(self.lam)
+            assert len(flux) == len(self.lam)
         maggies = np.dot(self.trans, flux)
 
         return maggies.T
@@ -719,6 +720,7 @@ def list_available_filters():
         names = os.listdir(os.path.join(sedpydir, '/data/filters/'))
 
     parfiles = [n.replace('.par', '') for n in names if n[-4:] == '.par']
+    parfiles.sort()
     return parfiles
 
 

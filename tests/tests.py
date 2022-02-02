@@ -106,6 +106,31 @@ def test_shapes():
             assert np.allclose(mags, omags, 1e-3)
 
 
+def test_gridded_shapes():
+
+    from sedpy.observate import FilterSet
+
+    # array of object spectra
+    Nobj, Nwave = 100, 3000
+    spec = np.ones([Nobj, Nwave], dtype=float)
+    wave = np.exp(np.linspace(np.log(0.5e4), np.log(5e4), Nwave))
+
+    fnames = [f"jwst_f{b}" for b in ["070w", "090w", "115w", "150w", "200w", "335m"]]
+    fnames.sort()
+
+    wmin = wave.min()
+    dlnlam = np.gradient(np.log(wave))
+    dlnlam_filters = dlnlam.min()
+    assert np.allclose(dlnlam, dlnlam[0])
+
+    filterset = FilterSet(fnames, dlnlam=dlnlam_filters, wmin=wmin)
+    inds = np.log(wave) <= (np.log(filterset.lam.max()) + dlnlam_filters*0.1)
+
+    maggies = filterset.get_sed_maggies(spec[:, inds])
+    assert maggies.shape == (100, len(fnames))
+
+
+
 def test_filter_properties():
     """Compare to the values obtained from the K-correct code
     (which uses a slightly different Vega spectrum)
