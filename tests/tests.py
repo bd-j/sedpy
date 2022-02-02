@@ -103,7 +103,7 @@ def test_shapes():
             omags = observate.getSED(sw, sf, observate.load_filters(fl))
             assert omags.shape == truth, "getSED with Filter list gives {}, expected {}".format(omags.shape, truth)
 
-            assert np.allclose(mags, omags, 1e-3)
+            assert np.allclose(mags, omags, 5e-3), mags - omags
 
 
 def test_gridded_shapes():
@@ -128,7 +128,6 @@ def test_gridded_shapes():
 
     maggies = filterset.get_sed_maggies(spec[:, inds])
     assert maggies.shape == (100, len(fnames))
-
 
 
 def test_filter_properties():
