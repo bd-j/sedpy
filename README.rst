@@ -34,7 +34,7 @@ Then in python, e.g.,
 		filterlist = observate.load_filters(["galex_NUV", "sdss_r0"])
 		mags = observate.getSED(angstroms, f_lambda_cgs, filterlist=filters)
 
-see the `FAQ`_
+For adding transmission curves, see the `FAQ`_
 
 .. _FAQ: docs/faq.rst
 
@@ -52,6 +52,8 @@ Description:
   With a huge debt to Mike Blanton's `kcorrect <https://github.com/blanton144/kcorrect>`_ code .
 
 * ``attenuation`` contains simple dust attenuation methods.
+
+* ``smoothing`` methods for smoothing well sampled spectra.
 
 * ``extinction`` (Deprecated) classes for a detailed modeling of extinction curves,
   following the Fitzpatrick & Massa parameterizations.
