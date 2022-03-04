@@ -29,32 +29,34 @@ class Filter(object):
     number of useful filter quantities.  Methods are provided to project a
     source spectrum onto the filter and return the magnitude, AB or Vega.
 
-    :param kname: (default: 'sdss_r0')
+    Parameters
+    ----------
+    kname : string (default: 'sdss_r0')
         The kcorrect style name of the filter, excluing '.par',
         e.g. sdss_r0.
 
-    :param nick: (optional)
+    nick : string (optional)
         A nickname to associate with the filter.
 
-    :param directory: (optional)
+    directory : string (optional)
         The path to the directory containing the filter file.  If not given
         then the sedpy/data/filters/ directory will be searched.
 
-    :param dlnlam: (optional)
+    dlnlam : float (optional)
         If given, interpolate the transmission curve onto a grid in
-        ln(wavelength) with this spacing (and begining at wmin)
+        :math:`\ln(\lambda)` with this spacing (and begining at ``wmin``)
 
-    :param wmin: (optional, default 100.)
-        If `dlnlam` is supplied then `wmin` gives the minimum wavelength
-        (in angstroms) for the grid.
+    wmin : float (optional, default 100.)
+        If ``dlnlam`` is supplied then ``wmin`` gives the minimum wavelength
+        (in Angstroms) for the grid.
 
-    :param min_trans: (optional, default 1e-5)
-        The minimum transmission value (as fraction of the maximum
-        transmission value) to consider as a useful positive value.  Useful
-        for curves calculated with insane low amplitude components far from
-        the main part of the filter.
+    min_trans : float (optional, default 1e-5)
+        The minimum transmission value (as fraction of the maximum transmission
+        value) to consider as a useful positive value.  Useful for curves that
+        have extremely low amplitude components far from the main part of the
+        filter when speed is more important than accuracy.
 
-    :param data: (optional, default None)
+    data: None or tuple of ndarray (optional, default None)
         If provided, a 2-tuple of ndarrays giving wavelength and transmission.
     """
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
@@ -112,7 +114,9 @@ class Filter(object):
         wavelength and transmission arrays.  The first column is wavelength in
         AA and the second column is transmission (detector signal per photon)
 
-        :param filename:
+        Parameters
+        ----------
+        filename : string
             The fully qualified path and filename of the file that contains the
             filter transmission.
         """
@@ -123,11 +127,13 @@ class Filter(object):
     def _process_filter_data(self, wave, trans):
         """Clean up transmission data and assign to attributes.
 
-        :param wave:
-            Wavelength, in Angstroms.
+        Parameters
+        ----------
+        wave : ndarray of shape ``(N_wave)``
+            Wavelength, in Angstroms, of the transmission curve
 
-        :param trans:
-            Filter transmission
+        trans : ndarray of shape ``(N_wave)``
+            Filter transmission at the wavelengths corresponding to ``wave``
         """
         ind = np.isfinite(trans) & (trans >= 0.0)
         order = wave[ind].argsort()
@@ -141,7 +147,9 @@ class Filter(object):
         leaves one zero before (after) the first (last) non-zero transmission
         point, if they were present in the original transmission function.
 
-        :param min_trans:
+        Parameters
+        ----------
+        min_trans : float (optional, default: 1e-5)
             Defines zero, in terms of fraction of the maximum transmission.
         """
         v = np.argwhere(self.transmission > (self.transmission.max() * min_trans))
@@ -157,12 +165,14 @@ class Filter(object):
         corresponding to these values are stored as the `inds` attribute (a
         slice object). (with possibly a zero at either end.)
 
-        :param dlnlam:
-            The spacing in log lambda of the regular wavelength grid onto which
+        Parameters
+        ----------
+        dlnlam : float
+            The spacing in ln-lambda of the regular wavelength grid onto which
             the filter is to be placed.
 
-        :param wmin:
-            The starting wavelength (angstroms) for the regular grid.
+        wmin : float (optional, default: 100)
+            The starting wavelength (Angstroms) for the regular grid.
         """
         # find min and max of the filter in a global wavelength grid given by
         # wmin, wmax, and dlnlam
@@ -245,7 +255,7 @@ class Filter(object):
         return self._ab_to_vega
 
     def display(self, normalize=False, ax=None):
-        """Plot the filter transmission curve.
+        """Plot the filter transmission curve
         """
         if self.npts > 0:
             if ax is None:
@@ -261,16 +271,18 @@ class Filter(object):
     def obj_counts_hires(self, sourcewave, sourceflux, sourceflux_unc=0):
         """Project source spectrum onto filter and return the detector signal.
 
-        :param sourcewave:
-            Spectrum wavelength (in AA), ndarray of shape (nwave).  Must be
-            monotonic increasing.
+        Parameters
+        ----------
+        sourcewave : ndarray of shape ``(N_pix,)``
+            Spectrum wavelength (in Angstroms). Must be monotonic increasing.
 
-        :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nspec,nwave).
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Associated flux (assumed to be in erg/s/cm^2/AA)
 
-        :returns counts:
-            Detector signal(s) (nspec).
+        Returns
+        -------
+        counts : ndarray of shape ``(N_source,)``
+            Detector signal(s).
         """
         assert sourcewave[1] > sourcewave[0], "``sourcewave`` not in ascending order."
         # Interpolate filter transmission to source spectrum
@@ -298,16 +310,18 @@ class Filter(object):
         of vice-versa, which is necessary with the source spectrum does not
         adequately sample features in the transmission spectrum.
 
-        :param sourcewave:
-            Spectrum wavelength (in AA), ndarray of shape (nwave).  Must be
-            monotonic increasing.
+        Parameters
+        ----------
+        sourcewave : ndarray of shape ``(N_pix,)``
+            Spectrum wavelength (in Angstroms). Must be monotonic increasing.
 
-        :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nspec,nwave).
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Associated flux (assumed to be in erg/s/cm^2/AA)
 
-        :returns counts:
-            Detector signal(s) (nspec).
+        Returns
+        -------
+        counts : ndarray of shape ``(N_source,)``
+            Detector signal(s).
         """
         sourceflux = np.squeeze(sourceflux)
         assert sourceflux.ndim == 1, "Only a single source allowed."
@@ -331,18 +345,22 @@ class Filter(object):
         lambda with spacing and minimum wavelength given by `dlnlam` and `wmin`
         filter attributes.
 
-        :param sourceflux:
-            Source flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nspec,nwave), assumed to be on the logarithmic grid defined by
-            wmin and dlnlam, with wavelength ascending.
+        Parameters
+        ----------
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Source flux (assumed to be in erg/s/cm^2/AA) assumed to be on the
+            logarithmic grid defined by ``wmin`` and ``dlnlam``, with wavelength
+            ascending.
 
-        :param source_offset:
+        source_offset : int (optional)
             The (hypothetical) element of the sourceflux array corresponding to
-            observed frame wavelength of wmin.  Should be negative if the first
+            observed frame wavelength of ``wmin``.  Should be negative if the first
             element of sourcewave corresponds to a wavelength > wmin.
 
-        :returns counts:
-            Detector signal(s) (nspec).
+        Returns
+        -------
+        counts : ndarray of shape ``(N_source,)``
+            Detector signal(s).
         """
         # Note that redshifting can also be incorporated using negative `source_offset`,
         # modulo factors of (1+z).  I think.
@@ -361,29 +379,31 @@ class Filter(object):
         This method uses the keywords `lores` and `gridded` to choose between
         the various projection algorithms.
 
-        :param sourcewave:
-            Spectrum wavelength (in AA), ndarray of shape (nwave).  Must be
-            monotonic increasing.
+        Parameters
+        ----------
+        sourcewave : ndarray of shape ``(N_pix,)``
+            Spectrum wavelength (in Angstroms). Must be monotonic increasing.
 
-        :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nspec,nwave).
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Associated flux (assumed to be in erg/s/cm^2/AA)
 
-        :param lores: (optional, default: False)
+        lores : bool (optional, default: False)
             Switch to interpolate the source spectrum onto the wavelength grid
             of the filter transmission curve, instead of the vice-versa (which
             is the default).  Useful for a spectrum with sparse sampling in
             wavelength compared to the filter transmission curve (e.g. narrow
             bands and BaSeL lores spectra)
 
-        :param gridded: (optional, default: False)
+        gridded : bool (optional, default: False)
             Switch to accomplish the filter projection via simple sums.  This
             can be faster, but assumes the sourcewave and sourceflux are on a
             logarithmic wavelength grid given by the dlnlam and wmin attributes
             of the Filter object.
 
-        :returns counts:
-            Detector signal(s) (nspec).
+        Returns
+        -------
+        counts : ndarray of shape ``(N_source,)``
+            Detector signal(s).
 
         """
         if gridded:
@@ -398,15 +418,18 @@ class Filter(object):
     def ab_mag(self, sourcewave, sourceflux, **extras):
         """Project source spectrum onto filter and return the AB magnitude.
 
-        :param sourcewave:
-            Spectrum wavelength (in AA), ndarray of shape (nwave).
+        Parameters
+        ----------
+        sourcewave : ndarray of shape ``(N_pix,)``
+            Spectrum wavelength (in Angstroms). Must be monotonic increasing.
 
-        :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nobj,nwave).
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Associated flux (assumed to be in erg/s/cm^2/AA)
 
-        :returns mag:
-            AB magnitude of the source.
+        Returns
+        -------
+        mag : float or ndarray of shape ``(N_source,)``
+            AB magnitude of the source(s).
         """
         counts = self.obj_counts(sourcewave, sourceflux, **extras)
         return -2.5 * np.log10(counts / self.ab_zero_counts)
@@ -414,15 +437,18 @@ class Filter(object):
     def vega_mag(self, sourcewave, sourceflux, **extras):
         """Project source spectrum onto filter and return the Vega magnitude.
 
-        :param sourcewave:
-            Spectrum wavelength (in AA), ndarray of shape (nwave).
+        Parameters
+        ----------
+        sourcewave : ndarray of shape ``(N_pix,)``
+            Spectrum wavelength (in Angstroms). Must be monotonic increasing.
 
-        :param sourceflux:
-            Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-            (nobj,nwave).
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Associated flux (assumed to be in erg/s/cm^2/AA)
 
-        :returns mag:
-            Vega magnitude of the source.
+        Returns
+        -------
+        mag : float or ndarray of shape ``(N_source,)``
+            Vega magnitude of the source(s).
         """
         counts = self.obj_counts(sourcewave, sourceflux, **extras)
         return -2.5 * np.log10(counts / self.vega_zero_counts)
@@ -500,15 +526,18 @@ class FilterSet(object):
     def interp_source(self, inwave, sourceflux):
         """Interpolate spectra onto the global wavelength grid.
 
-        :param inwave: ndarray of shape (nw,)
-            Input wavelength
+        Parameters
+        ----------
+        inwave : ndarray of shape ``(N_pix,)``
+            Input wavelength (Angstroms)
 
-        :param sourceflux: ndarray of shape (nw,) or (nsource, nw)
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
             Input source fluxes at the wavelengths given by `inwave`
 
-        :returns flux: ndarray
-           Interpolated flux of shape (nlam,) or (nlam, nsource) if nsource > 1
-           Note the transpose relative to input....
+        Returns
+        -------
+        flux : ndarray of shape ``(N_pix,)`` or ``(N_pix, N_source)``
+           Interpolated flux. Note the transpose relative to input if ``N_source > 1``
         """
         sourceflux = np.atleast_2d(sourceflux)
         # TODO: replace with scipy interpolate for vectorization?
@@ -519,17 +548,20 @@ class FilterSet(object):
     def get_sed_maggies(self, sourceflux, sourcewave=None):
         """Compute the flux in maggies of the source through the given filters.
 
-        :param sourceflux: ndarray of shape (nwave,) or (nsource, nwave)
-            Flux in erg/s/cm^2/AA
+        Parameters
+        ----------
+        sourceflux : ndarray of shape ``(N_source, N_pix)``
+            Source flux (assumed to be in erg/s/cm^2/AA)
 
-        :param sourcewave: optional ndarray
-            If supplied, the wavelength in Angstroms.  Else it is assumed to be
-            on the same wavelength grid as FilterSet.lam, saving the cost of an
-            interpolation.
+        sourcewave: ndarray (optional)
+            If supplied, the wavelength in Angstroms.  Otherwise it is assumed
+            to be on the same wavelength grid as FilterSet.lam, saving the cost
+            of an interpolation.
 
-        :returns maggies: ndarray of shape (nfilter,) or (nsource, nfilter)
+        Returns
+        -------
+        maggies : ndarray of shape ``(N_filter,)`` or ``(N_source, N_filter)``
             The flux (in maggies) of the sources through the filters.
-
         """
         if sourcewave is not None:
             flux = self.interp_source(sourcewave, sourceflux)
@@ -565,7 +597,8 @@ class FilterSet(object):
                 self.trans_dw[j, :self.nf[j]] = t
 
     def get_sed_maggies_trapz(self, sourceflux, sourcewave=None):
-        """Use vectorized trapz to project filters.  This can be slower than the default get_sed_maggies
+        """Use vectorized trapz to project filters.  This can be
+        slower than the default get_sed_maggies
         """
         # NOTE: THIS IS SLOWER THAN GET_SED_MAGGIES
         if sourcewave is not None:
@@ -615,9 +648,9 @@ except(ImportError):
 
 def rebin(outwave, wave, trans):
     """Rebin (instead of interpolate) transmission onto given wavelength array,
-    preserving total transmission.  This is useful if the output wavelength array
-    is more coarseley sampled than the native transmission array, to avoid interpolating
-    over important sharp features in the transmission function
+    preserving total transmission.  This is useful if the output wavelength
+    array is more coarseley sampled than the native transmission array, to avoid
+    interpolating over important sharp features in the transmission function
 
     Stripped down version of specutils.FluxConservingResampler
 
@@ -657,10 +690,14 @@ def load_filters(filternamelist, **kwargs):
     """Given a list of filter names, this method returns a list of Filter
     objects.
 
-    :param filternamelist:
-        List of strings giving names of the filters.
+    Parameters
+    ----------
+    filternamelist : list of strings
+        The names of the filters.
 
-    :returns filterlist:
+    Returns
+    -------
+    filterlist : list of Filter() instances
         A list of filter objects.
     """
     return [Filter(f, **kwargs) for f in filternamelist]
@@ -670,22 +707,24 @@ def getSED(sourcewave, sourceflux, filterlist=None, linear_flux=False, **kwargs)
     """Takes wavelength vector, a flux array and list of Filter objects and
     returns the SED in AB magnitudes.
 
-    :param sourcewave:
-        Spectrum wavelength (in AA), ndarray of shape (nwave).
+    Parameters
+    ----------
+    sourcewave : ndarray of shape ``(N_pix,)``.
+        Spectrum wavelength (in Angstroms)
 
-    :param sourceflux:
-        Associated flux (assumed to be in erg/s/cm^2/AA), ndarray of shape
-        (nsource, nwave) or (nwave,).
+    sourceflux : ndarray of shape ``(N_pix,)`` or ``(N_source, N_pix)``
+        Associated flux (assumed to be in erg/s/cm^2/AA)
 
-    :param filterlist:
-        List of filter objects, of length nfilt, or a FilterSet instance with
-        the method `get_sed_maggies`
+    filterlist : list of Filter() instances or a FilterSet() instance.
+        The filters onto which to project the spectra
 
-    :param linear_flux: bool, optional (default: True)
+    linear_flux : bool, optional (default: True)
         If True return maggies, else AB mags
 
-    :returns sed:
-        array of broadband magnitudes or maggies, of shape (nsource, nfilter) or (nfilter,) if nsource==1
+    Returns
+    -------
+    sed : ndarray of shape ``(N_source, N_filter)`` or ``(N_filter,)``
+        broadband magnitudes or maggies.
     """
     if hasattr(filterlist, "get_sed_maggies"):
         maggies = filterlist.get_sed_maggies(sourceflux, sourcewave=sourcewave)
@@ -738,19 +777,23 @@ def filter_dict(filterlist):
 def Lbol(wave, spec, wave_min=90, wave_max=1e6):
     """Calculate the bolometric luminosity of a spectrum or spectra.
 
-    :param wave:
+    Parameters
+    ----------
+    wave : ndarray
        The wavelength vector of length nwave.
 
-    :param spec:
+    spec : ndarray
        The spectra, of shape (...,nsource, nwave), in F_lambda.
 
-    :param wave_min:
+    wave_min : float
        Minimum wavelength for the integral.
 
-    :param max_wave:
+    max_wave : float
        Maximum wavelength for the integral
 
-    :returns lbol:
+    Returns
+    -------
+    lbol :
        The bolometric luminosity, integrated from wave_min to wave_max.  Array
        of length (...nsource)
     """
@@ -762,10 +805,14 @@ def air2vac(air):
     """Convert from in-air wavelengths to vacuum wavelengths.  Based on Allen's
     Astrophysical Quantities.
 
-    :param air:
+    Parameters
+    ----------
+    air : ndarray of shape ``(N_pix,)``
         The in-air wavelengths.
 
-    :returns vac:
+    Returns
+    -------
+    vac: ndarray of shape ``(N_pix,)``
         The corresponding vacuum wavelengths.
     """
     ss = 1e4 / air
@@ -781,10 +828,14 @@ def vac2air(vac):
     vac2air(air2vac(wave)) yields wave to within 1 part in a million over the
     optical range.
 
-    :param vac:
+    Parameters
+    ----------
+    vac: ndarray of shape ``(N_pix,)``
         The vacuum wavelengths.
 
-    :returns air:
+    Returns
+    -------
+    air : ndarray of shape ``(N_pix,)``
         The corresponding in-air wavelengths.
     """
     conv = (1.0 + 2.735182e-4 + 131.4182 / vac**2 + 2.76249e8 / vac**4)
