@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name="astro-sedpy",
-    version='0.2.1',
+    version='0.3.0',
     author="Ben Johnson",
     author_email="benjamin.johnson@cfa.harvard.edu",
     classifiers=["Development Status :: 4 - Beta",
