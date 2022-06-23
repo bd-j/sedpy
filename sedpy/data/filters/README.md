@@ -119,7 +119,7 @@
 |$H$|[`twomass_H`](filters/twomass_H.par)|1.642 μm|184.7 nm||
 |$Ks$|[`twomass_Ks`](filters/twomass_Ks.par)|2.157 μm|206.9 nm||
 
-### Víctor M. Blanco Telescope Telescope
+### Víctor M. Blanco Telescope
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
