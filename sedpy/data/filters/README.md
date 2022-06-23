@@ -1,14 +1,35 @@
 # Filters in `sedpy`
 
+## Idealized Systems
+
+### Bessell
+
+|Filter|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:----------:|---------------------:|---------------------------:|:-------|
+|$U$|[`bessell_U`](filters/bessell_U.par)|357.1 nm|52.4 nm||
+|$B$|[`bessell_B`](filters/bessell_B.par)|434.4 nm|79.7 nm||
+|$V$|[`bessell_V`](filters/bessell_V.par)|545.6 nm|80.7 nm||
+|$R$|[`bessell_R`](filters/bessell_R.par)|644.2 nm|137.7 nm||
+|$I$|[`bessell_I`](filters/bessell_I.par)|799.4 nm|107.9 nm||
+
+### Stromgren
+
+|Filter|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:----------:|---------------------:|---------------------------:|:-------|
+|$u$|[`stromgren_u`](filters/stromgren_u.par)|344.4 nm|29.7 nm||
+|$v$|[`stromgren_v`](filters/stromgren_v.par)|410.4 nm|23.1 nm||
+|$b$|[`stromgren_b`](filters/stromgren_b.par)|466.7 nm|21.2 nm||
+|$y$|[`stromgren_y`](filters/stromgren_y.par)|547.5 nm|23.9 nm||
+
 ## Space-Based Telescopes
 
 ### Gaia
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$G$||[`gaia_g`](filters/gaia_g.par)|590.2 nm|333.4 nm||
-|$G_\textrm{BP}$|BP|[`gaia_bp`](filters/gaia_bp.par)|488.8 nm|211.7 nm||
-|$G_\textrm{RP}$|RP|[`gaia_rp`](filters/gaia_rp.par)|762.7 nm|216.9 nm||
+|$G$||[`gaia_g`](filters/gaia_g.par)|590.2 nm|333.4 nm|DR2 revised|
+|$G_\textrm{BP}$|BP|[`gaia_bp`](filters/gaia_bp.par)|488.8 nm|211.7 nm|DR2 revised|
+|$G_\textrm{RP}$|RP|[`gaia_rp`](filters/gaia_rp.par)|762.7 nm|216.9 nm|DR2 revised|
 
 ### Galaxy Evolution Explorer (GALEX)
 
@@ -107,7 +128,21 @@
 |$\textrm{W3}$|WISE|[`wise_w3`](filters/wise_w3.par)|11.55 μm|5.851 μm||
 |$\textrm{W4}$|WISE|[`wise_w4`](filters/wise_w4.par)|22.08 μm|3.720 μm||
 
+### Hipparcos
 
+|Filter|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:----------:|---------------------:|---------------------------:|:-------|
+|$H$|[`hipparcos_H`](filters/hipparcos_H.par)|519.0 nm|198.5 nm||
+|$B$|[`hipparcos_B`](filters/hipparcos_B.par)|413.1 nm|71.4 nm||
+|$V$|[`hipparcos_V`](filters/hipparcos_V.par)|527.8 nm|91.2 nm||
+
+### SWIFT/UVOT
+
+|Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
+|$w1$|UVOT|[`uvot_w1`](filters/uvot_w1.par)|251.7 nm|93.8 nm||
+|$w2$|UVOT|[`uvot_w2`](filters/uvot_w2.par)|201.0 nm|67.2 nm||
+|$m2$|UVOT|[`uvot_m2`](filters/uvot_m2.par)|223.0 nm|45.9 nm||
 
 ## Ground-Based Telescopes
 
@@ -213,6 +248,11 @@
 |$\textrm{IA797}$|Suprime-Cam|[`subaru_suprimecam_ia797`](filters/subaru_suprimecam_ia797.par)|796.4 nm|26.61 nm||
 |$\textrm{IA827}$|Suprime-Cam|[`subaru_suprimecam_ia827`](filters/subaru_suprimecam_ia827.par)|824.5 nm|24.62 nm||
 |$\textrm{IA856}$|Suprime-Cam|[`subaru_suprimecam_ia856`](filters/subaru_suprimecam_ia856.par)|856.3 nm|26.78 nm||
+|$g$|Hyper Suprime-Cam|[`hsc_g`](filters/hsc_g.par)|475.5 nm|97.7 nm||
+|$r$|Hyper Suprime-Cam|[`hsc_r`](filters/hsc_r.par)|618.4 nm|101.4 nm||
+|$i$|Hyper Suprime-Cam|[`hsc_i`](filters/hsc_i.par)|766.1 nm|107.9 nm||
+|$z$|Hyper Suprime-Cam|[`hsc_z`](filters/hsc_z.par)|889.7 nm|55.2 nm||
+|$y$|Hyper Suprime-Cam|[`hsc_y`](filters/hsc_y.par)|976.2 nm|73.1 nm||
 
 ### United Kingdom Infrared Telescope (UKIRT)
 

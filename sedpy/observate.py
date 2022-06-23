@@ -464,10 +464,11 @@ class FilterSet(object):
     def __init__(self, filterlist, wmin=None, dlnlam=None,
                  **loading_kwargs):
         """
-        :param filterlist: list of strings
+        Parameters
+        ----------
+        filterlist : list of strings
             The filters to include in this set, in order
         """
-
         self.filternames = filterlist
         native = load_filters(self.filternames, **loading_kwargs)
         self._set_filters(native, wmin=wmin, dlnlam=dlnlam, **loading_kwargs)
