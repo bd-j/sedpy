@@ -1,3 +1,21 @@
+# Acquired from stsynphot on 2022-06-29
+#
+# $ wget https://ssb.stsci.edu/trds/tarfiles/synphot1.tar.gz
+# $ tar -xzf synphot1.tar.gz
+# $ export PYSYN_CDBS=$(pwd)/grp/redcat/trds
+# $ python
+# >>> import stsynphot as stsyn
+# >>> f390w_1 = stsyn.band('wfc3,uvis1,f390w')
+# >>> f390w_2 = stsyn.band('wfc3,uvis2,f390w')
+# >>> wave_1 = f390w_1.binset
+# >>> wave_2 = f390w_2.binset
+# >>> assert (wave_1 == wave_2).all()
+# >>> wave = wave_1
+# >>> tran_1 = f390w_1(wave)
+# >>> tran_2 = f390w_2(wave)
+# >>> tran = 0.5 * (tran_1 + tran_2)
+
+
 1900.0 0.0
 1901.0 0.0
 1902.0 0.0
