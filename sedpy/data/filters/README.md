@@ -63,6 +63,7 @@
 |$\textrm{F435LP}$|ACS (WFC)|[`acs_wfc_f850lp`](filters/acs_wfc_f850lp.par)|900.5 nm|124.1 nm||
 |$\textrm{F275W}$|WFC3 (UVIS)|[`wfc3_uvis_f275w`](filters/wfc3_uvis_f275w.par)|270.0 nm|38.71 nm||
 |$\textrm{F336W}$|WFC3 (UVIS)|[`wfc3_uvis_f336w`](filters/wfc3_uvis_f336w.par)|334.7 nm|37.31 nm||
+|$\textrm{F390W}$|WFC3 (UVIS)|[`wfc3_uvis_f390w`](filters/wfc3_uvis_f390w.par)|390.1 nm|68.57 nm|Average of UVIS1 and UVIS2|
 |$\textrm{F475W}$|WFC3 (UVIS)|[`wfc3_uvis_f475w`](filters/wfc3_uvis_f475w.par)|473.6 nm|99.19 nm||
 |$\textrm{F555W}$|WFC3 (UVIS)|[`wfc3_uvis_f555w`](filters/wfc3_uvis_f555w.par)|525.6 nm|121.8 nm||
 |$\textrm{F606W}$|WFC3 (UVIS)|[`wfc3_uvis_f606w`](filters/wfc3_uvis_f606w.par)|581.3 nm|154.6 nm||
