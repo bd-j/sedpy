@@ -278,6 +278,6 @@
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
 |$J$|ISAAC|[`vlt_isaac_J`](filters/vlt_isaac_J.par)|1.231 μm|178.0 nm||
 |$H$|ISAAC|[`vlt_isaac_H`](filters/vlt_isaac_H.par)|1.645 μm|199.2 nm||
-|$K_s|ISAAC|[`vlt_isaac_Ks`](filters/vlt_isaac_Ks.par)|2.164 μm|185.5 nm||
+|$K_s$|ISAAC|[`vlt_isaac_Ks`](filters/vlt_isaac_Ks.par)|2.164 μm|185.5 nm||
 |$U$|VIMOS|[`vlt_vimos_U`](filters/vlt_vimos_U.par)|374.2 nm|39.07 nm||
 |$R$|VIMOS|[`vlt_vimos_R`](filters/vlt_vimos_R.par)|641.7 nm|94.24 nm||
