@@ -63,6 +63,7 @@
 |$\textrm{F435LP}$|ACS (WFC)|[`acs_wfc_f850lp`](filters/acs_wfc_f850lp.par)|900.5 nm|124.1 nm||
 |$\textrm{F275W}$|WFC3 (UVIS)|[`wfc3_uvis_f275w`](filters/wfc3_uvis_f275w.par)|270.0 nm|38.71 nm||
 |$\textrm{F336W}$|WFC3 (UVIS)|[`wfc3_uvis_f336w`](filters/wfc3_uvis_f336w.par)|334.7 nm|37.31 nm||
+|$\textrm{F390W}$|WFC3 (UVIS)|[`wfc3_uvis_f390w`](filters/wfc3_uvis_f390w.par)|390.1 nm|68.57 nm|Average of UVIS1 and UVIS2|
 |$\textrm{F475W}$|WFC3 (UVIS)|[`wfc3_uvis_f475w`](filters/wfc3_uvis_f475w.par)|473.6 nm|99.19 nm||
 |$\textrm{F555W}$|WFC3 (UVIS)|[`wfc3_uvis_f555w`](filters/wfc3_uvis_f555w.par)|525.6 nm|121.8 nm||
 |$\textrm{F606W}$|WFC3 (UVIS)|[`wfc3_uvis_f606w`](filters/wfc3_uvis_f606w.par)|581.3 nm|154.6 nm||
@@ -282,6 +283,6 @@ JWST/NIRCam filter there are also module specific curves available as
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
 |$J$|ISAAC|[`vlt_isaac_J`](filters/vlt_isaac_J.par)|1.231 μm|178.0 nm||
 |$H$|ISAAC|[`vlt_isaac_H`](filters/vlt_isaac_H.par)|1.645 μm|199.2 nm||
-|$K_s|ISAAC|[`vlt_isaac_Ks`](filters/vlt_isaac_Ks.par)|2.164 μm|185.5 nm||
+|$K_s$|ISAAC|[`vlt_isaac_Ks`](filters/vlt_isaac_Ks.par)|2.164 μm|185.5 nm||
 |$U$|VIMOS|[`vlt_vimos_U`](filters/vlt_vimos_U.par)|374.2 nm|39.07 nm||
 |$R$|VIMOS|[`vlt_vimos_R`](filters/vlt_vimos_R.par)|641.7 nm|94.24 nm||
