@@ -8,7 +8,7 @@ Modules for storing and operating on astronomical source spectral energy distrib
 
 Installation & setup:
 ---------------------
-``sedpy`` is now pip installable:
+``sedpy`` is pip installable:
 
 .. code-block:: shell
 
@@ -34,8 +34,9 @@ Then in python, e.g.,
 		filterlist = observate.load_filters(["galex_NUV", "sdss_r0"])
 		mags = observate.getSED(angstroms, f_lambda_cgs, filterlist=filters)
 
-For adding transmission curves, see the `FAQ`_
+The available filters see `filter_list`_. For adding transmission curves, see the `FAQ`_
 
+.. _filter_list: sedpy/data/filters/README.md
 .. _FAQ: docs/faq.rst
 
 This code can be referenced as:
@@ -53,7 +54,7 @@ Description:
 
 * ``attenuation`` contains simple dust attenuation methods.
 
-* ``smoothing`` methods for smoothing well sampled spectra.
+* ``smoothing`` methods for smoothing well-sampled spectra.
 
 * ``extinction`` (Deprecated) classes for a detailed modeling of extinction curves,
   following the Fitzpatrick & Massa parameterizations.

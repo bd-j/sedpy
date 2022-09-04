@@ -107,6 +107,10 @@
 |$\textrm{F2100W}$|MIRI|[`jwst_f2100w`](filters/jwst_f2100w.par)|20.70 μm|3.296 μm||
 |$\textrm{F2550W}$|MIRI|[`jwst_f2550w`](filters/jwst_f2550w.par)|25.28 μm|3.461 μm||
 
+The default NIRCam filters are averages over the A and B modules. For every
+JWST/NIRCam filter there are also module specific curves available as
+`jwst_mod[a,b]_f*w.par`.
+
 ### Spitzer Space Telescope
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
