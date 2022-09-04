@@ -40,7 +40,7 @@ Then in python, e.g.,
 		mags = observate.getSED(angstroms, f_lambda_cgs, filterlist=filters)
 
 For the filters available by default see the `filter_list`_.
-For adding transmission curves, see these `_docs`_.
+For adding transmission curves, see these `docs`_.
 
 .. _filter_list: sedpy/data/filters/README.md
 .. _docs: docs/transmissions.rst
