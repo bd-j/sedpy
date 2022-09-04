@@ -34,10 +34,10 @@ Then in python, e.g.,
 		filterlist = observate.load_filters(["galex_NUV", "sdss_r0"])
 		mags = observate.getSED(angstroms, f_lambda_cgs, filterlist=filters)
 
-The available filters see `filter_list`_. For adding transmission curves, see the `FAQ`_
+The available filters see the `filter_list`_. For adding transmission curves, see the `FAQ`_
 
 .. _filter_list: sedpy/data/filters/README.md
-.. _FAQ: docs/faq.rst
+.. _FAQ: docs/adding.rst
 
 This code can be referenced as:
 

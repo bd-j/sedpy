@@ -1,8 +1,21 @@
-Frequently Asked Questions
-============
+Transmission Curves
+===================
 
-How do I add filter transmission curves?
---------
+Available Transmission Curves
+------------------------------
+The available transmission curves are described `here <https://github.com/bd-j/sedpy/blob/main/sedpy/data/filters/README.md>`_
+
+They are also listed within the code via
+
+.. code-block:: python
+
+		from sedpy import observate
+		observate.list_available_filters()
+
+
+Adding Transmission curves
+--------------------------
+
 Each transmission curve should be in its own file named ``filter_name.par``,
 where ``filter_name`` is a unique identifier that will be used to identify the filter in the code
 (e.g., ``galex_FUV.par``).
