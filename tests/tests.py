@@ -113,7 +113,7 @@ def test_gridded_shapes():
     # array of object spectra
     Nobj, Nwave = 100, 3000
     spec = np.ones([Nobj, Nwave], dtype=float)
-    wave = np.exp(np.linspace(np.log(0.5e4), np.log(5e4), Nwave))
+    wave = np.exp(np.linspace(np.log(0.5e4), np.log(5.1e4), Nwave))
 
     fnames = [f"jwst_f{b}" for b in ["070w", "090w", "115w", "150w", "200w", "335m"]]
     fnames.sort()
