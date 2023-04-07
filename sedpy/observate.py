@@ -57,7 +57,8 @@ class Filter(object):
         filter when speed is more important than accuracy.
 
     data: None or tuple of ndarray (optional, default None)
-        If provided, a 2-tuple of ndarrays giving wavelength and transmission.
+        If provided, a 2-tuple of ndarrays giving wavelength (AA) and
+        transmission (detector signal per photon).
     """
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
     npts = 0
@@ -124,6 +125,14 @@ class Filter(object):
         # Clean negatives, NaNs, and Infs, then sort, then store
         self._process_filter_data(wave, trans)
 
+    @property
+    def transmission(self):
+        return self._transmission
+
+    @property
+    def wavelength(self):
+        return self._wavelength
+
     def _process_filter_data(self, wave, trans):
         """Clean up transmission data and assign to attributes.
 
@@ -138,8 +147,8 @@ class Filter(object):
         ind = np.isfinite(trans) & (trans >= 0.0)
         order = wave[ind].argsort()
         self.npts = ind.sum()
-        self.wavelength = wave[ind][order]
-        self.transmission = trans[ind][order]
+        self._wavelength = wave[ind][order]
+        self._transmission = trans[ind][order]
         self._remove_extra_zeros(self.min_trans)
 
     def _remove_extra_zeros(self, min_trans=0):
@@ -154,8 +163,8 @@ class Filter(object):
         """
         v = np.argwhere(self.transmission > (self.transmission.max() * min_trans))
         inds = slice(max(v.min() - 1, 0), min(v.max() + 2, len(self.transmission)))
-        self.wavelength = self.wavelength[inds]
-        self.transmission = self.transmission[inds]
+        self._wavelength = self._wavelength[inds]
+        self._transmission = self._transmission[inds]
         self.npts = len(self.wavelength)
 
     def gridify_transmission(self, dlnlam, wmin=1e2):
@@ -181,14 +190,15 @@ class Filter(object):
         lnlam = np.linspace(ind_min * dlnlam + np.log(wmin),
                             ind_max * dlnlam + np.log(wmin), ind_max - ind_min)
         lam = np.exp(lnlam)
+        # TODO: replace with a rebinning
         trans = np.interp(lam, self.wavelength, self.transmission,
                           left=0., right=0.)
 
         self.wmin = wmin
         self.dlnlam = dlnlam
         self.inds = slice(ind_min, ind_max)
-        self.wavelength = lam
-        self.transmission = trans
+        self._wavelength = lam
+        self._transmission = trans
         self.dwave = np.gradient(lam)
 
     def get_properties(self):
@@ -468,6 +478,12 @@ class FilterSet(object):
         ----------
         filterlist : list of strings
             The filters to include in this set, in order
+
+        wmin : float
+            Minimum wavelength (AA) for the wavelength grid for the FilterSet
+
+        dlnlam : float
+            logarithmic spacing for the wavelength grid of the FilterSet
         """
         self.filternames = filterlist
         native = load_filters(self.filternames, **loading_kwargs)
@@ -480,6 +496,10 @@ class FilterSet(object):
     def _set_filters(self, native, wmin=None, wmax=None, dlnlam=None,
                      **loading_kwargs):
         """Set the filters and the wavelength grid
+
+        native : list of Filter() instances
+            The Filter objects that will be part of this FilterSet, including
+            their native transmission
         """
         # get the wavelength grid parameters
         self.dlnlam_native = np.array([np.diff(np.log(f.wavelength)).min()
@@ -542,6 +562,7 @@ class FilterSet(object):
         """
         sourceflux = np.atleast_2d(sourceflux)
         # TODO: replace with scipy interpolate for vectorization?
+        # TODO replace with rebinning!!!!
         flux = np.array([np.interp(self.lam, inwave, s, left=0, right=0)
                          for s in sourceflux])
         return np.squeeze(flux.T)
