@@ -222,11 +222,20 @@ class Filter(object):
         i3 = np.trapz(self.transmission,
                       self.wavelength)
 
+        tmax = self.transmission.max()
         self.wave_effective = np.exp(i0 / i1)
         self.wave_pivot = np.sqrt(i2 / i1)
         self.wave_mean = self.wave_effective
         self.wave_average = i2 / i3
-        self.rectangular_width = i3 / self.transmission.max()
+        self.rectangular_width = i3 / tmax
+
+        wpeak = self.wavelength[np.argmax(self.transmission)]
+        sel = (self.wavelength < wpeak) & (self.transmission < 0.5 * tmax)
+        bind = np.argmax(self.wavelength[sel])
+        self.blue_edge = self.wavelength[sel][bind]
+        sel = (self.wavelength > wpeak) & (self.transmission < 0.5 * tmax)
+        rind = np.argmin(self.wavelength[sel])
+        self.red_edge = self.wavelength[sel][rind]
 
         i4 = np.trapz(self.transmission *
                       (np.log(self.wavelength / self.wave_effective))**2.0,
