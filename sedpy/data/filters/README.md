@@ -110,7 +110,8 @@
 
 The default NIRCam filters are averages over the A and B modules. For every
 JWST/NIRCam filter there are also module specific curves available as
-`jwst_mod[a,b]_f*w.par`.
+`jwst_mod[a,b]_f*w.par`.  For the SW filters these correspond to detector '1' of
+each module.
 
 ### Spitzer Space Telescope
 
