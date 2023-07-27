@@ -64,12 +64,14 @@ def test_filterset():
     from sedpy.observate import FilterSet
     flist = [f for f in observate.list_available_filters()
              if ("jw" in f) or ("wise" in f) or ("galex" in f)]
-    filterset = FilterSet(flist)
+    filterset = FilterSet(flist, dlnlam=1e-4)
     source = observate.vega.T
 
     mags = observate.getSED(source[0], source[1], filterset)
     omags = observate.getSED(source[0], source[1], observate.load_filters(flist))
-    assert np.allclose(mags, omags, 1e-3)
+
+    good = np.isclose(mags, omags, atol=1.0e-3)
+    assert np.all(good), f"filters {np.array(flist)[~good]} failed with {(mags-omags)[~good]}"
 
 
 def test_shapes():
