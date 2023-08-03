@@ -1,3 +1,29 @@
+[project]
+name = "astro-sedpy"
+description = "Simple tools for astronomical spectral energy distributions, particularly filter projections."
+authors = [{ name = "Benjamin Johnson", email = "benjamin.johnson@cfa.harvard.edu" }]
+readme = "README.rst"
+license = { text = "MIT License" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+dynamic = ["version"]
+dependencies = ["numpy"]
+
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=42", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools]
+packages = ["sedpy"]
+include-package-data = true
+
+
+[tool.setuptools_scm]
+write_to = "sedpy/_version.py"
