@@ -7,8 +7,11 @@ Old code, use with caution!
 
 import numpy as np
 import warnings, sys
-import scipy.interpolate as interp
 from numpy.random import normal
+try:
+    import scipy.interpolate as interp
+except:
+    pass
 
 thismod = sys.modules[__name__]
 

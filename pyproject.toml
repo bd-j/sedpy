@@ -13,17 +13,15 @@ classifiers = [
     "Programming Language :: Python",
 ]
 dynamic = ["version"]
-dependencies = ["numpy"]
+dependencies = ["numpy", "astropy"]
 
 [build-system]
 requires = ["setuptools>=42", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
-
 [tool.setuptools]
 packages = ["sedpy"]
 include-package-data = true
-
 
 [tool.setuptools_scm]
 write_to = "sedpy/_version.py"
