@@ -100,6 +100,8 @@
 |$\textrm{F430M}$|NIRCam|[`jwst_f430m`](filters/jwst_f430m.par)|4.280 μm|164.8 nm||
 |$\textrm{F460M}$|NIRCam|[`jwst_f460m`](filters/jwst_f460m.par)|4.628 μm|182.9 nm||
 |$\textrm{F480M}$|NIRCam|[`jwst_f480m`](filters/jwst_f480m.par)|4.815 μm|256.1 nm||
+|$\textrm{F070W}$|NIRCam|[`jwst_f150w2`](filters/jwst_f150w2.par)| 1.578 μm | 908.6 nm ||
+|$\textrm{F090W}$|NIRCam|[`jwst_f322w2`](filters/jwst_f322w2.par)| 3.179 μm | 1099.2 nm ||
 |$\textrm{F560W}$|MIRI|[`jwst_f560w`](filters/jwst_f560w.par)|5.615 μm|791.9 nm||
 |$\textrm{F770W}$|MIRI|[`jwst_f770w`](filters/jwst_f770w.par)|7.591 μm|1.426 μm||
 |$\textrm{F1000W}$|MIRI|[`jwst_f1000w`](filters/jwst_f1000w.par)|9.923 μm|1.287 μm||
