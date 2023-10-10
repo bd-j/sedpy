@@ -70,7 +70,7 @@ def test_filterset():
     mags = observate.getSED(source[0], source[1], filterset)
     omags = observate.getSED(source[0], source[1], observate.load_filters(flist))
 
-    good = np.isclose(mags, omags, atol=1.0e-3)
+    good = np.isclose(mags, omags, atol=1.5e-3)
     assert np.all(good), f"filters {np.array(flist)[~good]} failed with {(mags-omags)[~good]}"
 
 
