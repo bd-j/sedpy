@@ -291,3 +291,11 @@ each module.
 |$K_s$|ISAAC|[`vlt_isaac_Ks`](filters/vlt_isaac_Ks.par)|2.164 μm|185.5 nm||
 |$U$|VIMOS|[`vlt_vimos_U`](filters/vlt_vimos_U.par)|374.2 nm|39.07 nm||
 |$R$|VIMOS|[`vlt_vimos_R`](filters/vlt_vimos_R.par)|641.7 nm|94.24 nm||
+
+### BASS and MzLS (https://legacysurvey.org)
+
+|Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
+|$g$|90-Prime|[`BASS-g`](filters/BASS-g.par)|472.1 nm|100.2 nm||
+|$r$|90-Prime|[`BASS-r`](filters/BASS-r.par)|637.0 nm|97.76 nm||
+|$z$|Mosaic-3|[`MzLS-z`](filters/MzLS-z.par)|917.9 nm|100.7 nm||
