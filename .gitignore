@@ -4,5 +4,4 @@ dist/
 *.pyc
 __pycache__
 .vscode
-sedpy/data/filters
 junk
