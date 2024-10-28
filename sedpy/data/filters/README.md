@@ -27,9 +27,9 @@
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$G$||[`gaia_g`](filters/gaia_g.par)|590.2 nm|333.4 nm|DR2 revised|
-|$G_\textrm{BP}$|BP|[`gaia_bp`](filters/gaia_bp.par)|488.8 nm|211.7 nm|DR2 revised|
-|$G_\textrm{RP}$|RP|[`gaia_rp`](filters/gaia_rp.par)|762.7 nm|216.9 nm|DR2 revised|
+|$G$||[`gaia_g`](filters/gaia_g.par)|588.2 nm|332 nm|EDR3 (Riello21)|
+|$G_\textrm{BP}$|BP|[`gaia_bp`](filters/gaia_bp.par)|496.4 nm|202.4 nm|EDR3 (Riello21)|
+|$G_\textrm{RP}$|RP|[`gaia_rp`](filters/gaia_rp.par)|765.9 nm|214.3 nm|EDR3 (Riello21)|
 
 ### Galaxy Evolution Explorer (GALEX)
 
