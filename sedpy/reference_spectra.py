@@ -25,6 +25,9 @@ __all__ = ["vega", "solar", "sedpydir"]
 sedpydir, f = os.path.split(__file__)
 sedpydir = sedpydir
 try:
+    # This is from stsci calspec database ("calspec_ascii_review")
+    # C.f. https://ui.adsabs.harvard.edu/abs/2007ASPC..364..315B/abstract
+    # C.f. https://ui.adsabs.harvard.edu/abs/2014AJ....147..127B/abstract
     vega_file = resource_filename('sedpy', 'data/alpha_lyr_stis_005.fits')
 except:
     vega_file = os.path.join(sedpydir, 'data', 'alpha_lyr_stis_005.fits')

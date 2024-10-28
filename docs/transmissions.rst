@@ -50,3 +50,15 @@ Finally, you can simply pass a tuple of ``(wavelength, transmission)``:
 
 		from sedpy import observate
 		filt = observate.Filter("filter_name", data=(wavelength, transmission)
+
+
+Vega reference
+--------------
+
+By default ``sedpy`` produces AB magnitudes.  However, for each filter a
+conversion to Vega zeropoints is computed.  This is based on a Vega reference
+spectrum from the HST calspec database, as discussed in
+`Bolin07 <https://ui.adsabs.harvard.edu/abs/2007ASPC..364..315B/abstract>`_ and
+`Bohlin14 <https://ui.adsabs.harvard.edu/abs/2014AJ....147..127B/abstract>`_ .
+The version used corresponds to the one
+`here <https://ssb.stsci.edu/cdbs/calspec_ascii_review/>`_ .
