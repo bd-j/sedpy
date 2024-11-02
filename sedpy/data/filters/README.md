@@ -154,6 +154,19 @@ each module.
 |$w2$|UVOT|[`uvot_w2`](filters/uvot_w2.par)|201.0 nm|67.2 nm||
 |$m2$|UVOT|[`uvot_m2`](filters/uvot_m2.par)|223.0 nm|45.9 nm||
 
+### Roman
+
+|Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
+|$\textrm{F062}$|WFI|[`roman_wfi_f062`](filters/roman_wfi_f062.par)|617.8 nm|184.2 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F087}$|WFI|[`roman_wfi_f087`](filters/roman_wfi_f087.par)|867.1 nm|149.9 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F106}$|WFI|[`roman_wfi_f106`](filters/roman_wfi_f106.par)|1056.3 nm|179.4 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F129}$|WFI|[`roman_wfi_f129`](filters/roman_wfi_f129.par)|1277.2 nm|220.6 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F146}$|WFI|[`roman_wfi_f146`](filters/roman_wfi_f146.par)|1365.3 nm|719.9 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F158}$|WFI|[`roman_wfi_f158`](filters/roman_wfi_f158.par)|1571.6 nm|270.8 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F184}$|WFI|[`roman_wfi_f184`](filters/roman_wfi_f184.par)|1833.7 nm|218.2 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F213}$|WFI|[`roman_wfi_f213`](filters/roman_wfi_f213.par)|2126.4 nm|237.1 nm|03/24: Average of normalized SCA curves|
+
 ## Ground-Based Telescopes
 
 ### Two Micron All-Sky Survey (2MASS) Telescope
