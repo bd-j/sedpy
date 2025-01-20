@@ -42,6 +42,14 @@ class Filter(object):
         The path to the directory containing the filter file.  If not given
         then the sedpy/data/filters/ directory will be searched.
 
+    trans_colnum : int or None (default, None)
+        Column from which to pull the transmission, starting with 1. Will attempt
+        to update the filter name with the column name.
+
+    data: None or tuple of ndarray (optional, default None)
+        If provided, a 2-tuple of ndarrays giving wavelength (AA) and
+        transmission (detector signal per photon).
+
     dlnlam : float (optional)
         If given, interpolate the transmission curve onto a grid in
         :math:`\ln(\lambda)` with this spacing (and begining at ``wmin``)
@@ -55,16 +63,13 @@ class Filter(object):
         value) to consider as a useful positive value.  Useful for curves that
         have extremely low amplitude components far from the main part of the
         filter when speed is more important than accuracy.
-
-    data: None or tuple of ndarray (optional, default None)
-        If provided, a 2-tuple of ndarrays giving wavelength (AA) and
-        transmission (detector signal per photon).
     """
     ab_gnu = 3.631e-20  # AB reference spctrum in erg/s/cm^2/Hz
     npts = 0
 
-    def __init__(self, kname='sdss_r0', nick=None, directory=None,
-                 dlnlam=None, wmin=1e2, min_trans=1e-5, data=None, **extras):
+    def __init__(self, kname='sdss_r0', nick=None,
+                 directory=None, trans_colname=None, data=None,
+                 dlnlam=None, wmin=1e2, min_trans=1e-5,  **extras):
         """Read in the filter data, calculate and cache some properties of the
         filters.
         """
@@ -75,6 +80,7 @@ class Filter(object):
             self.nick = nick
 
         self.min_trans = min_trans
+        self.trans_colname = trans_colname
 
         if directory is None:
             loc = os.path.join('data', 'filters', kname + '.par')
@@ -121,7 +127,26 @@ class Filter(object):
             The fully qualified path and filename of the file that contains the
             filter transmission.
         """
-        wave, trans = np.genfromtxt(filename, usecols=(0, 1), unpack=True)
+        if self.trans_colname is None:
+            # basic
+            wave, trans = np.genfromtxt(filename, usecols=(0, 1), unpack=True)
+        else:
+            # get colnum from colname
+            with open(filename, "r") as f:
+                line = "#"
+                while (line[0] in "#\n"):
+                    cols = line[1:].split()
+                    line = f.readline()
+            try:
+                colnum = cols.index(self.trans_colname)
+            except:
+                print(f"{self.trans_colname} not in {cols}")
+                raise
+            wave, trans = np.genfromtxt(filename, usecols=(0, colnum), unpack=True)
+
+            self.name = f"{self.name}_{self.trans_colname}"
+            self.nick = f"{self.nick}_{self.trans_colname}"
+
         # Clean negatives, NaNs, and Infs, then sort, then store
         self._process_filter_data(wave, trans)
 

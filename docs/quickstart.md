@@ -17,6 +17,22 @@ filterlist = observate.load_filters(["galex_NUV", "sdss_r0"])
 mags = observate.getSED(angstroms, f_lambda_cgs, filterlist=filters)
 ```
 
+For some filters, multiple versions of the transmission (e.g. corresponding to
+different chips) are stored in the same file in different columns.  While the
+default column is always the first one, other columns can be accessed by name as follows
+
+```python
+from sedpy import observate
+# filter corresponding to an average over SCAs
+filt_mean =  observate.Filter("roman_wfi_f146")
+# filter corresponding to SCA1
+filt_sca01 = observate.Filter("roman_wfi_f146", trans_colname="sca01")
+
+print(filt_mean.name, filt_mean.wave_effective)
+print(filt_sca01.name, filt_sca01.wave_effective)
+
+```
+
+
 Spectral smoothing
 ------------------
-

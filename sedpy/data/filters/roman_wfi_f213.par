@@ -4,11 +4,11 @@
 # Units of transmission are effective area (m^2)
 
 # First column:
-   wavelength in AA
+#   wavelength in AA
 # Second column:
-   Effective area aaveraged over all SCAs after renormalizing by AB=0 counts
+#   Effective area averaged over all SCAs after renormalizing by AB=0 counts
 # Third through 21st column:
-   Effective area for SCAs 01 through 18
+#   Effective area for SCAs 01 through 18
 
 # From the webpage:
 # The Roman Effective area has been updated to reflect recalibration
@@ -18,7 +18,7 @@
 # filter bandpasses with field angle.
 
 
-# wave sca_mean sca_01 sca_02 sca_03 sca_04 sca_05 sca_06 sca_07 sca_08 sca_09 sca_10 sca_11 sca_12 sca_13 sca_14 sca_15 sca_16 sca_17
+# wave sca_mean sca01 sca02 sca03 sca04 sca05 sca06 sca07 sca08 sca09 sca10 sca11 sca12 sca13 sca14 sca15 sca16 sca17
 4000.0 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00
 4010.0 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00
 4020.0 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00
