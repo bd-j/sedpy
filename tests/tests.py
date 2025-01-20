@@ -132,6 +132,17 @@ def test_gridded_shapes():
     assert maggies.shape == (100, len(fnames))
 
 
+def test_filter_cols():
+    from sedpy import observate
+    # filter corresponding to an average over SCAs
+    filt_mean =  observate.Filter("roman_wfi_f146")
+    # filter corresponding to SCA1
+    filt_sca01 = observate.Filter("roman_wfi_f146", trans_colname="sca01")
+    k = filt_mean.name, filt_mean.wave_effective
+    j = filt_sca01.name, filt_sca01.wave_effective
+    assert (filt_mean.name != filt_sca01.name)
+
+
 def test_filter_properties():
     """Compare to the values obtained from the K-correct code
     (which uses a slightly different Vega spectrum)

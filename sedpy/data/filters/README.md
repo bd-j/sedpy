@@ -49,6 +49,14 @@
 |$350\ \textrm{μm}$|SPIRE|[`herschel_spire_350`](filters/herschel_spire_350.par)|345.5 μm|74.97 μm||
 |$500\ \textrm{μm}$|SPIRE|[`herschel_spire_500`](filters/herschel_spire_500.par)|493.1 μm|139.6 μm||
 
+### Hipparcos
+
+|Filter|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:----------:|---------------------:|---------------------------:|:-------|
+|$H$|[`hipparcos_H`](filters/hipparcos_H.par)|519.0 nm|198.5 nm||
+|$B$|[`hipparcos_B`](filters/hipparcos_B.par)|413.1 nm|71.4 nm||
+|$V$|[`hipparcos_V`](filters/hipparcos_V.par)|527.8 nm|91.2 nm||
+
 ### Hubble Space Telescope (HST)
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
@@ -117,6 +125,29 @@ JWST/NIRCam filter there are also module specific curves available as
 `jwst_mod[a,b]_f*w.par`.  For the SW filters these correspond to detector '1' of
 each module.
 
+
+### Roman
+
+|Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
+|$\textrm{F062}$|WFI|[`roman_wfi_f062`](filters/roman_wfi_f062.par)|617.8 nm|184.2 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F087}$|WFI|[`roman_wfi_f087`](filters/roman_wfi_f087.par)|867.1 nm|149.9 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F106}$|WFI|[`roman_wfi_f106`](filters/roman_wfi_f106.par)|1056.3 nm|179.4 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F129}$|WFI|[`roman_wfi_f129`](filters/roman_wfi_f129.par)|1277.2 nm|220.6 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F146}$|WFI|[`roman_wfi_f146`](filters/roman_wfi_f146.par)|1365.3 nm|719.9 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F158}$|WFI|[`roman_wfi_f158`](filters/roman_wfi_f158.par)|1571.6 nm|270.8 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F184}$|WFI|[`roman_wfi_f184`](filters/roman_wfi_f184.par)|1833.7 nm|218.2 nm|03/24: Average of normalized SCA curves|
+|$\textrm{F213}$|WFI|[`roman_wfi_f213`](filters/roman_wfi_f213.par)|2126.4 nm|237.1 nm|03/24: Average of normalized SCA curves|
+
+
+The default Roman filters are averages over the 18 available SCAs. However, by
+asking for `trans_colname="sca??"` you can obtain the transmission curve for the
+`??`th SCA (beginning with `sca01`)
+
+### Spherex
+
+There are 102 `SPHEREX` channels, accessed using `trans_colname='ch???'`, beginning with `ch001`
+
 ### Spitzer Space Telescope
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
@@ -138,14 +169,6 @@ each module.
 |$\textrm{W3}$|WISE|[`wise_w3`](filters/wise_w3.par)|11.55 μm|5.851 μm||
 |$\textrm{W4}$|WISE|[`wise_w4`](filters/wise_w4.par)|22.08 μm|3.720 μm||
 
-### Hipparcos
-
-|Filter|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
-|:----:|:----------:|---------------------:|---------------------------:|:-------|
-|$H$|[`hipparcos_H`](filters/hipparcos_H.par)|519.0 nm|198.5 nm||
-|$B$|[`hipparcos_B`](filters/hipparcos_B.par)|413.1 nm|71.4 nm||
-|$V$|[`hipparcos_V`](filters/hipparcos_V.par)|527.8 nm|91.2 nm||
-
 ### SWIFT/UVOT
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
@@ -154,18 +177,7 @@ each module.
 |$w2$|UVOT|[`uvot_w2`](filters/uvot_w2.par)|201.0 nm|67.2 nm||
 |$m2$|UVOT|[`uvot_m2`](filters/uvot_m2.par)|223.0 nm|45.9 nm||
 
-### Roman
 
-|Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
-|:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$\textrm{F062}$|WFI|[`roman_wfi_f062`](filters/roman_wfi_f062.par)|617.8 nm|184.2 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F087}$|WFI|[`roman_wfi_f087`](filters/roman_wfi_f087.par)|867.1 nm|149.9 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F106}$|WFI|[`roman_wfi_f106`](filters/roman_wfi_f106.par)|1056.3 nm|179.4 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F129}$|WFI|[`roman_wfi_f129`](filters/roman_wfi_f129.par)|1277.2 nm|220.6 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F146}$|WFI|[`roman_wfi_f146`](filters/roman_wfi_f146.par)|1365.3 nm|719.9 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F158}$|WFI|[`roman_wfi_f158`](filters/roman_wfi_f158.par)|1571.6 nm|270.8 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F184}$|WFI|[`roman_wfi_f184`](filters/roman_wfi_f184.par)|1833.7 nm|218.2 nm|03/24: Average of normalized SCA curves|
-|$\textrm{F213}$|WFI|[`roman_wfi_f213`](filters/roman_wfi_f213.par)|2126.4 nm|237.1 nm|03/24: Average of normalized SCA curves|
 
 ## Ground-Based Telescopes
 
