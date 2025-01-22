@@ -88,28 +88,28 @@
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$\textrm{F070W}$|NIRCam|[`jwst_f070w`](filters/jwst_f070w.par)|700.7 nm|116.4 nm||
-|$\textrm{F090W}$|NIRCam|[`jwst_f090w`](filters/jwst_f090w.par)|898.1 nm|144.8 nm||
-|$\textrm{F115W}$|NIRCam|[`jwst_f115w`](filters/jwst_f115w.par)|1.149 μm|188.0 nm||
-|$\textrm{F150W}$|NIRCam|[`jwst_f150w`](filters/jwst_f150w.par)|1.494 μm|232.1 nm||
-|$\textrm{F200W}$|NIRCam|[`jwst_f200w`](filters/jwst_f200w.par)|1.979 μm|322.6 nm||
-|$\textrm{F277W}$|NIRCam|[`jwst_f277w`](filters/jwst_f277w.par)|2.747 μm|480.3 nm||
-|$\textrm{F356W}$|NIRCam|[`jwst_f356w`](filters/jwst_f356w.par)|3.552 μm|577.4 nm||
-|$\textrm{F444W}$|NIRCam|[`jwst_f444w`](filters/jwst_f444w.par)|4.381 μm|750.8 nm||
-|$\textrm{F140M}$|NIRCam|[`jwst_f140m`](filters/jwst_f140m.par)|1.404 μm|105.4 nm||
-|$\textrm{F162M}$|NIRCam|[`jwst_f162m`](filters/jwst_f162m.par)|1.626 μm|120.5 nm||
-|$\textrm{F182M}$|NIRCam|[`jwst_f182m`](filters/jwst_f182m.par)|1.842 μm|170.5 nm||
-|$\textrm{F210M}$|NIRCam|[`jwst_f210m`](filters/jwst_f210m.par)|2.094 μm|146.4 nm||
-|$\textrm{F250M}$|NIRCam|[`jwst_f250m`](filters/jwst_f250m.par)|2.502 μm|129.3 nm||
-|$\textrm{F300M}$|NIRCam|[`jwst_f300m`](filters/jwst_f300m.par)|2.986 μm|233.7 nm||
-|$\textrm{F335M}$|NIRCam|[`jwst_f335m`](filters/jwst_f335m.par)|3.359 μm|261.1 nm||
-|$\textrm{F360M}$|NIRCam|[`jwst_f360m`](filters/jwst_f360m.par)|3.620 μm|275.9 nm||
-|$\textrm{F410M}$|NIRCam|[`jwst_f410m`](filters/jwst_f410m.par)|4.078 μm|311.5 nm||
-|$\textrm{F430M}$|NIRCam|[`jwst_f430m`](filters/jwst_f430m.par)|4.280 μm|164.8 nm||
-|$\textrm{F460M}$|NIRCam|[`jwst_f460m`](filters/jwst_f460m.par)|4.628 μm|182.9 nm||
-|$\textrm{F480M}$|NIRCam|[`jwst_f480m`](filters/jwst_f480m.par)|4.815 μm|256.1 nm||
-|$\textrm{F070W}$|NIRCam|[`jwst_f150w2`](filters/jwst_f150w2.par)| 1.578 μm | 908.6 nm ||
-|$\textrm{F090W}$|NIRCam|[`jwst_f322w2`](filters/jwst_f322w2.par)| 3.179 μm | 1099.2 nm ||
+|$\textrm{F070W}$||[`jwst_f070w`](filters/jwst_f070w.par)|701.4 nm|114.7 nm|May 2024|
+|$\textrm{F090W}$||[`jwst_f090w`](filters/jwst_f090w.par)|898.3 nm|143.9 nm|May 2024|
+|$\textrm{F115W}$||[`jwst_f115w`](filters/jwst_f115w.par)|1148.6 nm|188.0 nm|May 2024|
+|$\textrm{F150W}$||[`jwst_f150w`](filters/jwst_f150w.par)|1494.4 nm|232.1 nm|May 2024|
+|$\textrm{F200W}$||[`jwst_f200w`](filters/jwst_f200w.par)|1978.2 nm|321.9 nm|May 2024|
+|$\textrm{F277W}$||[`jwst_f277w`](filters/jwst_f277w.par)|2760.5 nm|490.3 nm|May 2024|
+|$\textrm{F356W}$||[`jwst_f356w`](filters/jwst_f356w.par)|3548.4 nm|581.0 nm|May 2024|
+|$\textrm{F444W}$||[`jwst_f444w`](filters/jwst_f444w.par)|4378.7 nm|745.5 nm|May 2024|
+|$\textrm{F140M}$||[`jwst_f140m`](filters/jwst_f140m.par)|1403.9 nm|105.1 nm|May 2024|
+|$\textrm{F162M}$||[`jwst_f162m`](filters/jwst_f162m.par)|1625.6 nm|120.5 nm|May 2024|
+|$\textrm{F182M}$||[`jwst_f182m`](filters/jwst_f182m.par)|1842.4 nm|170.5 nm|May 2024|
+|$\textrm{F210M}$||[`jwst_f210m`](filters/jwst_f210m.par)|2093.8 nm|146.3 nm|May 2024|
+|$\textrm{F250M}$||[`jwst_f250m`](filters/jwst_f250m.par)|2502.0 nm|125.9 nm|May 2024|
+|$\textrm{F300M}$||[`jwst_f300m`](filters/jwst_f300m.par)|2992.9 nm|231.7 nm|May 2024|
+|$\textrm{F335M}$||[`jwst_f335m`](filters/jwst_f335m.par)|3358.6 nm|260.6 nm|May 2024|
+|$\textrm{F360M}$||[`jwst_f360m`](filters/jwst_f360m.par)|3619.5 nm|276.0 nm|May 2024|
+|$\textrm{F410M}$||[`jwst_f410m`](filters/jwst_f410m.par)|4078.7 nm|311.0 nm|May 2024|
+|$\textrm{F430M}$||[`jwst_f430m`](filters/jwst_f430m.par)|4280.2 nm|162.9 nm|May 2024|
+|$\textrm{F460M}$||[`jwst_f460m`](filters/jwst_f460m.par)|4628.5 nm|166.7 nm|May 2024|
+|$\textrm{F480M}$||[`jwst_f480m`](filters/jwst_f480m.par)|4814.5 nm|235.1 nm|May 2024|
+|$\textrm{F150W2}$||[`jwst_f150w2`](filters/jwst_f150w2.par)|1578.7 nm|909.4 nm|May 2024|
+|$\textrm{F322W2}$||[`jwst_f322w2`](filters/jwst_f322w2.par)|3179.2 nm|1099.3 nm|May 2024|
 |$\textrm{F560W}$|MIRI|[`jwst_f560w`](filters/jwst_f560w.par)|5.615 μm|791.9 nm||
 |$\textrm{F770W}$|MIRI|[`jwst_f770w`](filters/jwst_f770w.par)|7.591 μm|1.426 μm||
 |$\textrm{F1000W}$|MIRI|[`jwst_f1000w`](filters/jwst_f1000w.par)|9.923 μm|1.287 μm||

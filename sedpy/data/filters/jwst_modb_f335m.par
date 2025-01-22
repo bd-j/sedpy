@@ -1,5 +1,5 @@
-# from http://www.stsci.edu/jwst/instruments/nircam/instrumentdesign/filters
-# Retrieved March, 2023, dated Nov, 2022 (post-flight)
+# from B. Hilbert, priv. comm. 
+# Dated May 2024 (post-flight)
 # Uses modA or modB  filters+DBS+QE+OTE (nrc_plus_ote)
 # Units of transmission are PCE (photon to electron conversion efficiency)
 # 
