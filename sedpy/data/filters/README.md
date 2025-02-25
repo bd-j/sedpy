@@ -321,6 +321,6 @@ There are 102 `SPHEREX` channels, accessed using `trans_colname='ch???'`, beginn
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$g$|90-Prime|[`BASS-g`](filters/BASS-g.par)|472.1 nm|100.2 nm||
-|$r$|90-Prime|[`BASS-r`](filters/BASS-r.par)|637.0 nm|97.76 nm||
-|$z$|Mosaic-3|[`MzLS-z`](filters/MzLS-z.par)|917.9 nm|100.7 nm||
+|$g$|90-Prime|[`bass_g`](./bass_g.par)|472.1 nm|100.2 nm||
+|$r$|90-Prime|[`bass_r`](./bass_r.par)|637.0 nm|97.76 nm||
+|$z$|Mosaic-3|[`mzls_z`](./mzls_z.par)|917.9 nm|100.7 nm||
