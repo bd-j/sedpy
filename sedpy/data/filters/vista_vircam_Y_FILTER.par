@@ -8,10 +8,10 @@
 #   https://www.eso.org/sci/facilities/paranal/decommissioned/vircam/inst.html
 #   https://astro.pas.rochester.edu/IR-camera/papers/CMcMurtry-SPIEv5902-2005-VIRGO.pdf
 # Notes :
-#   Includes filter transmission, atmosphere, detector QE, and mirror reflectivity.
-#   Individual contributions are tabulated in the tar file available from ESO.
-#   This file is a copy of 'VISTA_Filters_at80K_forETC_Y.dat'
-#   with wavelength converted to Angstroms.
+#   Includes filter transmission ONLY.
+#   This file is a copy of 'VISTA_Filters_at80K_forETC_Y.dat' from ESO's 
+#   'Filters_QE_Atm_curves.tar' with wavelength converted to Angstroms.
+#   Prior to April 2025, this was vista_vircam_Y.par in sedpy.
 #
 # wavelength transmission
 5000.0000 0.0006
