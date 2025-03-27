@@ -11,7 +11,7 @@
 #   Includes filter transmission ONLY.
 #   This file is a copy of 'VISTA_Filters_at80K_forETC_Y.dat' from ESO's 
 #   'Filters_QE_Atm_curves.tar' with wavelength converted to Angstroms.
-#   Prior to April 2025, this was vista_vircam_Y.par in sedpy.
+#   Prior to April 2025, this was 'vista_vircam_Y.par' in sedpy.
 #
 # wavelength transmission
 5000.0000 0.0006
