@@ -144,9 +144,9 @@ The default Roman filters are averages over the 18 available SCAs. However, by
 asking for `trans_colname="sca??"` you can obtain the transmission curve for the
 `??`th SCA (beginning with `sca01`)
 
-### Spherex
+### SPHEREx
 
-There are 102 `SPHEREX` channels, accessed using `trans_colname='ch???'`, beginning with `ch001`
+There are 6 `SPHEREx` 'bands' beginning with `band1`, each having 17 channels per band accessed using `trans_colname='ch??'`, beginning with `ch01`.  So, e.g. ``filt=Filter("spherex_band2", trans_colname="ch14")`` gets you the 14th channel of the 2nd band.
 
 ### Spitzer Space Telescope
 
@@ -301,11 +301,17 @@ There are 102 `SPHEREX` channels, accessed using `trans_colname='ch???'`, beginn
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$Z$|VIRCAM|[`vista_vircam_Z`](./vista_vircam_Z.par)|876.6 nm|68.04 nm||
-|$Y$|VIRCAM|[`vista_vircam_Y`](./vista_vircam_Y.par)|1.020 μm|75.26 nm||
-|$J$|VIRCAM|[`vista_vircam_J`](./vista_vircam_J.par)|1.250 μm|120.9 nm||
-|$H$|VIRCAM|[`vista_vircam_H`](./vista_vircam_H.par)|1.639 μm|200.6 nm||
-|$K_s$|VIRCAM|[`vista_vircam_Ks`](./vista_vircam_Ks.par)|2.145 μm|258.7 nm||
+
+|$\textrm{Z}$|VIRCAM|[`vista_vircam_Z`](./vista_vircam_Z.par)|878.3 nm|86.8 nm|Filter+QE+atm|
+|$\textrm{Y}$|VIRCAM|[`vista_vircam_Y`](./vista_vircam_Y.par)|1.020 μm|78.3 nm|Filter+QE+atm|
+|$\textrm{J}$|VIRCAM|[`vista_vircam_J`](./vista_vircam_J.par)|1.251 μm|122.7 nm|Filter+QE+atm|
+|$\textrm{H}$|VIRCAM|[`vista_vircam_H`](./vista_vircam_H.par)|1.639 μm|201.9 nm|Filter+QE+atm|
+|$\textrm{KS}$|VIRCAM|[`vista_vircam_Ks`](./vista_vircam_Ks.par)|2.145 μm|261.5 nm|Filter+QE+atm|
+|$\textrm{Z}$|VIRCAM|[`vista_vircam_Z_FILTER`](./vista_vircam_Z_FILTER.par)|831.5 nm|734.6 nm|Filter only|
+|$\textrm{Y}$|VIRCAM|[`vista_vircam_Y_FILTER`](./vista_vircam_Y_FILTER.par)|1027.2 nm|223.9 nm|Filter only|
+|$\textrm{J}$|VIRCAM|[`vista_vircam_J_FILTER`](./vista_vircam_J_FILTER.par)|1256.8 nm|229.3 nm|Filter only|
+|$\textrm{H}$|VIRCAM|[`vista_vircam_H_FILTER`](./vista_vircam_H_FILTER.par)|1639.7 nm|207.1 nm|Filter only|
+|$\textrm{KS}$|VIRCAM|[`vista_vircam_Ks_FILTER`](./vista_vircam_Ks_FILTER.par)|2139.6 nm|267.4 nm|Filter only|
 
 ### Very Large Telescope (VLT) Array
 

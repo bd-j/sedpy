@@ -23,7 +23,7 @@ def make_md_entry(filternames,
     for f in filters:
         name = f.name
         try:
-            tel, inst, band = name.split("_")
+            tel, inst, band, dummy = name.split("_")
         except(ValueError):
             tel, band = name.split("_")
             inst = ""
