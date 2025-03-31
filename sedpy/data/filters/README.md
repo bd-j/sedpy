@@ -301,7 +301,6 @@ There are 6 `SPHEREx` 'bands' beginning with `band1`, each having 17 channels pe
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-
 |$\textrm{Z}$|VIRCAM|[`vista_vircam_Z`](./vista_vircam_Z.par)|878.3 nm|86.8 nm|Filter+QE+atm|
 |$\textrm{Y}$|VIRCAM|[`vista_vircam_Y`](./vista_vircam_Y.par)|1.020 μm|78.3 nm|Filter+QE+atm|
 |$\textrm{J}$|VIRCAM|[`vista_vircam_J`](./vista_vircam_J.par)|1.251 μm|122.7 nm|Filter+QE+atm|
