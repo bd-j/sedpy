@@ -17,7 +17,7 @@ __all__ = ["calzetti", "chevallard", "conroy", "noll",
 
 
 def powerlaw(wave, tau_v=1, alpha=1.0, **kwargs):
-    """Simple power-law attenuation, normalized to 5500\AA.
+    r"""Simple power-law attenuation, normalized to 5500\AA.
 
     :param wave:
         The wavelengths at which optical depth estimates are desired.
@@ -33,7 +33,7 @@ def powerlaw(wave, tau_v=1, alpha=1.0, **kwargs):
 
 
 def calzetti(wave, tau_v=1, R_v=4.05, **kwargs):
-    """Calzetti et al. 2000 starburst attenuation curve, with extrapolations to
+    r"""Calzetti et al. 2000 starburst attenuation curve, with extrapolations to
     the FUV and NIR.
 
     :param wave:
@@ -102,7 +102,7 @@ def drude(x, x0=4.59, gamma=0.90, **extras):
 
 
 def noll(wave, tau_v=1, delta=0.0, c_r=0.0, Ebump=0.0, **kwargs):
-    """Noll 2009 attenuation curve. This is based on the Calzetti curve, with
+    r"""Noll 2009 attenuation curve. This is based on the Calzetti curve, with
     added variable bump (as Drude) and overall slope change.  Any extra
     keywords are passed to the Drude (e.g. x0, gamma, both in inverse microns).
 
@@ -133,7 +133,7 @@ def noll(wave, tau_v=1, delta=0.0, c_r=0.0, Ebump=0.0, **kwargs):
 
 
 def chevallard(wave, tau_v=1, **kwargs):
-    """ \tau_v dependent attenuation curves matched to disk RT models,
+    r""" \tau_v dependent attenuation curves matched to disk RT models,
     as in Chevallard et al. 2013.  No UV bump (or indeed tests in the
     UV at all).
 
@@ -156,7 +156,7 @@ def chevallard(wave, tau_v=1, **kwargs):
 
 
 def conroy(wave, tau_v=1, R_v=3.1, f_bump=0.6, **kwargs):
-    """ Conroy & Schiminovich 2010 dust attenuation curves including a
+    r""" Conroy & Schiminovich 2010 dust attenuation curves including a
     decreased UV bump.
 
     :param wave:
@@ -235,7 +235,7 @@ def conroy(wave, tau_v=1, R_v=3.1, f_bump=0.6, **kwargs):
 
 def broken_powerlaw(wave, tau_v=1, alpha=[0.7, 0.7, 0.7],
                     breaks=[0, 3000, 10000, 4e4], **kwargs):
-    """ Attenuation curve as in V. Wild et al. 2011, i.e. power-law
+    r""" Attenuation curve as in V. Wild et al. 2011, i.e. power-law
     slope can change between regions.  Superceded by Chevallard 2013
     for optical/NIR.
 
@@ -271,7 +271,7 @@ def wg00(wave, tau_v=1, geometry='SHELL', composition='MW',
 
 
 def cardelli(wave, tau_v=1, R_v=3.1, **kwargs):
-    """ Cardelli, Clayton, and Mathis 1998 Milky Way extinction curve,
+    r""" Cardelli, Clayton, and Mathis 1998 Milky Way extinction curve,
     with an update in the near-UV from O'Donnell 1994
 
     :param wave:
@@ -336,7 +336,7 @@ def cardelli(wave, tau_v=1, R_v=3.1, **kwargs):
 
 
 def smc(wave, tau_v=1, **kwargs):
-    """Pei 1992 SMC extinction curve.
+    r"""Pei 1992 SMC extinction curve.
 
     :param wave:
         The wavelengths at which optical depth estimates are desired.
@@ -369,7 +369,7 @@ def smc(wave, tau_v=1, **kwargs):
 
 
 def lmc(wave, tau_v=1, **kwargs):
-    """ Pei 1992 LMC extinction curve.
+    r""" Pei 1992 LMC extinction curve.
 
     :param wave:
         The wavelengths at which optical depth estimates are desired.

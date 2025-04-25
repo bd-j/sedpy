@@ -19,7 +19,7 @@ sigma_to_fwhm = 2.355
 def smoothspec(wave, spec, resolution=None, outwave=None,
                smoothtype="vel", fftsmooth=True,
                min_wave_smooth=0, max_wave_smooth=np.inf, **kwargs):
-    """
+    r"""
     Parameters
     ----------
     wave : ndarray of shape ``(N_pix,)``
@@ -288,7 +288,7 @@ def smooth_vel_fft(wavelength, spectrum, outwave, sigma_out, inres=0.0,
 
 def smooth_wave(wave, spec, outwave, sigma, nsigma=10, inres=0, in_vel=False,
                 **extras):
-    """Smooth a spectrum in wavelength space.  This is insanely slow, but
+    r"""Smooth a spectrum in wavelength space.  This is insanely slow, but
     general and correct (except for the treatment of the input resolution if it
     is velocity)
 
