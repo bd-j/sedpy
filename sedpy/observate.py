@@ -24,7 +24,7 @@ lightspeed = 2.998e18  # AA/s
 
 
 class Filter(object):
-    """This class operates on filter transmission files.  It reads simple
+    r"""This class operates on filter transmission files.  It reads simple
     2-column ascii files containing filter transmission curves. It caches a
     number of useful filter quantities.  Methods are provided to project a
     source spectrum onto the filter and return the magnitude, AB or Vega.
@@ -557,7 +557,7 @@ class FilterSet(object):
                                     dlnlam=self.dlnlam, **loading_kwargs)
 
     def _build_super_trans(self):
-        """Build the global gridded transmission array. Populates FilterSet.trans, which
+        r"""Build the global gridded transmission array. Populates FilterSet.trans, which
         is an array of shape (nfilters, nlam) giving :math:`T\times \lambda \times
         d\lambda / Z` where `T` is the detector signal per photon and `Z` is the
         detector signal for a 1 maggie source
