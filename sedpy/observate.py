@@ -238,13 +238,13 @@ class Filter(object):
         of many of these quantities.
         """
         # Calculate some useful integrals
-        i0 = np.trapz(self.transmission * np.log(self.wavelength),
+        i0 = np.trapezoid(self.transmission * np.log(self.wavelength),
                       np.log(self.wavelength))
-        i1 = np.trapz(self.transmission,
+        i1 = np.trapezoid(self.transmission,
                       np.log(self.wavelength))
-        i2 = np.trapz(self.transmission * self.wavelength,
+        i2 = np.trapezoid(self.transmission * self.wavelength,
                       self.wavelength)
-        i3 = np.trapz(self.transmission,
+        i3 = np.trapezoid(self.transmission,
                       self.wavelength)
 
         tmax = self.transmission.max()
@@ -262,14 +262,14 @@ class Filter(object):
         rind = np.argmin(self.wavelength[sel])
         self.red_edge = self.wavelength[sel][rind]
 
-        i4 = np.trapz(self.transmission *
+        i4 = np.trapezoid(self.transmission *
                       (np.log(self.wavelength / self.wave_effective))**2.0,
                       np.log(self.wavelength))
         self.gauss_width = (i4 / i1)**(0.5)
         self.effective_width = (2.0 * np.sqrt(2. * np.log(2.)) *
                                 self.gauss_width *
                                 self.wave_effective)
-        # self.norm  = np.trapz(transmission,wavelength)
+        # self.norm  = np.trapezoid(transmission,wavelength)
 
         # Get zero points and AB to Vega conversion
         self.ab_zero_counts = self.obj_counts(self.wavelength,
@@ -340,7 +340,7 @@ class Filter(object):
             # assert ~edge, "Source spectrum does not span filter."
             ind = slice(max(positive.min() - 1, 0),
                         min(positive.max() + 2, len(sourcewave)))
-            counts = np.trapz(sourcewave[ind] * newtrans[ind] *
+            counts = np.trapezoid(sourcewave[ind] * newtrans[ind] *
                               sourceflux[..., ind],
                               sourcewave[ind], axis=-1)
             return np.squeeze(counts)
@@ -376,7 +376,7 @@ class Filter(object):
 
         # Integrate lambda*f_lambda*R
         if True in (newflux > 0.):
-            counts = np.trapz(self.wavelength * self.transmission * newflux,
+            counts = np.trapezoid(self.wavelength * self.transmission * newflux,
                               self.wavelength)
             return np.squeeze(counts)
         else:
@@ -564,7 +564,7 @@ class FilterSet(object):
         """
         # TODO: investigate using arrays that cover different wavelength
         # intervals (but same number of elements) for each filter. Then when
-        # integrating (with dot or vectorized trapz) the source spectrum must be
+        # integrating (with dot or vectorized trapezoid) the source spectrum must be
         # offset for each filter. This would remove the vast majority of zeros
 
         ab_counts = np.array([f.ab_zero_counts for f in self.filters])
@@ -664,7 +664,7 @@ class FilterSet(object):
             flux = sourceflux
         y = self.trans_dw * flux[self.finds]
         x = self.lam[self.finds]
-        maggies = np.trapz(y, x, axis=-1)
+        maggies = np.trapezoid(y, x, axis=-1)
         return maggies
 
     def get_sed_maggies_numba(self, sourceflux, sourcewave=None):
@@ -854,7 +854,7 @@ def Lbol(wave, spec, wave_min=90, wave_max=1e6):
        of length (...nsource)
     """
     inds = np.where(np.logical_and(wave < wave_max, wave >= wave_min))
-    return np.trapz(spec[..., inds[0]], wave[inds])
+    return np.trapezoid(spec[..., inds[0]], wave[inds])
 
 
 def air2vac(air):
