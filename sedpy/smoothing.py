@@ -6,6 +6,11 @@
 #  * more testing of the smooth_lsf* methods.
 
 import numpy as np
+try:
+    from numpy import trapezoid
+except(ImportError):
+    from numpy import trapz as trapezoid
+
 from numpy.fft import fft, ifft, fftfreq, rfftfreq
 
 __all__ = ["smoothspec", "smooth_wave", "smooth_vel", "smooth_lsf",
@@ -229,7 +234,7 @@ def smooth_vel(wave, spec, outwave, sigma, nsigma=10, inres=0, **extras):
         else:
             _spec = spec
         f = np.exp(-0.5 * x**2)
-        flux[i] = np.trapz(f * _spec, x) / np.trapz(f, x)
+        flux[i] = trapezoid(f * _spec, x) / trapezoid(f, x)
     return flux
 
 
@@ -352,7 +357,7 @@ def smooth_wave(wave, spec, outwave, sigma, nsigma=10, inres=0, in_vel=False,
         else:
             _spec = spec
         f = np.exp(-0.5 * x**2)
-        flux[i] = np.trapz(f * _spec, x) / np.trapz(f, x)
+        flux[i] = trapezoid(f * _spec, x) / trapezoid(f, x)
     return flux
 
 
@@ -463,8 +468,8 @@ def smooth_lsf(wave, spec, outwave, sigma=None, lsf=None, return_kernel=False,
     # should this be axis=0 or axis=1?
     kernel = kernel / kernel.sum(axis=1)[:, None]
     newspec = np.dot(kernel, spec)
-    # kernel /= np.trapz(kernel, wave, axis=1)[:, None]
-    # newspec = np.trapz(kernel * spec[None, :], wave, axis=1)
+    # kernel /= trapezoid(kernel, wave, axis=1)[:, None]
+    # newspec = trapezoid(kernel * spec[None, :], wave, axis=1)
     if return_kernel:
         return newspec, kernel
     return newspec
