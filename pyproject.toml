@@ -4,6 +4,7 @@ description = "Simple tools for astronomical spectral energy distributions, part
 authors = [{ name = "Benjamin Johnson", email = "benjamin.johnson@cfa.harvard.edu" }]
 readme = "README.rst"
 license = { text = "MIT License" }
+requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -11,9 +12,18 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dynamic = ["version"]
-dependencies = ["numpy", "astropy"]
+dependencies = [
+    "numpy", 
+    "astropy"
+]
 
 [build-system]
 requires = ["setuptools>=42", "wheel", "setuptools_scm"]

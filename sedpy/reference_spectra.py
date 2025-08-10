@@ -7,10 +7,7 @@ Units of the reference spectra are AA and erg/s/cm^2/AA
 
 import numpy as np
 import os
-try:
-    from pkg_resources import resource_filename
-except ImportError:
-    pass
+from importlib.resources import files
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -28,8 +25,9 @@ try:
     # This is from stsci calspec database ("calspec_ascii_review")
     # C.f. https://ui.adsabs.harvard.edu/abs/2007ASPC..364..315B/abstract
     # C.f. https://ui.adsabs.harvard.edu/abs/2014AJ....147..127B/abstract
-    vega_file = resource_filename('sedpy', 'data/alpha_lyr_stis_005.fits')
-except:
+    data_files = files('sedpy') / 'data'
+    vega_file = str(data_files / 'alpha_lyr_stis_005.fits')
+except Exception:
     vega_file = os.path.join(sedpydir, 'data', 'alpha_lyr_stis_005.fits')
 
 # This file should be in AA and erg/s/cm^2/AA
@@ -43,8 +41,9 @@ else:
                      'spectrum at {0}'.format(vega_file))
 
 try:
-    solar_file = resource_filename('sedpy', 'data/sun_kurucz93.fits')
-except:
+    data_files = files('sedpy') / 'data'
+    solar_file = str(data_files / 'sun_kurucz93.fits')
+except Exception:
     solar_file = os.path.join(sedpydir, 'data', 'sun_kurucz93.fits')
 
 # conversion to d=10 pc from 1 AU
