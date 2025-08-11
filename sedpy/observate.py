@@ -13,10 +13,7 @@ except(ImportError):
     from numpy import trapz as trapezoid
 
 import os
-try:
-    from pkg_resources import resource_filename, resource_listdir
-except(ImportError):
-    pass
+from importlib.resources import files
 from .reference_spectra import vega, solar, sedpydir
 
 
@@ -90,8 +87,9 @@ class Filter(object):
         if directory is None:
             loc = os.path.join('data', 'filters', kname + '.par')
             try:
-                self.filename = resource_filename("sedpy", loc)
-            except:
+                data_files = files('sedpy') / 'data' / 'filters'
+                self.filename = str(data_files / (kname + '.par'))
+            except Exception:
                 self.filename = os.path.join(sedpydir, loc)
         else:
             self.filename = os.path.join(directory, kname+'.par')
@@ -815,11 +813,12 @@ def list_available_filters():
     have been installed in the sedpy/data/filters/ directory.
     """
     try:
-        names = resource_listdir('sedpy', '/data/filters/')
-    except:
-        names = os.listdir(os.path.join(sedpydir, '/data/filters/'))
+        data_files = files('sedpy') / 'data' / 'filters'
+        names = [f.name for f in data_files.iterdir() if f.is_file()]
+    except Exception:
+        names = os.listdir(os.path.join(sedpydir, 'data', 'filters'))
 
-    parfiles = [n.replace('.par', '') for n in names if n[-4:] == '.par']
+    parfiles = [n.replace('.par', '') for n in names if n.endswith('.par')]
     parfiles.sort()
     return parfiles
 
