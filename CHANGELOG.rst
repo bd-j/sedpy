@@ -1,5 +1,18 @@
 .. :changelog:
 
+v0.4.1 (2025-09-05)
+-------------------
+
+* Deprecation fixes for `numpy.trapz` and `pkg_resources` (h/t @sbruto and @TheSkyentist)
+
+New Filter Curves
+^^^^^^^^^^^^^^^^^
+
+* LSST/Rubin Baseline v1.9 *ugrizy*, h/t @stevet40
+
+`Full Changelog <https://github.com/bd-j/sedpy/compare/v0.4.0...v0.4.1>`_
+
+
 v0.4.0 (2025-03-31)
 -------------------
 
