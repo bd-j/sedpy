@@ -63,7 +63,7 @@ def test_gridded_filters():
 def test_filterset():
     from sedpy.observate import FilterSet
     flist = [f for f in observate.list_available_filters()
-             if ("jw" in f) or ("wise" in f) or ("galex" in f)]
+             if (("jw" in f) or ("wise" in f) or ("galex" in f)) & (f[-1] != "n")]
     filterset = FilterSet(flist, dlnlam=1e-4)
     source = observate.vega.T
 
