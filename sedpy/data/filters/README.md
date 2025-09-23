@@ -88,28 +88,35 @@
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
 |:----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
-|$\textrm{F070W}$||[`jwst_f070w`](./jwst_f070w.par)|701.4 nm|114.7 nm|May 2024|
-|$\textrm{F090W}$||[`jwst_f090w`](./jwst_f090w.par)|898.3 nm|143.9 nm|May 2024|
-|$\textrm{F115W}$||[`jwst_f115w`](./jwst_f115w.par)|1148.6 nm|188.0 nm|May 2024|
-|$\textrm{F150W}$||[`jwst_f150w`](./jwst_f150w.par)|1494.4 nm|232.1 nm|May 2024|
-|$\textrm{F200W}$||[`jwst_f200w`](./jwst_f200w.par)|1978.2 nm|321.9 nm|May 2024|
-|$\textrm{F277W}$||[`jwst_f277w`](./jwst_f277w.par)|2760.5 nm|490.3 nm|May 2024|
-|$\textrm{F356W}$||[`jwst_f356w`](./jwst_f356w.par)|3548.4 nm|581.0 nm|May 2024|
-|$\textrm{F444W}$||[`jwst_f444w`](./jwst_f444w.par)|4378.7 nm|745.5 nm|May 2024|
-|$\textrm{F140M}$||[`jwst_f140m`](./jwst_f140m.par)|1403.9 nm|105.1 nm|May 2024|
-|$\textrm{F162M}$||[`jwst_f162m`](./jwst_f162m.par)|1625.6 nm|120.5 nm|May 2024|
-|$\textrm{F182M}$||[`jwst_f182m`](./jwst_f182m.par)|1842.4 nm|170.5 nm|May 2024|
-|$\textrm{F210M}$||[`jwst_f210m`](./jwst_f210m.par)|2093.8 nm|146.3 nm|May 2024|
-|$\textrm{F250M}$||[`jwst_f250m`](./jwst_f250m.par)|2502.0 nm|125.9 nm|May 2024|
-|$\textrm{F300M}$||[`jwst_f300m`](./jwst_f300m.par)|2992.9 nm|231.7 nm|May 2024|
-|$\textrm{F335M}$||[`jwst_f335m`](./jwst_f335m.par)|3358.6 nm|260.6 nm|May 2024|
-|$\textrm{F360M}$||[`jwst_f360m`](./jwst_f360m.par)|3619.5 nm|276.0 nm|May 2024|
-|$\textrm{F410M}$||[`jwst_f410m`](./jwst_f410m.par)|4078.7 nm|311.0 nm|May 2024|
-|$\textrm{F430M}$||[`jwst_f430m`](./jwst_f430m.par)|4280.2 nm|162.9 nm|May 2024|
-|$\textrm{F460M}$||[`jwst_f460m`](./jwst_f460m.par)|4628.5 nm|166.7 nm|May 2024|
-|$\textrm{F480M}$||[`jwst_f480m`](./jwst_f480m.par)|4814.5 nm|235.1 nm|May 2024|
-|$\textrm{F150W2}$||[`jwst_f150w2`](./jwst_f150w2.par)|1578.7 nm|909.4 nm|May 2024|
-|$\textrm{F322W2}$||[`jwst_f322w2`](./jwst_f322w2.par)|3179.2 nm|1099.3 nm|May 2024|
+|$\textrm{F070W}$|NIRCAM|[`jwst_f070w`](filters/jwst_f070w.par)|701.4 nm|114.7 nm|STScI v7|
+|$\textrm{F090W}$|NIRCAM|[`jwst_f090w`](filters/jwst_f090w.par)|898.3 nm|143.9 nm|STScI v7|
+|$\textrm{F115W}$|NIRCAM|[`jwst_f115w`](filters/jwst_f115w.par)|1148.6 nm|188.0 nm|STScI v7|
+|$\textrm{F140M}$|NIRCAM|[`jwst_f140m`](filters/jwst_f140m.par)|1403.9 nm|105.1 nm|STScI v7|
+|$\textrm{F150W}$|NIRCAM|[`jwst_f150w`](filters/jwst_f150w.par)|1494.4 nm|232.1 nm|STScI v7|
+|$\textrm{F150W2}$|NIRCAM|[`jwst_f150w2`](filters/jwst_f150w2.par)|1578.7 nm|909.4 nm|STScI v7|
+|$\textrm{F162M}$|NIRCAM|[`jwst_f162m`](filters/jwst_f162m.par)|1625.6 nm|120.5 nm|STScI v7|
+|$\textrm{F164N}$|NIRCAM|[`jwst_f164n`](filters/jwst_f164n.par)|1644.5 nm|19.0 nm|STScI v7|
+|$\textrm{F182M}$|NIRCAM|[`jwst_f182m`](filters/jwst_f182m.par)|1842.4 nm|170.5 nm|STScI v7|
+|$\textrm{F187N}$|NIRCAM|[`jwst_f187n`](filters/jwst_f187n.par)|1874.0 nm|21.4 nm|STScI v7|
+|$\textrm{F200W}$|NIRCAM|[`jwst_f200w`](filters/jwst_f200w.par)|1978.2 nm|321.9 nm|STScI v7|
+|$\textrm{F210M}$|NIRCAM|[`jwst_f210m`](filters/jwst_f210m.par)|2093.8 nm|146.3 nm|STScI v7|
+|$\textrm{F212N}$|NIRCAM|[`jwst_f212n`](filters/jwst_f212n.par)|2121.2 nm|25.0 nm|STScI v7|
+|$\textrm{F250M}$|NIRCAM|[`jwst_f250m`](filters/jwst_f250m.par)|2502.0 nm|125.9 nm|STScI v7|
+|$\textrm{F277W}$|NIRCAM|[`jwst_f277w`](filters/jwst_f277w.par)|2760.5 nm|490.3 nm|STScI v7|
+|$\textrm{F300M}$|NIRCAM|[`jwst_f300m`](filters/jwst_f300m.par)|2992.9 nm|231.7 nm|STScI v7|
+|$\textrm{F322W2}$|NIRCAM|[`jwst_f322w2`](filters/jwst_f322w2.par)|3179.2 nm|1099.3 nm|STScI v7|
+|$\textrm{F323N}$|NIRCAM|[`jwst_f323n`](filters/jwst_f323n.par)|3236.7 nm|30.1 nm|STScI v7|
+|$\textrm{F335M}$|NIRCAM|[`jwst_f335m`](filters/jwst_f335m.par)|3358.6 nm|260.6 nm|STScI v7|
+|$\textrm{F356W}$|NIRCAM|[`jwst_f356w`](filters/jwst_f356w.par)|3548.4 nm|581.0 nm|STScI v7|
+|$\textrm{F360M}$|NIRCAM|[`jwst_f360m`](filters/jwst_f360m.par)|3619.5 nm|276.0 nm|STScI v7|
+|$\textrm{F405N}$|NIRCAM|[`jwst_f405n`](filters/jwst_f405n.par)|4053.1 nm|36.4 nm|STScI v7|
+|$\textrm{F410M}$|NIRCAM|[`jwst_f410m`](filters/jwst_f410m.par)|4078.7 nm|311.0 nm|STScI v7|
+|$\textrm{F430M}$|NIRCAM|[`jwst_f430m`](filters/jwst_f430m.par)|4280.2 nm|162.9 nm|STScI v7|
+|$\textrm{F444W}$|NIRCAM|[`jwst_f444w`](filters/jwst_f444w.par)|4378.7 nm|745.5 nm|STScI v7|
+|$\textrm{F460M}$|NIRCAM|[`jwst_f460m`](filters/jwst_f460m.par)|4628.5 nm|166.7 nm|STScI v7|
+|$\textrm{F466N}$|NIRCAM|[`jwst_f466n`](filters/jwst_f466n.par)|4654.3 nm|41.6 nm|STScI v7|
+|$\textrm{F470N}$|NIRCAM|[`jwst_f470n`](filters/jwst_f470n.par)|4707.7 nm|39.8 nm|STScI v7|
+|$\textrm{F480M}$|NIRCAM|[`jwst_f480m`](filters/jwst_f480m.par)|4814.5 nm|235.1 nm|STScI v7|
 |$\textrm{F560W}$|MIRI|[`jwst_f560w`](./jwst_f560w.par)|5.615 μm|791.9 nm||
 |$\textrm{F770W}$|MIRI|[`jwst_f770w`](./jwst_f770w.par)|7.591 μm|1.426 μm||
 |$\textrm{F1000W}$|MIRI|[`jwst_f1000w`](./jwst_f1000w.par)|9.923 μm|1.287 μm||

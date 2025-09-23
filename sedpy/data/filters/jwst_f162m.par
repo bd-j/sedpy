@@ -1,6 +1,6 @@
-# from B. Hilbert, priv. comm. 
-# Dated May 2024 (post-flight)
-# Uses modA or modB  filters+DBS+QE+OTE (nrc_plus_ote)
+# v7
+# Dated Jan 2025 (post-flight)
+# filters+DBS+QE+OTE (nrc_plus_ote)
 # Units of transmission are PCE (photon to electron conversion efficiency)
 # 
 14284.0  0.000000e+00

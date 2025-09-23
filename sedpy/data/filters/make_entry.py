@@ -12,7 +12,9 @@ def make_md_entry(filternames,
 
 
     if filternames is None:
-        files = glob.glob(os.path.join(f"{directory}", f"{pattern}"))
+        search = os.path.join(f"{directory}", f"{pattern}")
+        files = glob.glob(search)
+        assert len(files) > 0, f"No files found for {search}"
         bases = [os.path.basename(f) for f in files]
         filternames = [b.replace(".par", "") for b in bases]
 
