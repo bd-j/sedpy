@@ -58,3 +58,44 @@ def test_vel_fft_non_uniform_grid_is_resampled():
     assert out.size == wave.size
     # the resampled path interpolates first, so it agrees only to a few 1e-3
     assert_allclose(out[core], direct[core], rtol=0, atol=5e-3)
+
+
+def test_smooth_fft_upsample_keeps_samples():
+    """upsample=1 equals smooth_fft; with upsample=4 every 4th point is a smoothed input sample."""
+    from sedpy.smoothing import smooth_fft_upsample
+
+    for n in (1024, 1023):
+        spec = np.random.default_rng(3).normal(size=n)
+        base = smooth_fft(10.0, spec, 20.0)
+        assert_allclose(smooth_fft_upsample(10.0, spec, 20.0, 1), base, rtol=0, atol=1e-14)
+        fine = smooth_fft_upsample(10.0, spec, 20.0, 4)
+        assert fine.size == 4 * (n - 1) + 1
+        assert_allclose(fine[::4], base, rtol=0, atol=1e-12)
+
+
+def _analytic(wave, sigma, width=12.7, nline=60, seed=0):
+    """The spectrum of _absorption_spectrum smoothed analytically by ``sigma`` km/s."""
+    rng = np.random.default_rng(seed)
+    total = np.hypot(width, sigma)
+    v = CKMS * np.log(wave[:, None] / rng.uniform(4800.0, 5200.0, nline)[None, :])
+    depth = rng.uniform(0.05, 0.6, nline) * width / total
+    return 1.0 - np.sum(depth * np.exp(-0.5 * (v / total) ** 2), axis=1)
+
+
+def test_vel_fft_fine_outwave_is_upsampled():
+    """On a finer outwave, Fourier upsampling keeps narrow lines; linear interpolation does not.
+
+    Lines of 12.7 km/s on 10 km/s pixels, smoothed by 13-25 km/s (a stellar LOSVD of 18-28 km/s
+    with the 12.7 km/s library resolution removed), evaluated on a 0.05 A grid.
+    """
+    wave = _log_grid(4500.0, 5500.0)
+    spec = _absorption_spectrum(wave)
+    fine = np.arange(4850.0, 5150.0, 0.05)
+    for losvd in (18.0, 23.0, 28.0):
+        sigma = np.sqrt(losvd**2 - 12.7**2)
+        truth = _analytic(fine, sigma)
+        out = smoothspec(wave, spec, sigma, outwave=fine, smoothtype="vel")
+        native = smoothspec(wave, spec, sigma, outwave=wave, smoothtype="vel")
+        linear = np.interp(fine, wave, native)
+        assert np.max(np.abs(out - truth)) < 2e-3
+        assert np.max(np.abs(linear - truth)) > 5e-3
