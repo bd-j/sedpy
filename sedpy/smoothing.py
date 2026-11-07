@@ -624,7 +624,7 @@ def smooth_fft(dx, spec, sigma):
     # Multiply in fourier space
     ff_tapered = spec_ff * taper
     # Fourier transform back
-    spec_conv = np.fft.irfft(ff_tapered)
+    spec_conv = np.fft.irfft(ff_tapered, n=len(spec))
     return spec_conv
 
 
