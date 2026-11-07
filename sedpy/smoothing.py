@@ -273,8 +273,13 @@ def smooth_vel_fft(wavelength, spectrum, outwave, sigma_out, inres=0.0,
     if sigma <= 0:
         return np.interp(outwave, wavelength, spectrum)
 
-    # make length of spectrum a power of 2 by resampling
-    wave, spec = resample_wave(wavelength, spectrum)
+    # smooth native samples when they are already uniform in log wavelength
+    lnw = np.log(wavelength)
+    dln = np.diff(lnw)
+    if np.allclose(dln, dln[0]):
+        wave, spec = wavelength, spectrum
+    else:
+        wave, spec = resample_wave(wavelength, spectrum)
 
     # get grid resolution (*not* the resolution of the input spectrum) and make
     # sure it's nearly constant.  It should be, by design (see resample_wave)
