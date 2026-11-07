@@ -271,13 +271,16 @@ def smooth_vel_fft(wavelength, spectrum, outwave, sigma_out, inres=0.0,
     """
     # The kernel width for the convolution.
     sigma = np.sqrt(sigma_out**2 - inres**2)
-    if sigma <= 0:
-        return np.interp(outwave, wavelength, spectrum)
 
     # smooth native samples when they are already uniform in log wavelength
     lnw = np.log(wavelength)
     dln = np.diff(lnw)
     native = np.allclose(dln, dln[0])
+
+    # with no kernel, a native grid still goes through the Fourier upsampling
+    # below, so a finer outwave is not filled by linear interpolation
+    if sigma <= 0 and not native:
+        return np.interp(outwave, wavelength, spectrum)
     if native:
         wave, spec = wavelength, spectrum
     else:
