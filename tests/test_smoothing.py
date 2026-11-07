@@ -99,3 +99,15 @@ def test_vel_fft_fine_outwave_is_upsampled():
         linear = np.interp(fine, wave, native)
         assert np.max(np.abs(out - truth)) < 2e-3
         assert np.max(np.abs(linear - truth)) > 5e-3
+
+
+def test_vel_fft_zero_kernel_native_grid_is_upsampled():
+    wave = _log_grid(4500.0, 5500.0)
+    spec = _absorption_spectrum(wave)
+    fine = np.arange(4850.0, 5150.0, 0.05)
+    out = smoothspec(wave, spec, 30.0, outwave=fine, smoothtype="vel", inres=30.0)
+    truth = _analytic(fine, 0.0)
+    assert np.max(np.abs(out - truth)) < 5e-3
+    assert np.max(np.abs(np.interp(fine, wave, spec) - truth)) > 2e-2
+    same = smoothspec(wave, spec, 30.0, outwave=wave, smoothtype="vel", inres=30.0)
+    assert_allclose(same, spec, rtol=0, atol=1e-12)
