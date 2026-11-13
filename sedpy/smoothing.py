@@ -14,7 +14,8 @@ except(ImportError):
 from numpy.fft import fft, ifft, fftfreq, rfftfreq
 
 __all__ = ["smoothspec", "smooth_wave", "smooth_vel", "smooth_lsf",
-           "smooth_wave_fft", "smooth_vel_fft", "smooth_fft", "smooth_lsf_fft",
+           "smooth_wave_fft", "smooth_vel_fft", "smooth_fft", "smooth_fft_upsample",
+           "smooth_lsf_fft",
            "mask_wave", "resample_wave"]
 
 ckms = 2.998e5
@@ -270,11 +271,20 @@ def smooth_vel_fft(wavelength, spectrum, outwave, sigma_out, inres=0.0,
     """
     # The kernel width for the convolution.
     sigma = np.sqrt(sigma_out**2 - inres**2)
-    if sigma <= 0:
-        return np.interp(outwave, wavelength, spectrum)
 
-    # make length of spectrum a power of 2 by resampling
-    wave, spec = resample_wave(wavelength, spectrum)
+    # smooth native samples when they are already uniform in log wavelength
+    lnw = np.log(wavelength)
+    dln = np.diff(lnw)
+    native = np.allclose(dln, dln[0])
+
+    # with no kernel, a native grid still goes through the Fourier upsampling
+    # below, so a finer outwave is not filled by linear interpolation
+    if sigma <= 0 and not native:
+        return np.interp(outwave, wavelength, spectrum)
+    if native:
+        wave, spec = wavelength, spectrum
+    else:
+        wave, spec = resample_wave(wavelength, spectrum)
 
     # get grid resolution (*not* the resolution of the input spectrum) and make
     # sure it's nearly constant.  It should be, by design (see resample_wave)
@@ -282,8 +292,22 @@ def smooth_vel_fft(wavelength, spectrum, outwave, sigma_out, inres=0.0,
     assert invRgrid.max() / invRgrid.min() < 1.05
     dv = ckms * np.median(invRgrid)
 
+    # on native samples, upsample in Fourier space when outwave is finer than
+    # the input grid, so the final interpolation does not alter narrow features
+    upsample = 1
+    if native and outwave is not None and len(outwave) > 1:
+        dout = np.diff(np.log(outwave))
+        dout = dout[dout > 0]
+        if dout.size:
+            upsample = max(1, int(np.ceil(np.median(invRgrid) / dout.min())))
+
     # Do the convolution
-    spec_conv = smooth_fft(dv, spec, sigma)
+    if upsample > 1:
+        spec_conv = smooth_fft_upsample(dv, spec, sigma, upsample)
+        dln_fine = np.median(invRgrid) / upsample
+        wave = np.exp(np.log(wave[0]) + np.arange(spec_conv.size) * dln_fine)
+    else:
+        spec_conv = smooth_fft(dv, spec, sigma)
     # interpolate onto output grid
     if outwave is not None:
         spec_conv = np.interp(outwave, wave, spec_conv)
@@ -624,8 +648,25 @@ def smooth_fft(dx, spec, sigma):
     # Multiply in fourier space
     ff_tapered = spec_ff * taper
     # Fourier transform back
-    spec_conv = np.fft.irfft(ff_tapered)
+    spec_conv = np.fft.irfft(ff_tapered, n=len(spec))
     return spec_conv
+
+
+def smooth_fft_upsample(dx, spec, sigma, upsample=1):
+    """Same as smooth_fft, but return the result on a grid
+    `upsample` times finer than the input grid (zero padding)."""
+    n = len(spec)
+    spec_ff = np.fft.rfft(spec)
+
+    if n % 2 == 0 and upsample > 1:
+        spec_ff[-1] *= 0.5  # Nyquist frequency
+
+    spec_ff *= np.exp(-2 * (np.pi ** 2) * (sigma ** 2) * (rfftfreq(n, d=dx) ** 2))
+
+    n_out = upsample * n
+    spec_fine = np.fft.irfft(spec_ff, n=n_out) * upsample
+
+    return spec_fine[: upsample * (n - 1) + 1]
 
 
 def mask_wave(wavelength, width=1, wlo=0, whi=np.inf, outwave=None,
