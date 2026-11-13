@@ -23,6 +23,15 @@
 
 ## Space-Based Telescopes
 
+### Euclid
+
+|Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
+|:-----:|:--------:|:----------:|---------------------:|---------------------------:|:-------|
+|$I_E$|VIS|[`euclid_vis_Ie`](./euclid_vis_Ie.par)|695.0 nm|241.6 nm|Taken from SVO (ref: Cropper25)|
+|$Y_E$|NISP|[`euclid_nisp_Ye`](./euclid_nisp_Ye.par)|1073.1 nm|179.1 nm|Taken from ESA (ref: Schirmer22)|
+|$J_E$|NISP|[`euclid_nisp_Je`](./euclid_nisp_Je.par)|1352.3 nm|270.2 nm|Taken from ESA (ref: Schirmer22)|
+|$H_E$|NISP|[`euclid_nisp_He`](./euclid_nisp_He.par)|1753.1 nm|338.2 nm|Taken from ESA (ref: Schirmer22)|
+
 ### Gaia
 
 |Filter|Instrument|`sedpy` Name|$\lambda_\textrm{eff}$|$\Delta\lambda_\textrm{eff}$|Comments|
